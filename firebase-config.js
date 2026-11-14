@@ -7,6 +7,5 @@ export const firebaseConfig = {
   projectId: 'astha-somiti-d441b',
   storageBucket: 'astha-somiti-d441b.firebasestorage.app',
   messagingSenderId: '100416170589',
-  appId: '1:100416170589:web:77bd17d9f0439241fd7bb4',
-  measurementId: 'G-4LZLQHQH5B'
+  appId: '1:100416170589:web:77bd17d9f0439241fd7bb4'
 };
