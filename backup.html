@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14532d">
+  <title>আস্থা সমিতি — ক্লাউড ব্যাকআপ</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;padding:18px;font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;background:#f3f6f4;color:#17231b}
+    main{max-width:560px;margin:24px auto;background:#fff;border:1px solid #dbe5dd;border-radius:16px;padding:22px;box-shadow:0 8px 28px #102b1710}
+    h1{font-size:23px;margin:0 0 8px}
+    p{line-height:1.65}
+    .muted{color:#526257;font-size:14px}
+    button,.filelabel{display:block;width:100%;border:0;border-radius:10px;padding:13px 15px;margin:12px 0;font-size:16px;font-weight:650;background:#166534;color:#fff;text-align:center}
+    button.secondary{background:#e8f0ea;color:#14532d}
+    button:disabled{opacity:.5}
+    input[type=file]{display:none}
+    #status{padding:12px;border-radius:10px;background:#f1f5f2;min-height:48px;white-space:pre-wrap;font-size:14px}
+    .warning{background:#fff7ed;border-left:4px solid #ea580c;padding:10px 12px;border-radius:7px;font-size:14px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+<main>
+  <h1>আস্থা সমিতি — ক্লাউড ব্যাকআপ</h1>
+  <p class="muted">আপনার Google অ্যাকাউন্টের Firebase ক্লাউড ডেটা JSON ফাইলে নামাতে বা আগে নেওয়া JSON ফাইল থেকে ফিরিয়ে আনতে ব্যবহার করুন।</p>
+  <p class="warning">সতর্কতা: ফিরিয়ে আনার সময় ক্লাউডের বর্তমান ডেটা নির্বাচিত JSON ফাইলের ডেটা দিয়ে প্রতিস্থাপিত হবে। আগে নিশ্চিত হয়ে নিন যে ফাইলটি সঠিক।</p>
+
+  <button id="loginBtn">Google দিয়ে লগইন</button>
+  <div id="account" class="muted hidden"></div>
+  <button id="downloadBtn" class="hidden">ক্লাউড থেকে JSON ব্যাকআপ নামান</button>
+  <label id="fileLabel" class="filelabel hidden" for="restoreFile">JSON ব্যাকআপ ফাইল বেছে নিন</label>
+  <input id="restoreFile" type="file" accept=".json,application/json">
+  <button id="restoreBtn" class="secondary hidden" disabled>নির্বাচিত ফাইল থেকে ক্লাউডে ফিরিয়ে আনুন</button>
+  <button id="logoutBtn" class="secondary hidden">Google লগআউট</button>
+  <p id="status" role="status">প্রথমে Google দিয়ে লগইন করুন।</p>
+</main>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { firebaseConfig } from './firebase-config.js';
+
+const $ = id => document.getElementById(id);
+const status = (s, bad=false) => { $('status').textContent=s; $('status').style.color=bad?'#b91c1c':'#14532d'; };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let selectedData = null;
+let activeUser = null;
+
+await setPersistence(auth, browserLocalPersistence);
+
+function showSignedIn(user) {
+  activeUser = user;
+  $('loginBtn').classList.toggle('hidden', !!user);
+  $('account').classList.toggle('hidden', !user);
+  $('downloadBtn').classList.toggle('hidden', !user);
+  $('fileLabel').classList.toggle('hidden', !user);
+  $('restoreBtn').classList.toggle('hidden', !user);
+  $('logoutBtn').classList.toggle('hidden', !user);
+  $('account').textContent = user ? `লগইন: ${user.email || 'Google অ্যাকাউন্ট'}` : '';
+  if (!user) {
+    selectedData = null;
+    $('restoreBtn').disabled = true;
+    $('restoreFile').value = '';
+  }
+}
+
+$('loginBtn').addEventListener('click', async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    await signInWithPopup(auth, provider);
+  } catch (e) { status('Google লগইন হয়নি: ' + e.message, true); }
+});
+
+onAuthStateChanged(auth, user => {
+  showSignedIn(user);
+  if (user) status('Google অ্যাকাউন্ট সংযুক্ত। এখন ব্যাকআপ নামাতে পারেন।');
+  else status('প্রথমে Google দিয়ে লগইন করুন।');
+});
+
+$('downloadBtn').addEventListener('click', async () => {
+  if (!activeUser) return status('আগে Google দিয়ে লগইন করুন।', true);
+  $('downloadBtn').disabled = true;
+  try {
+    const snap = await getDoc(doc(db, 'appSettings', activeUser.uid));
+    if (!snap.exists() || !snap.data()?.data) throw new Error('এই Gmail-এর ক্লাউডে কোনো অ্যাপ ডেটা পাওয়া যায়নি।');
+    const payload = {
+      backupType: 'astha-somiti-firestore',
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      account: activeUser.email || '',
+      data: snap.data().data
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `astha-somiti-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    status('JSON ব্যাকআপ ফাইল ডাউনলোড হয়েছে। ফাইলটি নিরাপদে রেখে দিন।');
+  } catch (e) { status('ব্যাকআপ নামানো যায়নি: ' + e.message, true); }
+  finally { $('downloadBtn').disabled = false; }
+});
+
+$('restoreFile').addEventListener('change', async e => {
+  selectedData = null;
+  $('restoreBtn').disabled = true;
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    const data = parsed?.data ?? parsed;
+    if (!data || typeof data !== 'object' || !Array.isArray(data.customers)) {
+      throw new Error('এই JSON ফাইলে আস্থা সমিতির গ্রাহক তালিকা নেই।');
+    }
+    selectedData = data;
+    $('restoreBtn').disabled = false;
+    status(`ফাইলটি ঠিক আছে। ${data.customers.length} জন গ্রাহকের তথ্য পাওয়া গেছে। ফিরিয়ে আনতে নিচের বাটন চাপুন।`);
+  } catch (e2) { status('ফাইল পড়া যায়নি: ' + e2.message, true); }
+});
+
+$('restoreBtn').addEventListener('click', async () => {
+  if (!activeUser || !selectedData) return status('Google লগইন ও সঠিক JSON ফাইল দরকার।', true);
+  const count = selectedData.customers.length;
+  const yes = confirm(`সতর্কতা: ${count} জন গ্রাহকের তথ্যসহ নির্বাচিত ফাইলের সম্পূর্ণ ডেটা এই Gmail-এর Firebase ক্লাউডে লেখা হবে। ক্লাউডের বর্তমান ডেটা প্রতিস্থাপিত হবে। আপনি কি নিশ্চিত?`);
+  if (!yes) return;
+  $('restoreBtn').disabled = true;
+  try {
+    await setDoc(doc(db, 'appSettings', activeUser.uid), {
+      data: selectedData,
+      updatedAt: serverTimestamp(),
+      schemaVersion: 1
+    });
+    status('ক্লাউডে ডেটা ফিরিয়ে আনা হয়েছে। মূল অ্যাপটি একই Gmail দিয়ে খুললে Sync হবে।');
+  } catch (e) { status('ক্লাউডে ডেটা ফিরিয়ে আনা যায়নি: ' + e.message, true); }
+  finally { $('restoreBtn').disabled = false; }
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  try { await signOut(auth); status('লগআউট হয়েছে।'); }
+  catch (e) { status('লগআউট হয়নি: ' + e.message, true); }
+});
+</script>
+</body>
+</html>
