@@ -1,7 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  onAuthStateChanged, signOut, getRedirectResult
+  onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
@@ -38,15 +38,22 @@ function addSignOutButton(){
   b.onclick=()=>window.asthaGoogleSignOut();host.appendChild(b);
 }
 function appStateRef(uid){ return doc(dbFirestore,'appSettings',uid); }
+function showLogin(){
+  document.querySelectorAll('#setup,#app,#appFooterNav,#customerLogin,#customerView').forEach(x=>x?.classList.add('hidden'));
+  document.getElementById('login')?.classList.remove('hidden');
+}
 function showMainApp(){
-  const data=window.getAsthaData?.();
-  if(data && data.admin && data.admin.phone && data.admin.pin){
-    openApp();
-  } else {
-    document.querySelectorAll('#login,#app,#appFooterNav,#customerLogin,#customerView').forEach(x=>x.classList.add('hidden'));
-    document.getElementById('setup')?.classList.remove('hidden');
-    status('Google অ্যাকাউন্ট যুক্ত হয়েছে। প্রথমবারের অ্যাডমিন তথ্য পূরণ করুন।');
-  }
+  const user=activeUser;
+  let data=window.getAsthaData?.();
+  if(!data || typeof data!=='object')data={customers:[],trash:[],cash:{entries:[]},settings:{}};
+  if(!data.admin)data.admin={phone:'',pin:''};
+  data.admin.name=data.admin.name||user?.displayName||'Google Admin';
+  data.admin.email=user?.email||data.admin.email||'';
+  data.admin.uid=user?.uid||data.admin.uid||'';
+  if(!Array.isArray(data.customers))data.customers=[];
+  if(!Array.isArray(data.trash))data.trash=[];
+  window.setAsthaData?.(data);
+  openApp();
 }
 async function loadCloud(uid){
   const ref=appStateRef(uid), snap=await getDoc(ref);
@@ -115,6 +122,8 @@ if(!hasConfig){
 } else {
   try{
     const app=initializeApp(firebaseConfig);auth=getAuth(app);dbFirestore=getFirestore(app);
+    // Keep the Google account signed in on this device until explicit logout.
+    await setPersistence(auth,browserLocalPersistence);
     // Google auth is required for admin login/setup; local PIN alone is not enough.
     const oldLogin=window.login;
     if(typeof oldLogin==='function')window.login=function(){if(!activeUser){status('আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}return oldLogin.apply(this,arguments)};
@@ -125,7 +134,7 @@ if(!hasConfig){
     getRedirectResult(auth).catch(e=>status('Google লগইন ফলাফল পাওয়া যায়নি: '+e.message,true));
     onAuthStateChanged(auth,async user=>{
       activeUser=user;
-      if(!user){window.__asthaGoogleUser=null;return;}
+      if(!user){window.__asthaGoogleUser=null;showLogin();status('প্রবেশ করতে Google/Gmail দিয়ে লগইন করুন।');return;}
       window.__asthaGoogleUser=user;
       status('Google অ্যাকাউন্ট যাচাই হয়েছে: '+(user.email||'ইমেইল অজানা'));
       try{await loadCloud(user.uid);showMainApp();}catch(e){status('Firebase ডেটা লোড হয়নি: '+e.message,true);}
