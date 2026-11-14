@@ -18,7 +18,7 @@
 
 1. Firebase Console খুলুন: https://console.firebase.google.com/
 2. `astha-somiti-d441b` প্রজেক্ট → Project settings → Your apps → Web App → SDK setup and configuration → Config খুলুন।
-3. এই ZIP-এর `firebase-config.js` ফাইলে আপনার দেওয়া Web App Config বসানো আছে। Firebase Console-এ Google provider Enabled এবং `nahidsheck-lgtm.github.io` Authorized domain-এ যোগ করা থাকতে হবে।
+3. এই ZIP-এর `firebase-config.js` ফাইলে `apiKey`, `messagingSenderId`, `appId` এবং `storageBucket`-এর placeholder-গুলো Firebase Console-এর সঠিক মান দিয়ে বদলান। `projectId` আগে থেকেই `astha-somiti-d441b` দেওয়া আছে।
 4. `firebase-config.js`-এ Service Account key, private key বা কোনো পাসওয়ার্ড রাখবেন না। Firebase Web API key ক্লায়েন্ট কনফিগারেশনের অংশ; নিরাপত্তা Firestore Rules দিয়ে নিয়ন্ত্রণ করতে হবে।
 
 ## ধাপ ২ — Google Authentication চালু করুন
@@ -31,7 +31,7 @@ Authentication → Settings → Authorized domains-এ আপনার চাল
 
 ## ধাপ ৩ — Firestore Rules
 
-`firestore.rules` ফাইলে আপনার দেওয়া owner-only UID rules রাখা হয়েছে। Firebase Console-এ আগে থেকেই একই rules প্রকাশিত থাকলে পুনরায় পরিবর্তনের দরকার নেই। এই নিয়মে শুধু নির্দিষ্ট UID ডেটা পড়তে/লিখতে পারে; অন্য Gmail দিয়ে লগইন করলে Firestore permission-denied হবে।
+`firestore.rules` ফাইলে UID-ভিত্তিক নিরাপদ নিয়ম দেওয়া আছে। Firebase Console → Firestore Database → Rules-এ এই নিয়মগুলো পর্যালোচনা করে Publish করুন। এটি প্রতিটি Google অ্যাকাউন্টকে শুধু নিজের UID-এর ডেটা পড়া/লেখার অনুমতি দেয়। আপনার বর্তমান Rules-এর অন্য প্রয়োজনীয় নিয়ম থাকলে যাচাই ছাড়া সেগুলো মুছবেন না; প্রয়োজনে মিলিয়ে নিন।
 
 ## ধাপ ৪ — চালানো / হোস্ট করা
 
@@ -57,15 +57,3 @@ Authentication → Settings → Authorized domains-এ আপনার চাল
 - `firestore.rules` — UID-ভিত্তিক নিরাপত্তা নিয়ম
 - `firebase.json`, `.firebaserc` — Firebase Hosting/Project config
 - `manifest.webmanifest`, `sw.js`, `assets/` — PWA ফাইল
-
-
-## এই প্যাকেজে বাস্তবায়িত সংশোধন ও যাচাই-সীমা
-
-- আপনার দেওয়া Firebase Web Config বসানো হয়েছে; Google Sign-in বাটন লগইন ও প্রথম সেটআপ—দুই জায়গাতেই দৃশ্যমান রাখা হয়েছে।
-- একই Google UID-এর `appSettings/{uid}` ডকুমেন্টে পুরো অ্যাপ ডেটা Sync হয়। একই Gmail-ই ব্যবহার করতে হবে; Firestore Rules-এর UID অবশ্যই সেই Gmail-এর Firebase UID-এর সঙ্গে মিলতে হবে।
-- রিপোর্টের তারিখ যাচাই, নির্বাচিত তারিখ অনুযায়ী CSV পুনর্গণনা এবং রিপোর্ট আলাদা উইন্ডোতে প্রিন্ট/PDF রাখা হয়েছে। রিপোর্ট প্যানেলটি “আরও সুবিধা” অংশের ভেতরে এক জায়গায় আছে।
-- WhatsApp নোটিশে “আগামী ৭ দিনের মধ্যে” prompt বাদ দেওয়া হয়েছে; WhatsApp-এ খসড়া মেসেজ খুলবে, পাঠাতে WhatsApp-এ Send চাপতে হবে।
-- ছোট স্ক্রিনে লেখা, বাটন, ইনপুট ও কার্ড compact করা হয়েছে; নতুন গ্রাহকের শাখা নির্বাচন, মোবাইল নম্বর দিয়ে সার্চ, গ্রাহক PIN, ক্যাশ এন্ট্রি edit/delete এবং recovery-তে থাকা ঋণকে ক্যাশ সারাংশে গণনা করা হয়েছে।
-- কিস্তির জমা তারিখ ধরে প্রথম বকেয়া সপ্তাহে FIFO-ভাবে বরাদ্দ হয়; আংশিক জমা পৃথকভাবে দেখানো হয়। পুরোনো ডেটায় নির্দিষ্ট সপ্তাহের ID সংরক্ষিত না থাকায় এটি পুনর্গণিত FIFO allocation, মূল লেনদেনের ইতিহাস বদলায় না।
-
-**সতর্কতা:** Firebase সংযোগ, Google OAuth, Firestore Rules, লাইভ multi-device sync এবং Android WhatsApp handoff এখানে বাস্তব Firebase/Android environment-এ end-to-end পরীক্ষা করা সম্ভব হয়নি। প্রথমবার ক্লাউডে ডেটা তোলার আগে JSON backup নিন। পুরো ডেটা একটি Firestore document-এ যায়; Firestore-এর 1 MiB document সীমা অতিক্রম করলে ডেটাকে পৃথক documents-এ ভাগ করতে হবে। একই সময়ে একাধিক ফোনে একই তথ্য বদলালে last-write-wins হতে পারে। অ্যাডমিন PIN ও পুরোনো localStorage ডেটার নিরাপত্তা/মাইগ্রেশন এই প্যাকেজে পূর্ণ server-side redesign করা হয়নি।
