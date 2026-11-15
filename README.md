@@ -6,6 +6,7 @@
 
 - লগইন এখন শুধু Google/Gmail দিয়ে হবে; মোবাইল নম্বর ও পাসওয়ার্ডের লগইন স্ক্রিন সরানো হয়েছে। নতুন ব্যবহারকারী প্রথমবার Google দিয়ে প্রবেশ করলে অ্যাকাউন্ট তৈরি হবে।
 - একই Google অ্যাকাউন্টের UID-ভিত্তিক Firestore ডকুমেন্টে অ্যাপের ডেটা Sync হবে: `appSettings/{uid}`। অন্য Gmail দিয়ে লগইন করলে তার UID-তে আলাদা ডেটা থাকবে।
+- আলাদা ম্যানুয়াল Firebase Backup `appBackups/{uid}/snapshots/{backupId}`-এ append-only ভাবে রাখা হয়; এটি মূল Sync ডেটা বদলায় না এবং অ্যাপ পুরোনো Backup মুছে না।
 - নতুন/পরিবর্তিত তথ্য স্বয়ংক্রিয়ভাবে প্রায় ১ সেকেন্ডের মধ্যে Sync হয়; অন্য ডিভাইসের আপডেট লাইভ শোনা হয়।
 - রিপোর্টের তারিখ যাচাই, CSV-তে বর্তমান নির্বাচিত তারিখ/শাখা পুনরায় গণনা এবং শুধু রিপোর্ট প্রিন্ট/PDF করা হয়েছে।
 - WhatsApp নোটিশে “আগামী ৭ দিনের মধ্যে” ডিফল্ট prompt ও মাধ্যম বাছাইয়ের prompt বাদ; WhatsApp সরাসরি খোলে এবং মেসেজে “যত দ্রুত সম্ভব” লেখা হয়।
@@ -31,11 +32,18 @@ Authentication → Settings → Authorized domains-এ আপনার চাল
 
 ## ধাপ ৩ — Firestore Rules
 
-`firestore.rules` ফাইলে UID-ভিত্তিক নিরাপদ নিয়ম দেওয়া আছে। Firebase Console → Firestore Database → Rules-এ এই নিয়মগুলো পর্যালোচনা করে Publish করুন। এটি প্রতিটি Google অ্যাকাউন্টকে শুধু নিজের UID-এর ডেটা পড়া/লেখার অনুমতি দেয়। আপনার বর্তমান Rules-এর অন্য প্রয়োজনীয় নিয়ম থাকলে যাচাই ছাড়া সেগুলো মুছবেন না; প্রয়োজনে মিলিয়ে নিন।
+`firestore.rules` ফাইলে UID-ভিত্তিক নিয়ম দেওয়া আছে। Firebase Console → Firestore Database → Rules-এ আপনার বর্তমান Rules-এর সঙ্গে মিলিয়ে প্রয়োজনীয় অংশ যোগ করে Publish করুন। `appSettings/{uid}`-এর নিয়ম মূল Sync-এর জন্য এবং `appBackups/{uid}/snapshots/{backupId}`-এর নিয়ম আলাদা Backup-এর জন্য। `appBackups`-এ read/create অনুমতি কেবল নিজের UID-তে; update/delete বন্ধ। আপনার বর্তমান Rules-এর অন্য প্রয়োজনীয় নিয়ম যাচাই ছাড়া মুছবেন না।
 
 ## ধাপ ৪ — চালানো / হোস্ট করা
 
 সব ফাইল একই ফোল্ডারে রাখুন। `file://` দিয়ে খুলবেন না; HTTPS ওয়েবসাইটে চালান। GitHub Pages-এ আপলোড করতে ZIP-এর ভেতরের ফাইলগুলো repository root-এ রাখুন। Firebase Hosting ব্যবহার করতে Firebase CLI দিয়ে এই ফোল্ডারকে Hosting public directory হিসেবে deploy করা যায়; `firebase.json` ও `.firebaserc` প্রস্তুত আছে।
+
+## ব্যাকআপ ব্যবহারের নিয়ম
+
+- অ্যাপের “আরও সুবিধা” অংশে “Firebase-এ নতুন ব্যাকআপ রাখুন” চাপলে বর্তমান ডেটার একটি নতুন কপি আলাদা Firestore path-এ যোগ হবে। এটি Restore করে না।
+- “ফোনে JSON ব্যাকআপ ডাউনলোড” চাপলে একটি স্থানীয় ফাইল নামবে; সেটি নিরাপদ স্থানে রাখুন।
+- পুরোনো `cloudEndpoint` সেটিং থাকলেও এই সংস্করণে GitHub Pages-এ PUT পাঠানো হয় না; GitHub Pages ব্যাকআপ API নয়।
+- Firebase Console-এ Rules প্রকাশ না করলে আলাদা Backup ব্যর্থ হবে; তখনও মূল Firebase Sync আলাদা থাকবে।
 
 ## প্রথমবারের ডেটা স্থানান্তর
 
@@ -43,7 +51,7 @@ Authentication → Settings → Authorized domains-এ আপনার চাল
 
 ## গুরুত্বপূর্ণ সীমাবদ্ধতা ও সতর্কতা
 
-- এই প্রথম Firebase সংস্করণে বিদ্যমান অ্যাপের সম্পূর্ণ `db` অবজেক্ট `appSettings/{uid}`-এর একটি Firestore document-এ রাখা হয়। ডেটা খুব বড় হলে Firestore-এর ১ MiB document limit-এর কারণে আলাদা `members` ও `transactions` document-এ ভাগ করতে হবে।
+- বিদ্যমান অ্যাপের সম্পূর্ণ `db` অবজেক্ট `appSettings/{uid}`-এর একটি Firestore document-এ রাখা হয়। আলাদা Backup-ও প্রতিটি snapshot-এ একটি document; ডেটা ১ MiB ছাড়ালে Firestore সেটি প্রত্যাখ্যান করবে। এ অবস্থায় ফোনে JSON ব্যাকআপ ডাউনলোড করুন এবং পরবর্তী সময়ে ডেটা ভাগ করার পরিকল্পনা করুন।
 - একাধিক ফোনে একই সময়ে একই রেকর্ড সম্পাদনা করলে সর্বশেষ Sync হওয়া সম্পূর্ণ অ্যাপ-ডেটা আগের পরিবর্তনকে প্রতিস্থাপন করতে পারে। গুরুত্বপূর্ণ হিসাব পরিবর্তনের আগে ব্যাকআপ রাখুন। পরবর্তী সংস্করণে সদস্য/লেনদেন আলাদা ডকুমেন্টে Sync করা উচিত।
 - Google Authentication সক্রিয় করার জন্য Firebase Console-এ Web App Config ও Authorized domain ঠিকভাবে বসানো আবশ্যক। এই ZIP-এ Firebase Web Config আগে থেকেই যুক্ত আছে; কখনো Service Account key বা পাসওয়ার্ড এখানে রাখবেন না।
 - WhatsApp-এর মেসেজ পাঠানোর শেষ ধাপ WhatsApp অ্যাপেই ব্যবহারকারীকে Send চাপতে হবে; ওয়েবসাইট নিজে থেকে মেসেজ পাঠাতে পারে না।
