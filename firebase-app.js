@@ -4,7 +4,7 @@ import {
   onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, addDoc
+  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
@@ -17,6 +17,7 @@ const status = (message, isError=false) => {
     target?.appendChild(node);
   }
   node.textContent=message; node.style.color=isError?'#b91c1c':'#166534';
+  const mirror=document.getElementById('firebaseSettingsStatus'); if(mirror){mirror.textContent=message;mirror.style.color=isError?'#b91c1c':'#166534';}
 };
 const hasConfig = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('PASTE_') &&
   firebaseConfig.appId && !firebaseConfig.appId.includes('PASTE_') &&
@@ -102,6 +103,7 @@ async function syncNow(){
     lastRemoteJson=JSON.stringify(cleanData);status('Firebase Sync সম্পন্ন।');
   }catch(e){status('Firebase-এ সংরক্ষণ হয়নি: '+e.message,true);}
 }
+window.asthaFirebaseSyncNow=async function(){if(!activeUser){status('আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}await syncNow();};
 function scheduleSync(){
   if(!activeUser||applyingRemote)return;
   clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,900);
@@ -115,32 +117,6 @@ window.googleSignIn=async function(){
     }else status('Google লগইন ব্যর্থ: '+e.message,true);
   }
 };
-
-// Create an append-only manual backup in a separate Firestore collection.
-// This never changes appSettings/{uid} and never deletes or restores customer data.
-window.createAsthaCloudBackup = async function(){
-  const node=document.getElementById('cloudStatus');
-  const say=(m,bad=false)=>{if(node){node.textContent=m;node.style.color=bad?'#b91c1c':'#166534';}};
-  if(!activeUser||!dbFirestore){say('আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}
-  try{
-    const current=window.getAsthaData?.();
-    if(!current||!Array.isArray(current.customers))throw new Error('অ্যাপের বর্তমান ডেটা পাওয়া যায়নি।');
-    const snapshot=JSON.parse(JSON.stringify(current));
-    await addDoc(collection(dbFirestore,'appBackups',activeUser.uid,'snapshots'),{
-      data:snapshot,
-      createdAt:serverTimestamp(),
-      schemaVersion:1,
-      backupType:'manual'
-    });
-    say('নতুন Firebase ব্যাকআপ সফলভাবে সংরক্ষিত হয়েছে। আগের ব্যাকআপ অপরিবর্তিত আছে।');
-  }catch(e){
-    const message=e?.code==='firestore/permission-denied'
-      ?'Firebase Rules-এ appBackups অনুমতি প্রকাশ করা হয়নি। README-এর ধাপ অনুসরণ করুন।'
-      :(e?.code==='firestore/resource-exhausted'?'ডেটা Firestore-এর একক ডকুমেন্ট সীমা ছাড়িয়েছে। ফোনে JSON ব্যাকআপও ডাউনলোড করুন।':'Firebase ব্যাকআপ হয়নি: '+(e?.message||String(e)));
-    say(message,true);
-  }
-};
-
 window.asthaGoogleSignOut=async function(){try{if(stopSnapshot)stopSnapshot();stopSnapshot=null;await signOut(auth);activeUser=null;window.__asthaGoogleUser=null;location.reload();}catch(e){status('লগআউট হয়নি: '+e.message,true);}};
 
 if(!hasConfig){
