@@ -1,0 +1,39 @@
+আস্থা সমিতি — GitHub Pages ও Firebase চালু করার নির্দেশনা
+
+এই প্যাকেজে index.html, firebase-app.js এবং firebase-config.js যুক্ত করা হয়েছে। Firebase প্রজেক্ট ID: astha-somiti-d441b.
+
+প্রথমে গুরুত্বপূর্ণ:
+- GitHub-এ এই ZIP-এর সব ফাইল ও assets ফোল্ডার একসাথে আপলোড করুন।
+- কোনো ফাইলের নাম পরিবর্তন করবেন না।
+- পুরোনো ডেটা ক্লাউডে আছে কি না এই প্যাকেজ তৈরির সময় সরাসরি পরীক্ষা করা যায়নি। প্রথম Google লগইনে অ্যাপ ক্লাউডে ডেটা পেলে সেটি লোড করবে। ক্লাউডে ডেটা না থাকলে স্থানীয় ডেটা আপলোডের আগে নিশ্চিতকরণ চাইবে।
+- প্রথমবার চালুর আগে বর্তমান ফোনের অ্যাপ থেকে JSON ব্যাকআপ ডাউনলোড করে রাখুন।
+
+Firebase Console-এ একবার যা করতে হবে:
+1. https://console.firebase.google.com/ খুলে astha-somiti-d441b প্রজেক্ট নির্বাচন করুন।
+2. Authentication > Sign-in method > Google চালু (Enable) করুন এবং Support email নির্বাচন করে Save করুন।
+3. Authentication > Settings > Authorized domains-এ আপনার GitHub Pages ডোমেইন যোগ করুন: nahidsheck-lgtm.github.io
+4. Firestore Database > Create database-এ গিয়ে ডেটাবেস তৈরি করুন (যদি আগে থেকেই থাকে, নতুন করে করবেন না)।
+5. Firestore > Rules-এ নিচের নিয়ম প্রকাশ (Publish) করুন। এই নিয়মে প্রত্যেক Google ব্যবহারকারী শুধু নিজের UID-র ডকুমেন্ট পড়তে/লিখতে পারবে।
+
+Firestore Security Rules:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /appSettings/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+
+GitHub Pages চালু:
+1. GitHub repository-তে index.html, firebase-app.js, firebase-config.js, manifest.webmanifest, sw.js এবং assets ফোল্ডার আপলোড করুন।
+2. Repository Settings > Pages-এ Deploy from a branch নির্বাচন করে main এবং /(root) সিলেক্ট করে Save করুন।
+3. কিছুক্ষণ পর https://nahidsheck-lgtm.github.io/Astha.somiti/ খুলুন।
+4. Google/Gmail দিয়ে লগইন করুন। পুরোনো ক্লাউড ডেটা পাওয়া গেলে সেটি লোড হবে।
+
+সতর্কতা:
+- Firebase Web API key ব্রাউজার অ্যাপের public config-এর অংশ; এটি service-account private key নয়।
+- Gmail পাসওয়ার্ড বা service-account private key কখনো GitHub-এ দেবেন না।
+- Firestore rules ছাড়া ডেটাবেস চালু রাখবেন না।
+- এই অ্যাপটি ক্লাউড Sync-এর পাশাপাশি লোকাল ব্রাউজার স্টোরেজেও ডেটা রাখে। নিয়মিত JSON ব্যাকআপ রাখুন।
