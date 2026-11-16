@@ -1,145 +1,174 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence
+  getRedirectResult, onAuthStateChanged, setPersistence, browserLocalPersistence,
+  signOut
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
-const status = (message, isError=false) => {
-  let node = document.getElementById('firebaseStatus');
-  if (!node) {
-    node = document.createElement('p'); node.id='firebaseStatus';
-    node.className='muted';
-    const target=document.querySelector('#login') || document.querySelector('#setup');
-    target?.appendChild(node);
-  }
-  node.textContent=message; node.style.color=isError?'#b91c1c':'#166534';
-  const mirror=document.getElementById('firebaseSettingsStatus'); if(mirror){mirror.textContent=message;mirror.style.color=isError?'#b91c1c':'#166534';}
+const status = (message) => {
+  const node = document.getElementById('firebaseSettingsStatus');
+  if (node) node.textContent = message;
+  const loginNode = document.getElementById('firebaseLoginStatus');
+  if (loginNode) loginNode.textContent = message;
 };
-const hasConfig = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('PASTE_') &&
-  firebaseConfig.appId && !firebaseConfig.appId.includes('PASTE_') &&
-  firebaseConfig.messagingSenderId && !firebaseConfig.messagingSenderId.includes('PASTE_');
-let auth=null, dbFirestore=null, activeUser=null, stopSnapshot=null, syncTimer=null;
-let applyingRemote=false, lastRemoteJson='';
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
+let activeUser = null;
+let stopListening = null;
+let applyingCloud = false;
+let syncTimer = null;
+let redirectHandled = false;
+let manualSignInPending = false;
 
-function openApp(){
-  window.__asthaGoogleUser=activeUser;
-  window.openAsthaAfterGoogleLogin?.();
-  addSignOutButton();
+function localData() {
+  return typeof window.getAsthaData === 'function' ? window.getAsthaData() : null;
 }
-function addSignOutButton(){
-  if(document.getElementById('asthaGoogleSignOut')) return;
-  const host=document.querySelector('header .head')||document.querySelector('header');
-  if(!host)return;
-  const b=document.createElement('button');b.id='asthaGoogleSignOut';b.className='secondary no-print';
-  b.type='button';b.textContent='Google লগআউট';b.style.cssText='font-size:11px;margin:5px';
-  b.onclick=()=>window.asthaGoogleSignOut();host.appendChild(b);
+function validData(value) {
+  return !!value && typeof value === 'object' && Array.isArray(value.customers);
 }
-function appStateRef(uid){ return doc(dbFirestore,'appSettings',uid); }
-function showLogin(){
-  document.querySelectorAll('#setup,#app,#appFooterNav,#customerLogin,#customerView').forEach(x=>x?.classList.add('hidden'));
-  document.getElementById('login')?.classList.remove('hidden');
+function nonEmptyLocal(data) {
+  return !!(data && ((data.customers || []).length || (data.trash || []).length || data.admin));
 }
-function showMainApp(){
-  const user=activeUser;
-  let data=window.getAsthaData?.();
-  if(!data || typeof data!=='object')data={customers:[],trash:[],cash:{entries:[]},settings:{}};
-  if(!data.admin)data.admin={phone:'',pin:''};
-  data.admin.name=data.admin.name||user?.displayName||'Google Admin';
-  data.admin.email=user?.email||data.admin.email||'';
-  data.admin.uid=user?.uid||data.admin.uid||'';
-  if(!Array.isArray(data.customers))data.customers=[];
-  if(!Array.isArray(data.trash))data.trash=[];
-  window.setAsthaData?.(data);
-  openApp();
+function cleanData(data) {
+  // Firestore cannot store undefined values. JSON round-trip also strips functions.
+  return JSON.parse(JSON.stringify(data ?? {}));
 }
-async function loadCloud(uid){
-  const ref=appStateRef(uid), snap=await getDoc(ref);
-  const local=window.getAsthaData?.();
-  if(snap.exists()){
-    const payload=snap.data();
-    if(!payload || !payload.data || !Array.isArray(payload.data.customers)) throw new Error('ক্লাউড ডেটার গঠন সঠিক নয়।');
-    applyingRemote=true;
-    window.setAsthaData(payload.data);
-    lastRemoteJson=JSON.stringify(payload.data);
-    applyingRemote=false;
-    status('Firebase থেকে তথ্য Sync হয়েছে।');
-  } else if(local && Array.isArray(local.customers)){
-    const yes=confirm('এই Gmail-এ এখনো ক্লাউড ডেটা নেই। এই ফোনের বর্তমান গ্রাহক ও হিসাব Firebase-এ প্রথমবার সংরক্ষণ করবেন?');
-    if(yes){ const cleanLocal=JSON.parse(JSON.stringify(local));await setDoc(ref,{data:cleanLocal,updatedAt:serverTimestamp(),schemaVersion:1});lastRemoteJson=JSON.stringify(cleanLocal);status('এই ফোনের তথ্য Firebase-এ সংরক্ষিত হয়েছে।'); }
-    else status('ক্লাউডে তথ্য নেই। এই ডিভাইসের ডেটা অপরিবর্তিত আছে।',true);
+function stopCloudListener() {
+  if (stopListening) { stopListening(); stopListening = null; }
+}
+async function syncNow() {
+  if (!activeUser) {
+    status('আগে Google / Gmail দিয়ে লগইন করুন।');
+    return false;
+  }
+  const data = localData();
+  if (!validData(data)) throw new Error('অ্যাপের গ্রাহক ডেটা পাওয়া যায়নি।');
+  const ref = doc(firestore, 'appSettings', activeUser.uid);
+  await setDoc(ref, {
+    data: cleanData(data),
+    updatedAt: serverTimestamp(),
+    schemaVersion: 1
+  }, { merge: true });
+  status('Firebase-এ সর্বশেষ তথ্য Sync হয়েছে।');
+  return true;
+}
+window.asthaFirebaseSyncNow = async () => {
+  try { await syncNow(); alert('Firebase Sync সম্পন্ন হয়েছে।'); }
+  catch (error) { console.error(error); alert('Sync হয়নি: ' + (error.message || error)); }
+};
+window.asthaGoogleSignOut = async () => {
+  try { await signOut(auth); stopCloudListener(); activeUser = null; status('Google অ্যাকাউন্ট থেকে লগআউট হয়েছে।'); }
+  catch (error) { alert('লগআউট হয়নি: ' + (error.message || error)); }
+};
+
+async function openUserData(user) {
+  activeUser = user;
+  window.__asthaGoogleUser = user;
+  status('Google অ্যাকাউন্ট যাচাই হচ্ছে…');
+  const ref = doc(firestore, 'appSettings', user.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const payload = snap.data();
+    if (!validData(payload.data)) throw new Error('Firebase-এ পাওয়া ডেটার কাঠামো সঠিক নয়। ডেটা পরিবর্তন করা হয়নি।');
+    applyingCloud = true;
+    try { window.setAsthaData(payload.data); }
+    finally { applyingCloud = false; }
+    status('পুরোনো Firebase তথ্য লোড হয়েছে।');
   } else {
-    status('Firebase সংযোগ হয়েছে। নতুন অ্যাডমিন সেটআপ করুন।');
-  }
-  if(stopSnapshot)stopSnapshot();
-  stopSnapshot=onSnapshot(ref,snap2=>{
-    if(!snap2.exists()||applyingRemote)return;
-    const incoming=snap2.data()?.data;
-    if(!incoming||!Array.isArray(incoming.customers))return;
-    const json=JSON.stringify(incoming);
-    if(json===lastRemoteJson)return;
-    // Do not replace data while local edits are waiting to sync.
-    if(syncTimer){status('অন্য ডিভাইসের আপডেট এসেছে; স্থানীয় পরিবর্তন Sync শেষ হলে রিফ্রেশ হবে।');return;}
-    applyingRemote=true;window.setAsthaData(incoming);lastRemoteJson=json;applyingRemote=false;
-    const active=document.querySelector('#app:not(.hidden)');
-    if(active){
-      const selected=document.querySelector('#app>nav button.active')?.id||'tabDash';
-      if(selected==='tabCustomers')window.renderCustomers?.();else if(selected==='tabCash')window.renderCash?.();else window.renderDash?.();
+    const data = localData();
+    if (nonEmptyLocal(data)) {
+      const upload = confirm('এই Google অ্যাকাউন্টের Firebase-এ এখনো কোনো অ্যাপ ডেটা পাওয়া যায়নি। এই ডিভাইসের বর্তমান স্থানীয় ডেটা কি প্রথমবার ক্লাউডে সংরক্ষণ করবেন?\n\nনা চাপলে কোনো ডেটা আপলোড হবে না।');
+      if (upload) await syncNow();
+      else status('স্থানীয় তথ্য অপরিবর্তিত আছে; Firebase-এ এখনো কিছু সংরক্ষণ হয়নি।');
+    } else {
+      status('এই Firebase অ্যাকাউন্টে এখনো ডেটা নেই। নতুন খালি অ্যাপ খুলছে।');
     }
-    status('অন্য মোবাইলের নতুন তথ্য পাওয়া গেছে।');
-  },err=>status('লাইভ Sync সমস্যা: '+err.message,true));
+  }
+  stopCloudListener();
+  stopListening = onSnapshot(ref, (cloudSnap) => {
+    if (!cloudSnap.exists() || applyingCloud) return;
+    const payload = cloudSnap.data();
+    if (!validData(payload.data)) { status('ক্লাউড ডেটার কাঠামো সঠিক নয়; বর্তমান তথ্য রাখা হয়েছে।'); return; }
+    applyingCloud = true;
+    try {
+      window.setAsthaData(payload.data);
+      if (document.getElementById('app') && !document.getElementById('app').classList.contains('hidden')) {
+        window.renderDash?.();
+        const activeTab = document.querySelector('nav button.active')?.id || '';
+        if (activeTab === 'tabCustomers') window.renderCustomers?.();
+      }
+      status('Firebase থেকে নতুন তথ্য Sync হয়েছে।');
+    } finally { applyingCloud = false; }
+  }, (error) => { console.error(error); status('লাইভ Sync বন্ধ: ' + (error.message || error)); });
+  if (typeof window.openAsthaAfterGoogleLogin === 'function') window.openAsthaAfterGoogleLogin();
 }
-async function syncNow(){
-  if(!activeUser||!dbFirestore||applyingRemote)return;
-  const data=window.getAsthaData?.();if(!data)return;
-  try{
-    const json=JSON.stringify(data);
-    if(json===lastRemoteJson)return;
-    const cleanData=JSON.parse(json);
-    await setDoc(appStateRef(activeUser.uid),{data:cleanData,updatedAt:serverTimestamp(),schemaVersion:1});
-    lastRemoteJson=JSON.stringify(cleanData);status('Firebase Sync সম্পন্ন।');
-  }catch(e){status('Firebase-এ সংরক্ষণ হয়নি: '+e.message,true);}
-}
-window.asthaFirebaseSyncNow=async function(){if(!activeUser){status('আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}await syncNow();};
-function scheduleSync(){
-  if(!activeUser||applyingRemote)return;
-  clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,900);
-}
-window.googleSignIn=async function(){
-  if(!hasConfig){status('Firebase Config অসম্পূর্ণ। firebase-config.js-এ Firebase Console-এর সঠিক মান বসাতে হবে।',true);return;}
-  try{status('Google অ্যাকাউন্ট সংযোগ করা হচ্ছে…');const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,provider);}
-  catch(e){
-    if(['auth/popup-blocked','auth/popup-closed-by-user','auth/operation-not-supported-in-this-environment'].includes(e.code)){
-      try{await signInWithRedirect(auth,new GoogleAuthProvider());return;}catch(e2){status('Google লগইন ব্যর্থ: '+e2.message,true);}
-    }else status('Google লগইন ব্যর্থ: '+e.message,true);
+
+window.googleSignIn = async function () {
+  try {
+    if (!firebaseConfig.apiKey || !firebaseConfig.appId || !firebaseConfig.messagingSenderId ||
+        String(firebaseConfig.apiKey).includes('YOUR_')) {
+      throw new Error('Firebase কনফিগারেশন অসম্পূর্ণ।');
+    }
+    await setPersistence(auth, browserLocalPersistence);
+    manualSignInPending = true;
+    status('Google লগইন খুলছে…');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await openUserData(result.user);
+      manualSignInPending = false;
+    } catch (popupError) {
+      if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/operation-not-supported-in-this-environment') {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      throw popupError;
+    }
+  } catch (error) {
+    manualSignInPending = false;
+    console.error(error);
+    status('Google/Firebase লগইন হয়নি: ' + (error.message || error));
+    alert('Google/Firebase লগইন হয়নি।\n' + (error.message || error) + '\n\nFirebase Console-এ Google Authentication চালু আছে কি না এবং GitHub Pages ডোমেইন অনুমোদিত কি না দেখুন।');
   }
 };
-window.asthaGoogleSignOut=async function(){try{if(stopSnapshot)stopSnapshot();stopSnapshot=null;await signOut(auth);activeUser=null;window.__asthaGoogleUser=null;location.reload();}catch(e){status('লগআউট হয়নি: '+e.message,true);}};
 
-if(!hasConfig){
-  status('Firebase প্রস্তুত করতে firebase-config.js-এ Web App Config বসান।');
-} else {
-  try{
-    const app=initializeApp(firebaseConfig);auth=getAuth(app);dbFirestore=getFirestore(app);
-    // Keep the Google account signed in on this device until explicit logout.
-    await setPersistence(auth,browserLocalPersistence);
-    // Google auth is required for admin login/setup; local PIN alone is not enough.
-    const oldLogin=window.login;
-    if(typeof oldLogin==='function')window.login=function(){if(!activeUser){status('আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}return oldLogin.apply(this,arguments)};
-    const oldFinishSetup=window.finishSetup;
-    if(typeof oldFinishSetup==='function')window.finishSetup=function(){if(!activeUser){status('অ্যাডমিন সেটআপের আগে Google/Gmail দিয়ে লগইন করুন।',true);return;}const r=oldFinishSetup.apply(this,arguments);scheduleSync();return r};
-    const originalSave=window.save;
-    if(typeof originalSave==='function')window.save=function(){const r=originalSave.apply(this,arguments);scheduleSync();return r};
-    getRedirectResult(auth).catch(e=>status('Google লগইন ফলাফল পাওয়া যায়নি: '+e.message,true));
-    onAuthStateChanged(auth,async user=>{
-      activeUser=user;
-      if(!user){window.__asthaGoogleUser=null;showLogin();status('প্রবেশ করতে Google/Gmail দিয়ে লগইন করুন।');return;}
-      window.__asthaGoogleUser=user;
-      status('Google অ্যাকাউন্ট যাচাই হয়েছে: '+(user.email||'ইমেইল অজানা'));
-      try{await loadCloud(user.uid);showMainApp();}catch(e){status('Firebase ডেটা লোড হয়নি: '+e.message,true);}
-    });
-  }catch(e){status('Firebase চালু করা যায়নি: '+e.message,true);}
+// Keep the app's existing local save behavior, then sync changes to this user's cloud document.
+function attachSaveSync() {
+  if (typeof window.save !== 'function' || window.save.__asthaFirebaseWrapped) return;
+  const originalSave = window.save;
+  const wrapped = function (...args) {
+    const result = originalSave.apply(this, args);
+    if (activeUser && !applyingCloud) {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => syncNow().catch((error) => {
+        console.error(error); status('স্থানীয়ভাবে সংরক্ষিত; Firebase Sync ব্যর্থ: ' + (error.message || error));
+      }), 900);
+    }
+    return result;
+  };
+  wrapped.__asthaFirebaseWrapped = true;
+  window.save = wrapped;
 }
+attachSaveSync();
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { activeUser = null; stopCloudListener(); return; }
+  // The explicit sign-in handler opens the data. Avoid opening the same session twice.
+  if (manualSignInPending || activeUser?.uid === user.uid) return;
+  if (redirectHandled) return;
+  try {
+    const redirectResult = await getRedirectResult(auth);
+    if (redirectResult?.user) { redirectHandled = true; await openUserData(redirectResult.user); }
+    else {
+      // Existing persisted Google session: restore its cloud data automatically.
+      redirectHandled = true;
+      await openUserData(user);
+    }
+  } catch (error) { console.error(error); status('Firebase সংযোগ হয়নি: ' + (error.message || error)); }
+});
