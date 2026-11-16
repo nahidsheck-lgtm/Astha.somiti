@@ -1,3 +1,11 @@
+{
+  "name": "আস্থা সমিতি",
+  "short_name": "আস্থা সমিতি",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8B0000",
+  "description": "আস্থা সমিতির গ্রাহক, ঋণ ও কিস্তির হিসাব পরিচালনার অ্যাপ",
   "icons": [
     {
       "src": "icon-192.png",
@@ -10,3 +18,4 @@
       "type": "image/png"
     }
   ]
+}
