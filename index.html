@@ -1486,20 +1486,29 @@ const _renderCashAstha=window.renderCash;
 if(typeof _renderCashAstha==='function')window.renderCash=function(){const r=_renderCashAstha.apply(this,arguments);const box=document.getElementById('cashHistory');if(box){const entries=db?.cash?.entries||[];box.innerHTML='<h3 style="margin-top:16px">লেনদেনের তালিকা</h3>'+(entries.map((x,rev)=>{const i=entries.length-1-rev;const type=x.type==='capital'?'মূলধন যোগ':x.type==='expense'?'খরচ':x.type==='loan'?'ঋণ বিতরণ':x.type==='repayment'?'কিস্তি আদায়':'লেনদেন';return `<div class="customer"><div style="flex:1;min-width:0"><b>${type} · ${money(x.amount)}</b><small>${esc(x.date)} · ${esc(x.note||'বিবরণ নেই')}</small></div><button class="secondary no-print" onclick="editCashEntry(${i})">এডিট</button><button class="danger no-print" onclick="deleteCashEntry(${i})">ডিলিট</button></div>`}).join('')||'<p class="muted">এখনো কোনো অতিরিক্ত লেনদেন নেই।</p>')}return r};
 window.logoutGoogleAstha=()=>window.asthaGoogleSignOut?.();
 </script>
-<script id="astha-startup-fallback">
+<script id="astha-startup-fallback"> 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Wait for Firebase to restore any previously saved Google session before
-  // showing the local login/setup screen. This prevents refresh from covering
-  // the app after Firebase has already restored the signed-in user.
+  // Firebase Auth emits this event after it has checked the persisted session.
+  // Wait longer than the old 6-second timeout to avoid showing a false login screen.
   if (!window.__asthaFirebaseAuthReady) {
     await new Promise(resolve => {
       let finished = false;
-      const done = () => { if (finished) return; finished = true; clearTimeout(timer); resolve(); };
+      const done = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        resolve();
+      };
       window.addEventListener('astha-firebase-auth-ready', done, { once:true });
-      const timer = setTimeout(done, 6000);
+      const timer = setTimeout(done, 15000);
     });
   }
   if (window.__asthaFirebaseHasUser) return;
+  if (!window.__asthaFirebaseAuthReady) {
+    const s = document.getElementById('firebaseLoginStatus');
+    if (s) s.textContent = 'লগইন সেশন যাচাই করা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে পেজ রিফ্রেশ করুন।';
+    return;
+  }
   const hasLocalAccount=!!(db&&(db.admins?.length||db.admin?.phone));
   const target=document.getElementById(hasLocalAccount?'login':'setup');
   ['setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
