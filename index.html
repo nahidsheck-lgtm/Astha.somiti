@@ -1473,6 +1473,14 @@ window.openAsthaAfterGoogleLogin=function(){
  document.body.classList.remove('customer-view-mode');hideAll();el('app').classList.remove('hidden');el('appFooterNav').classList.remove('hidden');
  document.querySelectorAll('[data-owner-only]').forEach(x=>x.classList.remove('hidden'));
  renderDash();
+ // Restore the last open app section after Firebase has confirmed the Gmail session.
+ try {
+   const savedTab = localStorage.getItem('astha_last_open_tab_v1');
+   const allowedTabs = ['dash','customers','trash','cash','docs','settings','advanced'];
+   if (savedTab && allowedTabs.includes(savedTab) && typeof window.showTab === 'function') {
+     window.showTab(savedTab);
+   }
+ } catch (e) { console.warn('Last tab restore skipped', e); }
 };
 // Branch selector: make branch assignment available while adding a new member.
 window.populateCustomerBranches=function(){
@@ -2200,6 +2208,12 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
       if(!restoring&&(before.tab!==t||before.detail||before.newPanel))pushPrevious();
       const result=originalShowTab.apply(this,arguments);
       currentDetailId=null;
+      // Remember the user's current section so a refresh returns to that section.
+      try {
+        if (['dash','customers','trash','cash','docs','settings','advanced'].includes(t)) {
+          localStorage.setItem('astha_last_open_tab_v1', t);
+        }
+      } catch(e) { console.warn('Could not save last open tab', e); }
       return result;
     };
   }
