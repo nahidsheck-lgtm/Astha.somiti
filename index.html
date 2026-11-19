@@ -1479,7 +1479,19 @@ if(typeof _renderCashAstha==='function')window.renderCash=function(){const r=_re
 window.logoutGoogleAstha=()=>window.asthaGoogleSignOut?.();
 </script>
 <script id="astha-startup-fallback">
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Wait for Firebase to restore any previously saved Google session before
+  // showing the local login/setup screen. This prevents refresh from covering
+  // the app after Firebase has already restored the signed-in user.
+  if (!window.__asthaFirebaseAuthReady) {
+    await new Promise(resolve => {
+      let finished = false;
+      const done = () => { if (finished) return; finished = true; clearTimeout(timer); resolve(); };
+      window.addEventListener('astha-firebase-auth-ready', done, { once:true });
+      const timer = setTimeout(done, 6000);
+    });
+  }
+  if (window.__asthaFirebaseHasUser) return;
   const hasLocalAccount=!!(db&&(db.admins?.length||db.admin?.phone));
   const target=document.getElementById(hasLocalAccount?'login':'setup');
   ['setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));

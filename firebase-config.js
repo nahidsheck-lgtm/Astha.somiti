@@ -1,5 +1,5 @@
 // Firebase Web App configuration for Astha Somiti.
-// Public client configuration only. Never place service-account keys here.
+// This client configuration is public; protect data with Firestore Security Rules.
 export const firebaseConfig = {
   apiKey: 'AIzaSyA9BbQYRsDzgAeIf0xtElRMMAXErQEl-2Q',
   authDomain: 'astha-somiti-d441b.firebaseapp.com',

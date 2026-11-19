@@ -1,4 +1,4 @@
-const CACHE_NAME = 'astha-somiti-v2';
+const CACHE_NAME = 'astha-somiti-v3';
 const APP_SHELL = './';
 
 self.addEventListener('install', (event) => {
@@ -17,14 +17,14 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
+// Network-first: GitHub Pages updates are fetched immediately when online.
+// Cached responses are used only when the network is unavailable.
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Always try the network first so published GitHub Pages changes are picked up.
   event.respondWith((async () => {
     try {
       const response = await fetch(request, { cache: 'no-cache' });
