@@ -471,9 +471,14 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
  #app>nav.astha-five-nav>button img.nav-logo{width:38px!important;height:38px!important}
 }
 </style>
-\n
+
 <style id="astha-transparent-nav-icons">
 #app>nav.astha-five-nav>button img.nav-logo{background:transparent!important;border:0!important;box-shadow:none!important;object-fit:contain!important;padding:0!important;mix-blend-mode:normal!important;}
+</style>
+<style id="astha-weeks-elapsed-badge">
+#customerList .compact-customer .cust-avatar.weeks-elapsed{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:0!important;width:42px!important;height:42px!important;min-width:42px!important;flex:0 0 42px!important;border-radius:50%!important;background:#e9eef3!important;color:#8b0000!important;font-size:14px!important;line-height:1.05!important;font-weight:800!important;box-shadow:inset 0 0 0 1px rgba(139,0,0,.12)!important}
+#customerList .compact-customer .cust-avatar.weeks-elapsed strong{font-size:16px!important;font-weight:900!important;line-height:1!important}
+#customerList .compact-customer .cust-avatar.weeks-elapsed small{font-size:9px!important;font-weight:700!important;line-height:1.1!important;color:#526071!important}
 </style>
 </head>
 <body>
@@ -1029,9 +1034,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const q=($('search')?.value||'').trim().toLowerCase();
   $('customerList').innerHTML=(db.customers||[]).filter(c=>[c.name,c.phone,c.loginId].join(' ').toLowerCase().includes(q)).map(c=>{
    const t=totals(c),id=safe(c.id);
-   const lastWeekDate=(()=>{const raw=String(c.startDate||new Date().toISOString().slice(0,10));const parts=raw.split('-').map(Number);const start=new Date(parts[0],(parts[1]||1)-1,parts[2]||1);start.setDate(start.getDate()+7*Number(c.weeks||12));return new Intl.DateTimeFormat('bn-BD',{day:'numeric',month:'long',year:'numeric'}).format(start)})();
+   const startDateForWeeks=(()=>{const raw=String(c.startDate||new Date().toISOString().slice(0,10));const parts=raw.split('-').map(Number);return new Date(parts[0],(parts[1]||1)-1,parts[2]||1)})();
+   const todayForWeeks=new Date();todayForWeeks.setHours(0,0,0,0);startDateForWeeks.setHours(0,0,0,0);
+   const weeksElapsed=Math.min(Number(c.weeks||12),Math.max(0,Math.floor((todayForWeeks-startDateForWeeks)/604800000)));
+   const lastWeekDate=(()=>{const end=new Date(startDateForWeeks);end.setDate(end.getDate()+7*Number(c.weeks||12));return new Intl.DateTimeFormat('bn-BD',{day:'numeric',month:'long',year:'numeric'}).format(end)})();
    return `<div class="customer compact-customer" data-customer="${id}" role="group">
-    <div class="cust-avatar-wrap"><div class="cust-avatar">♙</div></div><div class="cust-main"><button class="customer-id-label id-tap" type="button" aria-label="${safe(c.loginId)}-এর লোনের তথ্য দেখুন" onclick="event.stopPropagation();toggleCustomerInfo('${id}')">${safe(c.loginId)}</button><b>${safe(c.name)}</b><small class="customer-phone">${safe(c.phone)}</small></div><div class="customer-info-panel" id="customerInfo_${c.id}" hidden><div>💰 <b>লোনের পরিমাণ:</b> ${money(c.given)}</div><div>📅 <b>মেয়াদ:</b> ${bn(c.weeks||12)} সপ্তাহ</div><div>💵 <b>জমা:</b> ${money(t.paid)}</div><div>🗓️ <b>শেষ সপ্তাহের তারিখ:</b> ${lastWeekDate}</div></div>
+    <div class="cust-avatar-wrap"><div class="weeks-count-badge" title="${bn(weeksElapsed)} সপ্তাহ পার হয়েছে">${bn(weeksElapsed)} সপ্তাহ</div><button class="cust-avatar customer-photo-slot" type="button" title="প্রোফাইল ছবি যোগ বা পরিবর্তন করুন" aria-label="প্রোফাইল ছবি যোগ করুন" onclick="event.stopPropagation();editCustomer('${id}')">${c.photo?`<img class="customer-photo-mini" src="${c.photo}" alt="গ্রাহকের ছবি">`:'＋'}</button></div><div class="cust-main"><button class="customer-id-label id-tap" type="button" aria-label="${safe(c.loginId)}-এর লোনের তথ্য দেখুন" onclick="event.stopPropagation();toggleCustomerInfo('${id}')">${safe(c.loginId)}</button><b>${safe(c.name)}</b><small class="customer-phone">${safe(c.phone)}</small></div><div class="customer-info-panel" id="customerInfo_${c.id}" hidden><div>💰 <b>লোনের পরিমাণ:</b> ${money(c.given)}</div><div>📅 <b>মেয়াদ:</b> ${bn(c.weeks||12)} সপ্তাহ</div><div>💵 <b>জমা:</b> ${money(t.paid)}</div><div>🗓️ <b>শেষ সপ্তাহের তারিখ:</b> ${lastWeekDate}</div></div>
     <div class="cust-values"><button class="due-tap" type="button" aria-label="নতুন জমা" onclick="event.stopPropagation();toggleQuickDeposit('${id}')">${money(t.due)}</button><span class="muted">বাকি</span></div>
     <div class="cust-open"><button class="schedule-tap" type="button" aria-label="সাপ্তাহিক কিস্তির সময়সূচি" onclick="event.stopPropagation();openCustomerSchedule('${id}')">▤</button></div>
     <div class="quick-deposit-inline" id="quickDeposit_${id}" style="display:none">
@@ -1550,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
  const oldList=window.renderCustomers;
  if(typeof oldList==='function')window.renderCustomers=function(){oldList.apply(this,arguments);(db.customers||[]).forEach(c=>{if(!c.photo)return;const cards=[...document.querySelectorAll('.compact-customer')];const card=cards.find(x=>x.getAttribute('onclick')?.includes(String(c.id)));if(card){const av=card.querySelector('.cust-avatar');if(av){av.innerHTML=`<img class="customer-photo-mini" src="${c.photo}" alt="গ্রাহকের ছবি">`;}}})};
  const oldDetail=window.renderDetail;
- if(typeof oldDetail==='function')window.renderDetail=function(c){oldDetail.apply(this,arguments);const hero=document.querySelector('#detail .detail-hero .row');if(hero&&c.photo&&!hero.querySelector('.customer-photo-large')){const img=document.createElement('img');img.className='customer-photo-large';img.src=c.photo;img.alt='গ্রাহকের ছবি';hero.insertBefore(img,hero.firstChild)}const actions=document.querySelector('#detail .top-actions');if(actions&&!document.getElementById('printCustomerId')){const b=document.createElement('button');b.id='printCustomerId';b.className='secondary';b.textContent='আইডি কার্ড প্রিন্ট';b.onclick=()=>window.printCustomerIdCard(c.id);actions.appendChild(b)}};
+ if(typeof oldDetail==='function')window.renderDetail=function(c){oldDetail.apply(this,arguments);const hero=document.querySelector('#detail .detail-hero .row');if(hero){let img=hero.querySelector('.customer-photo-large');if(c.photo&&!img){img=document.createElement('img');img.className='customer-photo-large';img.src=c.photo;img.alt='গ্রাহকের ছবি';hero.insertBefore(img,hero.firstChild)}if(img){img.style.cursor='pointer';img.title='ছবি পরিবর্তন করতে চাপ দিন';img.onclick=()=>window.editCustomer(c.id)}else{const add=document.createElement('button');add.type='button';add.className='secondary no-print';add.textContent='📷 প্রোফাইল ছবি যোগ করুন';add.onclick=()=>window.editCustomer(c.id);hero.insertBefore(add,hero.firstChild)}}const actions=document.querySelector('#detail .top-actions');if(actions&&!document.getElementById('printCustomerId')){const b=document.createElement('button');b.id='printCustomerId';b.className='secondary';b.textContent='আইডি কার্ড প্রিন্ট';b.onclick=()=>window.printCustomerIdCard(c.id);actions.appendChild(b)}};
  window.printCustomerIdCard=function(id){const c=(db.customers||[]).find(x=>String(x.id)===String(id));if(!c)return;const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));const w=window.open('','_blank','width=700,height=520');if(!w)return alert('আইডি কার্ড খুলতে পপ-আপ অনুমতি দিন।');w.document.write(`<!doctype html><html lang="bn"><meta charset="utf-8"><title>গ্রাহক আইডি কার্ড</title><style>body{font-family:Arial,sans-serif;padding:24px}.card{width:340px;border:2px solid #24543c;border-radius:14px;padding:16px;color:#173c2c}.head{text-align:center;font-weight:bold;margin-bottom:12px}.row{display:flex;gap:14px;align-items:flex-start}.photo{width:88px;height:105px;object-fit:cover;border:1px solid #aaa;border-radius:8px}.thumb{width:58px;height:58px;object-fit:contain;border:1px solid #aaa;border-radius:6px}p{font-size:13px;margin:7px 0}.id{font-weight:bold;color:#946515}</style><div class="card"><div class="head">আস্থা সমিতি<br>গ্রাহক পরিচয়পত্র</div><div class="row">${c.photo?`<img class="photo" src="${c.photo}">`:''}<div><p class="id">আইডি: ${esc(c.loginId)}</p><p><b>${esc(c.name||'—')}</b></p><p>মোবাইল: ${esc(c.phone||'—')}</p><p>লোন: ৳${esc(c.given||0)}</p><p>NID: ${esc(c.nidNumber||'—')}</p></div></div>${c.thumbPhoto?`<p>বুড়ো আঙুলের ছাপ:</p><img class="thumb" src="${c.thumbPhoto}">`:''}<p>জন্ম: ${esc(c.dob||'—')} · ঠিকানা: ${esc(c.address||'—')}</p></div><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></html>`);w.document.close()};
  // Dashboard total customer tile opens the customer list directly.
  const stat=document.getElementById('sCount')?.closest('.stat');if(stat){stat.style.cursor='pointer';stat.setAttribute('role','button');stat.setAttribute('tabindex','0');stat.addEventListener('click',()=>{if(typeof showTab==='function')showTab('customers');if(typeof renderCustomers==='function')renderCustomers()});stat.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(typeof showTab==='function')showTab('customers');if(typeof renderCustomers==='function')renderCustomers()}})}
@@ -1994,8 +2002,16 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      <label style="grid-column:1/-1">ঠিকানা<textarea id="aeAddress" rows="2" style="display:block;width:100%;box-sizing:border-box;padding:9px"></textarea></label>
     </div>
     <div style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0">
-     <b>গ্রাহকের প্রোফাইল ছবি</b><input id="aeProfileFile" type="file" accept="image/*" capture="user" style="display:block;margin:8px 0">
-     <img id="aeProfilePreview" alt="প্রোফাইল ছবি" style="display:none;width:82px;height:82px;object-fit:cover;border-radius:50%">
+     <b>গ্রাহকের প্রোফাইল ছবি</b>
+     <p style="font-size:12px;color:#64748b;margin:5px 0">ছবিতে চাপ দিন অথবা নিচের অপশন থেকে ক্যামেরা/গ্যালারি বেছে নিন।</p>
+     <img id="aeProfilePreview" alt="প্রোফাইল ছবি যোগ বা পরিবর্তন করুন" title="ছবি যোগ বা পরিবর্তন করুন" style="display:block;width:82px;height:82px;object-fit:cover;border-radius:50%;border:2px solid #991b1b;cursor:pointer;background:#f1f5f9" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='82' height='82' viewBox='0 0 82 82'%3E%3Crect width='82' height='82' rx='41' fill='%23f1f5f9'/%3E%3Ctext x='41' y='51' text-anchor='middle' font-size='34' fill='%238b0000'%3E%2B%3C/text%3E%3C/svg%3E">
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
+      <button type="button" class="secondary" id="aeProfileCamera">📷 ক্যামেরা</button>
+      <button type="button" class="secondary" id="aeProfileGallery">🖼️ গ্যালারি</button>
+      <button type="button" class="danger" id="aeProfileRemove">ছবি মুছুন</button>
+     </div>
+     <input id="aeProfileCameraFile" type="file" accept="image/*" capture="user" hidden>
+     <input id="aeProfileGalleryFile" type="file" accept="image/*" hidden>
     </div>
     <div style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0">
      <b>ভোটার আইডি কার্ডের ছবি</b><input id="aeNidFile" type="file" accept="image/*" capture="environment" style="display:block;margin:8px 0">
@@ -2025,7 +2041,16 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      $(inputId).addEventListener('change',function(){const f=this.files?.[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const scale=Math.min(1,1000/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*scale);cv.height=Math.round(im.height*scale);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);setter(cv.toDataURL('image/jpeg',.72));img.src=setter===setProfile?profilePhoto:setter===setNid?nidPhoto:thumbPhoto;img.style.display='block'};im.src=fr.result};fr.readAsDataURL(f)});
    }
    function setProfile(v){profilePhoto=v}function setNid(v){nidPhoto=v}function setThumb(v){thumbPhoto=v}
-   imageInput('aeProfileFile','aeProfilePreview',setProfile,profilePhoto);
+   // Profile photo can be selected from either the front camera or gallery.
+   const profilePreview=$('aeProfilePreview');
+   if(profilePhoto){profilePreview.src=profilePhoto;}
+   const profileCamera=$('aeProfileCameraFile'),profileGallery=$('aeProfileGalleryFile');
+   const openCamera=()=>profileCamera.click(),openGallery=()=>profileGallery.click();
+   $('aeProfileCamera').onclick=openCamera;$('aeProfileGallery').onclick=openGallery;
+   profilePreview.onclick=()=>{const choose=confirm('ক্যামেরা দিয়ে ছবি তুলতে OK চাপুন। গ্যালারি থেকে নিতে Cancel চাপুন।');(choose?openCamera:openGallery)()};
+   $('aeProfileRemove').onclick=()=>{profilePhoto='';profilePreview.removeAttribute('src');profilePreview.alt='প্রোফাইল ছবি যোগ করুন'};
+   function readProfileFile(input){input.addEventListener('change',function(){const f=this.files?.[0];if(!f)return;if(!f.type.startsWith('image/')){alert('শুধু ছবির ফাইল নির্বাচন করুন।');return}const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const scale=Math.min(1,1000/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*scale);cv.height=Math.round(im.height*scale);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);profilePhoto=cv.toDataURL('image/jpeg',.72);profilePreview.src=profilePhoto};im.src=fr.result};fr.readAsDataURL(f)})}
+   readProfileFile(profileCamera);readProfileFile(profileGallery);
    imageInput('aeNidFile','aeNidPreview',setNid,nidPhoto);
    imageInput('aeThumbFile','aeThumbPreview',setThumb,thumbPhoto);
    const close=()=>overlay.remove();$('aeClose').onclick=close;$('aeCancel').onclick=close;
@@ -2208,4 +2233,14 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
   }
   #asthaLedgerOverlay .ledger-head{padding:7px 8px!important}
 }
+</style>
+
+
+<style id="astha-week-above-photo-slot">
+#customerList .compact-customer{grid-template-columns:52px minmax(0,1fr) auto 28px!important;column-gap:8px!important}
+#customerList .compact-customer > .cust-avatar-wrap{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;width:52px!important;min-width:52px!important}
+#customerList .compact-customer .weeks-count-badge{display:block!important;min-width:34px!important;max-width:48px!important;box-sizing:border-box!important;padding:1px 4px!important;border-radius:7px!important;background:#fceeee!important;color:#8b1e1e!important;border:1px solid #ead0d0!important;font-size:9px!important;font-weight:800!important;line-height:13px!important;text-align:center!important;white-space:nowrap!important}
+#customerList .compact-customer .cust-avatar.customer-photo-slot{display:flex!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;margin:0!important;border:1.5px dashed #9aa5b1!important;border-radius:50%!important;background:#f1f4f7!important;color:#8b1e1e!important;font-size:25px!important;line-height:1!important;overflow:hidden!important;cursor:pointer!important;box-shadow:none!important}
+#customerList .compact-customer .customer-photo-slot img,#customerList .compact-customer .customer-photo-slot .customer-photo-mini{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;border:0!important}
+@media(max-width:380px){#customerList .compact-customer{grid-template-columns:48px minmax(0,1fr) auto 26px!important;column-gap:6px!important}#customerList .compact-customer > .cust-avatar-wrap{width:48px!important;min-width:48px!important}#customerList .compact-customer .cust-avatar.customer-photo-slot{width:40px!important;height:40px!important;min-width:40px!important}}
 </style>
