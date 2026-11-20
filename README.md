@@ -39,6 +39,8 @@
 - একই ডিভাইসে trusted-device PIN login থাকলে refresh-এর পর আর login/loading screen দিয়ে অ্যাপ ঢেকে যাবে না।
 - শেষ দেখা tab এবং customer detail refresh-এর পর ফিরিয়ে আনার ব্যবস্থা যোগ করা হয়েছে।
 - Splash screen-এ মূল লোগো পূর্ণ দৃশ্যমান রাখা হয়েছে; Firebase ধীর হলে ৮ সেকেন্ড পর স্থানীয় login/setup দেখাবে।
+- আগের ZIP-এ স্থানীয় login fallback দেখানোর কথা থাকলেও `login` section-এ শুধু Google বাটন ছিল; ফলে PIN login সম্ভব হচ্ছিল না। এখন মোবাইল + ৪ সংখ্যার PIN login UI ফিরিয়ে আনা হয়েছে এবং সফল PIN login-এর পর trusted-device session restore কাজ করবে।
+- Service worker cache version `v6` করা হয়েছে, যাতে নতুন login screen পুরোনো cache থেকে আটকে না থাকে।
 - Service worker cached page দ্রুত দেখায় এবং নতুন পেজ ব্যাকগ্রাউন্ডে cache করে।
 - Backup page-এ mobile popup block হলে Google login redirect fallback যোগ করা হয়েছে।
 - `.firebaserc` এবং অনুপস্থিত PWA icon ফাইল যোগ করা হয়েছে।
