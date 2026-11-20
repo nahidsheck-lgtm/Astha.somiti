@@ -69,26 +69,6 @@ function readStashedLocalForUid(uid) {
   try { const raw = localStorage.getItem(ACCOUNT_BACKUP_PREFIX + uid); if (!raw) return null; const data = JSON.parse(raw); return validData(data) ? data : null; }
   catch (_) { return null; }
 }
-
-function keepSignedInWhenCloudUnavailable(user, error) {
-  activeUser = user;
-  window.__asthaGoogleUser = user;
-  const owner = localOwnerUid();
-  // Never show another Gmail's local records under this account.
-  if (owner && owner !== user.uid) {
-    stashLocalForUid(owner);
-    applyingCloud = true;
-    try { window.setAsthaData(emptyAccountData()); }
-    catch (e) { console.warn('Could not isolate local data for this account', e); }
-    finally { applyingCloud = false; }
-    setLocalOwnerUid(user.uid);
-  }
-  status('Gmail লগইন আছে। ক্লাউড সংযোগ সাময়িকভাবে পাওয়া যাচ্ছে না; ইন্টারনেট চালু হলে আবার Sync হবে।');
-  console.warn('Firebase session restored; Firestore unavailable:', error);
-  if (typeof window.openAsthaAfterGoogleLogin === 'function') window.openAsthaAfterGoogleLogin();
-  announceAuthReady(true);
-}
-
 function stopCloudListener() {
   if (stopListening) { stopListening(); stopListening = null; }
   if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; }
@@ -236,11 +216,7 @@ window.googleSignIn = async function () {
     status('Google লগইন খুলছে…');
     try {
       const result = await signInWithPopup(auth, provider);
-      try {
-        await openUserData(result.user);
-      } catch (cloudError) {
-        keepSignedInWhenCloudUnavailable(result.user, cloudError);
-      }
+      await openUserData(result.user);
       manualSignInPending = false;
     } catch (popupError) {
       if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/operation-not-supported-in-this-environment') {
@@ -252,10 +228,6 @@ window.googleSignIn = async function () {
   } catch (error) {
     manualSignInPending = false;
     console.error(error);
-    if (auth.currentUser) {
-      keepSignedInWhenCloudUnavailable(auth.currentUser, error);
-      return;
-    }
     status('Google/Firebase লগইন হয়নি: ' + (error.message || error));
     alert('Google/Firebase লগইন হয়নি।\n' + (error.message || error) + '\n\nFirebase Console-এ Google Authentication চালু আছে কি না এবং GitHub Pages ডোমেইন অনুমোদিত কি না দেখুন।');
     announceAuthReady(false);
@@ -297,8 +269,9 @@ onAuthStateChanged(auth, async (user) => {
     }
     await openUserData(resolvedUser);
   } catch (error) {
-    // Firebase Auth has restored the Gmail session. A Firestore/network error
-    // must not send the user back to the Google login screen.
-    keepSignedInWhenCloudUnavailable(user, error);
+    console.error(error);
+    activeUser = null;
+    status('Firebase সংযোগ হয়নি: ' + (error.message || error));
+    announceAuthReady(false);
   }
 });

@@ -5,7 +5,7 @@
 - `firebase-app.js` — Google login, প্রতি Gmail-এর UID-ভিত্তিক Firestore sync
 - `firebase-config.js` — Firebase Web App public client config
 - `firebase.json`, `firestore.rules`, `.firebaserc` — Firebase Hosting/Firestore setup
-- `manifest.webmanifest`, `sw.js`, `assets/` — PWA install icon ও network-first update/offline fallback
+- `manifest.webmanifest`, `sw.js`, `assets/icon-192.png`, `assets/icon-512.png` — PWA icon ও দ্রুত cache-সহ refresh/offline fallback
 - `backup.html` — একই Gmail-এর JSON cloud backup/restore
 
 ## Gmail ডেটা আলাদা রাখার নিয়ম
@@ -33,3 +33,13 @@
 - ডেপ্লয়ের আগে মূল অ্যাপ থেকে JSON backup ডাউনলোড করে রাখুন।
 - `sw.js` network-first; অনলাইনে নতুন ফাইল পাওয়ার চেষ্টা করে এবং নেটওয়ার্ক না থাকলে cache ব্যবহার করে। নতুন সংস্করণে cache version বাড়ানো আছে।
 - Firebase Authentication/Firestore live account দিয়ে পরীক্ষা করা হয়নি; Firebase Console-এর সেটিংস ও বাস্তব লগইন ছাড়া সম্পূর্ণ live test নিশ্চিত করা যায় না।
+
+\n## এই ZIP-এ করা সংশোধন
+- মূল `index.html`-এর আগের সব ফিচার ও ডিজাইন রেখে startup/refresh flow ঠিক করা হয়েছে।
+- একই ডিভাইসে trusted-device PIN login থাকলে refresh-এর পর আর login/loading screen দিয়ে অ্যাপ ঢেকে যাবে না।
+- শেষ দেখা tab এবং customer detail refresh-এর পর ফিরিয়ে আনার ব্যবস্থা যোগ করা হয়েছে।
+- Splash screen-এ মূল লোগো পূর্ণ দৃশ্যমান রাখা হয়েছে; Firebase ধীর হলে ৮ সেকেন্ড পর স্থানীয় login/setup দেখাবে।
+- Service worker cached page দ্রুত দেখায় এবং নতুন পেজ ব্যাকগ্রাউন্ডে cache করে।
+- Backup page-এ mobile popup block হলে Google login redirect fallback যোগ করা হয়েছে।
+- `.firebaserc` এবং অনুপস্থিত PWA icon ফাইল যোগ করা হয়েছে।
+\n

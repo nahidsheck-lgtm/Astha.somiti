@@ -481,10 +481,10 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #customerList .compact-customer .cust-avatar.weeks-elapsed small{font-size:9px!important;font-weight:700!important;line-height:1.1!important;color:#526071!important}
 </style>
 <style id="astha-auth-startup-splash">
-.auth-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:#f4f5f7;padding:24px;opacity:0;visibility:hidden;pointer-events:none;animation:astha-splash-reveal .22s ease .45s forwards}
+.auth-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:#f4f5f7;padding:24px;opacity:0;visibility:hidden;pointer-events:none;animation:astha-splash-reveal .18s ease .05s forwards}
 .auth-splash.hidden{display:none!important;animation:none}
 .auth-splash-card{width:min(100%,440px);text-align:center;background:#fff;border:1px solid #e5e7eb;border-radius:28px;padding:42px 26px;box-shadow:0 12px 36px #00000012}
-.auth-splash-logo{display:block;width:170px;height:170px;object-fit:contain;margin:0 auto 18px;opacity:.24}
+.auth-splash-logo{display:block;width:170px;height:170px;object-fit:contain;margin:0 auto 18px;opacity:1}
 .auth-splash-card h1{margin:0;color:#7f1d1d;font-size:29px}
 .auth-splash-card p{margin:12px 0 22px;color:#64748b;font-size:16px}
 .auth-splash-spinner{width:34px;height:34px;margin:auto;border:4px solid #fecaca;border-top-color:#991b1b;border-radius:50%;animation:astha-spin .8s linear infinite}
@@ -1514,34 +1514,44 @@ const _renderCashAstha=window.renderCash;
 if(typeof _renderCashAstha==='function')window.renderCash=function(){const r=_renderCashAstha.apply(this,arguments);const box=document.getElementById('cashHistory');if(box){const entries=db?.cash?.entries||[];box.innerHTML='<h3 style="margin-top:16px">লেনদেনের তালিকা</h3>'+(entries.map((x,rev)=>{const i=entries.length-1-rev;const type=x.type==='capital'?'মূলধন যোগ':x.type==='expense'?'খরচ':x.type==='loan'?'ঋণ বিতরণ':x.type==='repayment'?'কিস্তি আদায়':'লেনদেন';return `<div class="customer"><div style="flex:1;min-width:0"><b>${type} · ${money(x.amount)}</b><small>${esc(x.date)} · ${esc(x.note||'বিবরণ নেই')}</small></div><button class="secondary no-print" onclick="editCashEntry(${i})">এডিট</button><button class="danger no-print" onclick="deleteCashEntry(${i})">ডিলিট</button></div>`}).join('')||'<p class="muted">এখনো কোনো অতিরিক্ত লেনদেন নেই।</p>')}return r};
 window.logoutGoogleAstha=()=>window.asthaGoogleSignOut?.();
 </script>
-<script id="astha-startup-fallback"> 
+<script id="astha-startup-fallback">
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Firebase Auth emits this event after it has checked the persisted session.
-  // Wait longer than the old 6-second timeout to avoid showing a false login screen.
+  const byId=id=>document.getElementById(id);
+  const localSessionReady=()=>(
+    typeof current!=='undefined' && !!current &&
+    !!byId('app') && !byId('app').classList.contains('hidden')
+  );
+
+  // The trusted-device handler is registered earlier and runs first.
+  // Never replace its already-open app with a login/loading screen.
+  if(localSessionReady()){ byId('authSplash')?.classList.add('hidden'); return; }
+
   if (!window.__asthaFirebaseAuthReady) {
     await new Promise(resolve => {
-      let finished = false;
-      const done = () => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timer);
-        resolve();
-      };
-      window.addEventListener('astha-firebase-auth-ready', done, { once:true });
-      const timer = setTimeout(done, 15000);
+      let finished=false;
+      const done=()=>{ if(finished)return; finished=true; clearTimeout(timer); resolve(); };
+      window.addEventListener('astha-firebase-auth-ready',done,{once:true});
+      const timer=setTimeout(done,8000);
     });
   }
-  if (window.__asthaFirebaseHasUser) return;
-  if (!window.__asthaFirebaseAuthReady) {
-    const s = document.getElementById('firebaseLoginStatus');
-    if (s) s.textContent = 'লগইন সেশন যাচাই করা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে পেজ রিফ্রেশ করুন।';
+
+  if(window.__asthaFirebaseHasUser || localSessionReady()){
+    byId('authSplash')?.classList.add('hidden');
     return;
   }
+
+  // If Firebase is slow/offline, show the local login screen instead of leaving
+  // the logo/loading splash stuck over the whole app.
   window.__asthaStartupPending=false;
   const hasLocalAccount=!!(db&&(db.admins?.length||db.admin?.phone));
-  const target=document.getElementById(hasLocalAccount?'login':'setup');
-  ['authSplash','setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+  const target=byId(hasLocalAccount?'login':'setup');
+  ['authSplash','setup','login','app','customerLogin','customerView','appFooterNav']
+    .forEach(id=>byId(id)?.classList.add('hidden'));
   target?.classList.remove('hidden');
+  if(!window.__asthaFirebaseAuthReady){
+    const s=byId('firebaseLoginStatus');
+    if(s) s.textContent='Firebase যাচাই করতে সময় লাগছে। ইন্টারনেট থাকলে পরে Sync করুন; স্থানীয় লগইন চালু আছে।';
+  }
 });
 </script>
 
@@ -1671,7 +1681,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 })();
 </script>
 
-<style id="astha-customer-shortcuts-3d">
+<style id="astha-customer-shortcuts-3d-v2">
 /* Tactile 3D shortcut icons for identity and payment history. */
 #customerList .customer-id-label{display:inline-flex;align-items:center;cursor:pointer;position:relative;padding:2px 7px 3px 8px;margin:-2px 0 2px -8px;border-radius:8px;background:linear-gradient(145deg,#fff,#f1f2f5);box-shadow:2px 3px 0 #d6d8df,0 3px 7px #0002;transition:transform .12s,box-shadow .12s}
 #customerList .customer-id-label:active,#customerList .shortcut-3d:active{transform:translateY(2px);box-shadow:0 1px 2px #0003}
@@ -1683,7 +1693,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 #detail .customer-id-extra{scroll-margin-top:20px}
 #detail .payment-history-focus{outline:2px solid #d6a43b;border-radius:10px;padding:6px;scroll-margin-top:18px}
 </style>
-<script id="astha-customer-shortcuts-3d-js">
+<script id="astha-customer-shortcuts-3d-js-v2">
 (function(){
  const priorRender=window.renderCustomers;
  window.openCustomerIdentity=function(id){window.openDetail(id);requestAnimationFrame(()=>{const panel=document.querySelector('#detail .customer-id-extra');if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});});};
@@ -2009,10 +2019,19 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      const account=db.admins.find(a=>a.phone===phone && a.active!==false);
      if(!account)return;
      current=account;
-     ['setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>$(id)?.classList.add('hidden'));
+     ['authSplash','setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>$(id)?.classList.add('hidden'));
      $('app')?.classList.remove('hidden');$('appFooterNav')?.classList.remove('hidden');
      document.querySelectorAll('[data-owner-only]').forEach(x=>x.classList.toggle('hidden',account.role!=='owner'));
+     const allowedTabs=['dash','customers','trash','cash','docs','settings','advanced'];
+     let lastTab='dash', lastDetail='';
+     try {
+       const savedTab=localStorage.getItem('astha_last_open_tab_v1');
+       if(allowedTabs.includes(savedTab)) lastTab=savedTab;
+       lastDetail=localStorage.getItem('astha_last_customer_detail_v1')||'';
+     } catch(e) {}
      if(typeof renderDash==='function')renderDash();
+     if(lastTab!=='dash' && typeof showTab==='function')showTab(lastTab);
+     if(lastTab==='customers' && lastDetail && (db.customers||[]).some(c=>String(c.id)===String(lastDetail)) && typeof openDetail==='function') openDetail(lastDetail);
    }catch(e){console.warn('Trusted-device login skipped',e)}
  });
 
@@ -2147,7 +2166,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 
 </script>
 
-</body></html>
+
 <style id="astha-backup-icon-and-ledger-refine">
 #app>nav.no-print #tabBackup img.nav-logo{width:44px!important;height:44px!important;object-fit:contain!important;background:transparent!important;padding:0!important;border-radius:0!important}
 #app>nav.no-print #tabBackup{background:#fff7f7;border-color:#fecaca;color:#7f1d1d}
@@ -2285,3 +2304,27 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #customerList .compact-customer .customer-photo-slot img,#customerList .compact-customer .customer-photo-slot .customer-photo-mini{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;border:0!important}
 @media(max-width:380px){#customerList .compact-customer{grid-template-columns:48px minmax(0,1fr) auto 26px!important;column-gap:6px!important}#customerList .compact-customer > .cust-avatar-wrap{width:48px!important;min-width:48px!important}#customerList .compact-customer .cust-avatar.customer-photo-slot{width:40px!important;height:40px!important;min-width:40px!important}}
 </style>
+
+
+<script id="astha-refresh-state-restore">
+(function(){
+  const detailKey='astha_last_customer_detail_v1';
+  const baseOpen=window.openDetail;
+  if(typeof baseOpen==='function'){
+    window.openDetail=function(id){
+      try{localStorage.setItem(detailKey,String(id));}catch(e){}
+      return baseOpen.apply(this,arguments);
+    };
+  }
+  const baseShow=window.showTab;
+  if(typeof baseShow==='function'){
+    window.showTab=function(tab){
+      try{localStorage.removeItem(detailKey);}catch(e){}
+      return baseShow.apply(this,arguments);
+    };
+  }
+})();
+</script>
+
+</body>
+</html>
