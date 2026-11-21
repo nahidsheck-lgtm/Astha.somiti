@@ -1,8 +1,0 @@
-[
-  {
-    "origin": ["https://nahidsheck-lgtm.github.io"],
-    "method": ["GET", "HEAD", "POST", "PUT", "DELETE"],
-    "responseHeader": ["Content-Type", "Content-Length", "Content-Disposition", "Authorization", "x-goog-resumable"],
-    "maxAgeSeconds": 3600
-  }
-]
