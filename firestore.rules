@@ -1,12 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Each Google account can read/write only its own UID-keyed document.
     match /appSettings/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      match /snapshots/{snapshotId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
     }
+    // Not used by this application build.
     match /members/{document=**} { allow read, write: if false; }
     match /transactions/{document=**} { allow read, write: if false; }
   }
