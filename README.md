@@ -1,45 +1,47 @@
-# আস্থা সমিতি — হালকা ও স্থিতিশীল সংস্করণ
+# আস্থা সমিতি — Firebase + GitHub Pages
 
-এই সংস্করণটি আপনার চলমান Astha Somiti অ্যাপের ওপর ভিত্তি করে সংশোধন করা হয়েছে; নতুন করে অ্যাপ বানানো হয়নি। মূল ডিজাইন, গ্রাহক, ঋণ, কিস্তি, Recovery, ক্যাশ, Google Login, WhatsApp, ভোটার আইডি থেকে তথ্য নেওয়া এবং প্রয়োজনীয় ব্যাকআপ রাখা হয়েছে।
+## ফাইল
+- `index.html` — মূল অ্যাপ
+- `firebase-app.js` — Google login, প্রতি Gmail-এর UID-ভিত্তিক Firestore sync
+- `firebase-config.js` — Firebase Web App public client config
+- `firebase.json`, `firestore.rules`, `.firebaserc` — Firebase Hosting/Firestore setup
+- `manifest.webmanifest`, `sw.js`, `assets/icon-192.png`, `assets/icon-512.png` — PWA icon ও দ্রুত cache-সহ refresh/offline fallback
+- `backup.html` — একই Gmail-এর JSON cloud backup/restore
 
-## এই সংস্করণে যা বদলেছে
+## Gmail ডেটা আলাদা রাখার নিয়ম
+- প্রতিটি Google account-এর Firestore document: `appSettings/{Firebase UID}`.
+- Firestore rules অনুযায়ী একজন ব্যবহারকারী শুধু নিজের UID document পড়তে/লিখতে পারবেন।
+- একই Gmail অন্য ডিভাইসে লগইন করলে সেই Gmail-এর cloud data লোড হবে।
+- নতুন Gmail-এর cloud document না থাকলে আগের Gmail-এর স্থানীয় ডেটা নতুন Gmail-এ আপলোড হবে না; নতুন Gmail-এর জন্য খালি ডেটা তৈরি হবে।
+- প্রথমবার কোনো ডিভাইসে পুরোনো স্থানীয় ডেটা থাকলে সেটি প্রথম Gmail-এ নেওয়ার আগে নিশ্চিতকরণ দেখাবে। Cancel করলে লগইন বাতিল হবে এবং পুরোনো স্থানীয় ডেটা অক্ষত থাকবে।
 
-1. **রিফ্রেশে লগইন স্থিতিশীল:** একই Gmail-এর Firebase ক্লাউড ডেটা থাকলে সেটিই নির্ভরযোগ্য কপি হিসেবে লোড হবে। ডিভাইস-ক্লাউড কপি নিয়ে বারবার OK/Cancel প্রশ্ন আসবে না। রিফ্রেশের ঠিক আগে কোনো পরিবর্তন Sync-এর অপেক্ষায় থাকলে সেই একই Gmail-এর স্থানীয় পরিবর্তন আগে ক্লাউডে পাঠানোর চেষ্টা হবে।
-2. **প্রথমবারের ডেটা স্থানান্তর:** ক্লাউডে হিসাব না থাকলে একই Gmail-এর চিহ্নিত স্থানীয় কপি স্বয়ংক্রিয়ভাবে ক্লাউডে পাঠানো হবে। অন্য Gmail-এর তথ্য মিশবে না।
-3. **অফলাইনে রিফ্রেশ:** আগে একই Gmail দিয়ে এই ডিভাইসে লগইন করা থাকলে নেটওয়ার্ক না থাকলেও ওই Gmail-এর স্থানীয় কপি দিয়ে অ্যাপ খুলবে; অনলাইনে এলে Firebase Sync করা যাবে।
-4. **চুক্তিপত্র সম্পূর্ণ বাদ:** চুক্তিপত্রের মেনু, আপলোড ও দেখার ব্যবস্থা সরানো হয়েছে। পুরোনো গ্রাহক/Recovery রেকর্ড থেকে `documents` ফিল্ড বাদ দিয়ে ডেটা ছোট করা হবে।
-5. **“আরও সুবিধা” বিভাগ বাদ:** অতিরিক্ত শাখা, বায়োমেট্রিক, অডিট/অতিরিক্ত রিপোর্টের আলাদা অংশ সরানো হয়েছে। মূল গ্রাহক হিসাব ও ক্যাশ/ব্যাকআপ রাখা হয়েছে।
-6. **ফাইল ছোট করা:** HTML-এর মধ্যে থাকা পুনরাবৃত্ত বড় Base64 লোগো/ছবি আলাদা ছোট WebP asset-এ নেওয়া হয়েছে। ফলে HTML প্রায় ৯৭০ KB থেকে প্রায় ২০৮ KB হয়েছে; ZIP-এ প্রয়োজনীয় asset-গুলো থাকবে।
-7. **পুরোনো Cache পরিষ্কার:** Service Worker cache version v6 করা হয়েছে, যাতে নতুন আপলোডের পর পুরোনো cached ফাইল সরিয়ে নতুন ফাইল আনে।
-8. **একই Gmail-এর আলাদা হিসাব:** Firestore path `appSettings/{UID}`। অন্য Gmail-এর স্থানীয় ডেটা বর্তমান Gmail-এ মেশানো হবে না।
-9. **গ্রাহক লগইন:** গ্রাহকের আলাদা PIN/পাসওয়ার্ড নেই; ID দিয়ে দেখা যায়। ID গোপন পাসওয়ার্ড নয়।
+## GitHub Pages
+1. ZIP extract করে সব ফাইল/ফোল্ডার repository-র root-এ রাখুন।
+2. GitHub Pages branch/folder হিসেবে `main` + `/ (root)` নির্বাচন করুন।
+3. URL হবে `https://nahidsheck-lgtm.github.io/Astha.somiti/`.
+4. অ্যাপের `manifest.webmanifest`-এ এই repository path সেট করা আছে। অন্য repository হলে `start_url` এবং `scope` বদলাতে হবে।
 
-## GitHub Pages-এ আপলোড
+## Firebase Console
+1. Project: `astha-somiti-d441b`.
+2. Authentication → Sign-in method → Google Enable করুন।
+3. Authentication → Settings → Authorized domains-এ `nahidsheck-lgtm.github.io` যোগ করুন।
+4. Firestore Database তৈরি করুন এবং `firestore.rules` publish করুন।
+5. Firebase Hosting ব্যবহার করলে `firebase deploy` চালান; GitHub Pages ব্যবহার করলে Firebase Hosting deploy আবশ্যক নয়।
 
-1. আপলোডের আগে বর্তমান অ্যাপ থেকে Settings → JSON ডাউনলোড করে ব্যাকআপ রাখুন।
-2. ZIP Extract করুন।
-3. ZIP-এর ভেতরের `index.html`, `firebase-app.js`, `firebase-config.js`, `backup.html`, `firebase.json`, `firestore.rules`, `manifest.webmanifest`, `sw.js`, `assets/` এবং `README.md` আপনার GitHub repository-র root-এ আপলোড করুন। `assets/` ফোল্ডারটি সম্পূর্ণ আপলোড করতে হবে।
-4. পুরোনো ফাইল Replace করে Commit করুন। ফাইলগুলো আরেকটি nested folder-এর মধ্যে রাখবেন না।
-5. আগের Firebase project এবং `firebase-config.js` অপরিবর্তিত রাখুন। Firebase Console-এ Google Authentication চালু এবং `nahidsheck-lgtm.github.io` Authorized domains-এ থাকতে হবে।
-6. Firestore Rules-এ ZIP-এর `firestore.rules` প্রকাশিত আছে কি না নিশ্চিত করুন। Firebase CLI থাকলে repository root থেকে `firebase deploy --only firestore:rules` চালাতে পারেন।
-7. Deployment শেষ হলে `https://nahidsheck-lgtm.github.io/Astha.somiti/` খুলে আগের সেই Gmail দিয়ে প্রবেশ করুন।
+## গুরুত্বপূর্ণ
+- `firebase-config.js`-এর Web API key public client config; এটি service-account private key নয়। Firestore rules কখনো public করবেন না।
+- ডেপ্লয়ের আগে মূল অ্যাপ থেকে JSON backup ডাউনলোড করে রাখুন।
+- `sw.js` network-first; অনলাইনে নতুন ফাইল পাওয়ার চেষ্টা করে এবং নেটওয়ার্ক না থাকলে cache ব্যবহার করে। নতুন সংস্করণে cache version বাড়ানো আছে।
+- Firebase Authentication/Firestore live account দিয়ে পরীক্ষা করা হয়নি; Firebase Console-এর সেটিংস ও বাস্তব লগইন ছাড়া সম্পূর্ণ live test নিশ্চিত করা যায় না।
 
-## গুরুত্বপূর্ণ ডেটা বিষয়
-
-- ক্লাউডে পুরোনো ডেটা থাকলে সেটিই লোড হবে এবং পুরোনো চুক্তিপত্র/অতিরিক্ত ফিচারের ডেটা পরিষ্কার করে ক্লাউডে নতুন হালকা কাঠামো সংরক্ষণ হবে।
-- পুরোনো ডিভাইসের স্থানীয় ডেটা যদি একই Gmail-এর মালিক হিসেবে চিহ্নিত থাকে এবং ক্লাউডে কোনো হিসাব না থাকে, সেটি স্বয়ংক্রিয়ভাবে ক্লাউডে পাঠানো হবে।
-- নতুন সংস্করণ প্রথমবার আপলোডের আগে JSON backup রাখুন। ব্রাউজারের “Clear site data” করবেন না; এতে স্থানীয় ডেটা মুছে যেতে পারে।
-- NID/প্রোফাইল/আঙুলের ছাপের ছবি এখনও গ্রাহকের রেকর্ডে থাকলে সেগুলো Firestore ডেটার আকার বাড়াতে পারে।
-
-## Android-এ ইনস্টল
-
-Android Chrome-এ উপরের URL খুলুন → `⋮` → **Install app** অথবা **Add to Home screen** → Install। এটি PWA; অনলাইনে নতুন ফাইল প্রকাশ হলে অ্যাপ নিজে নতুন সংস্করণ আনবে। এই ZIP-এ signed APK binary নেই।
-
-## পরীক্ষার সীমা
-
-JavaScript syntax, inline scripts, JSON config/manifest, duplicate HTML IDs, assets ও ZIP integrity পরীক্ষা করা হয়েছে। বাস্তব Firebase Console, Google Login, একাধিক ফোনে live Sync এবং Android PWA update এই পরিবেশে সরাসরি পরীক্ষা করা যায়নি। আপলোডের পর প্রথমে ছোট test data দিয়ে যাচাই করুন।
-
-## Google অ্যাকাউন্ট ও লোগো
-- লগইন স্ক্রিনে `Google লগ ইন` এবং `Google সাইন ইন`—দুটিই Google Authentication ব্যবহার করে। প্রথমবার নতুন Gmail ব্যবহার করলে Firebase-এ সেই UID-এর অ্যাকাউন্ট তৈরি হবে।
-- অ্যাডমিন সেটিংস থেকে `Google লগ আউট` করা যাবে। ক্লাউড ব্যাকআপ পেজেও লগইন/লগআউট নিয়ন্ত্রণ আছে।
-- আস্থা সমিতির মূল লোগো `assets/astha-logo.webp` এবং অ্যাপ আইকন `assets/astha-logo-192.png`, `assets/astha-logo-512.png` হিসেবে রাখা হয়েছে। ZIP-এ `assets/` ফোল্ডারসহ সব ফাইল আপলোড করতে হবে।
+\n## এই ZIP-এ করা সংশোধন
+- মূল `index.html`-এর আগের সব ফিচার ও ডিজাইন রেখে startup/refresh flow ঠিক করা হয়েছে।
+- একই ডিভাইসে trusted-device PIN login থাকলে refresh-এর পর আর login/loading screen দিয়ে অ্যাপ ঢেকে যাবে না।
+- শেষ দেখা tab এবং customer detail refresh-এর পর ফিরিয়ে আনার ব্যবস্থা যোগ করা হয়েছে।
+- Splash screen-এ মূল লোগো পূর্ণ দৃশ্যমান রাখা হয়েছে; Firebase ধীর হলে ৮ সেকেন্ড পর স্থানীয় login/setup দেখাবে।
+- আগের ZIP-এ স্থানীয় login fallback দেখানোর কথা থাকলেও `login` section-এ শুধু Google বাটন ছিল; ফলে PIN login সম্ভব হচ্ছিল না। এখন মোবাইল + ৪ সংখ্যার PIN login UI ফিরিয়ে আনা হয়েছে এবং সফল PIN login-এর পর trusted-device session restore কাজ করবে।
+- Service worker cache version `v6` করা হয়েছে, যাতে নতুন login screen পুরোনো cache থেকে আটকে না থাকে।
+- Service worker cached page দ্রুত দেখায় এবং নতুন পেজ ব্যাকগ্রাউন্ডে cache করে।
+- Backup page-এ mobile popup block হলে Google login redirect fallback যোগ করা হয়েছে।
+- `.firebaserc` এবং অনুপস্থিত PWA icon ফাইল যোগ করা হয়েছে।
+\n

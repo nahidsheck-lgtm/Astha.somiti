@@ -11,7 +11,6 @@ import { firebaseConfig } from './firebase-config.js';
 
 const OWNER_KEY = 'astha_firebase_local_owner_uid_v1';
 const ACCOUNT_BACKUP_PREFIX = 'astha_local_backup_uid_v1_';
-const DIRTY_KEY = 'astha_local_dirty_uid_v1';
 const status = (message) => {
   const node = document.getElementById('firebaseSettingsStatus');
   if (node) node.textContent = message;
@@ -22,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const provider = new GoogleAuthProvider();
-// Do not force account selection on every manual sign-in. Existing Firebase sessions restore silently.
+provider.setCustomParameters({ prompt: 'select_account' });
 let activeUser = null;
 let stopListening = null;
 let applyingCloud = false;
@@ -47,29 +46,10 @@ function nonEmptyLocal(data) {
   return !!(data && ((data.customers || []).length || (data.trash || []).length || data.admin || (data.admins || []).length));
 }
 function emptyAccountData() {
-  return { admin: null, admins: [], customers: [], trash: [], cash: { opening: 0, entries: [] }, settings: {} };
+  return { admin: null, admins: [], customers: [], trash: [], cash: { opening: 0, entries: [] }, settings: {}, branches: [], audit: [], auditLog: [] };
 }
 function cleanData(data) {
-  const copy = JSON.parse(JSON.stringify(data ?? {}));
-  // Contract files and the optional "more features" module are intentionally removed.
-  const strip = (list) => (Array.isArray(list) ? list : []).map((item) => {
-    if (!item || typeof item !== 'object') return item;
-    const value = { ...item };
-    delete value.documents;
-    delete value.branchId;
-    delete value.customerPin;
-    return value;
-  });
-  copy.customers = strip(copy.customers);
-  copy.trash = strip(copy.trash);
-  delete copy.branches;
-  delete copy.audit;
-  delete copy.auditLog;
-  if (copy.settings && typeof copy.settings === 'object') {
-    delete copy.settings.biometric;
-    delete copy.settings.cloudEndpoint;
-  }
-  return copy;
+  return JSON.parse(JSON.stringify(data ?? {}));
 }
 function localOwnerUid() {
   try { return localStorage.getItem(OWNER_KEY) || ''; } catch (_) { return ''; }
@@ -105,8 +85,7 @@ async function syncNow() {
   if (!validData(data)) throw new Error('অ্যাপের গ্রাহক ডেটা পাওয়া যায়নি।');
   const ref = doc(firestore, 'appSettings', activeUser.uid);
   await setDoc(ref, { data: cleanData(data), updatedAt: serverTimestamp(), schemaVersion: 1 }, { merge: true });
-  try { if (localStorage.getItem(DIRTY_KEY) === activeUser.uid) localStorage.removeItem(DIRTY_KEY); } catch (_) {}
-  status('Firebase-এ সর্বশেষ তথ্য Sync হয়েছে।')
+  status('Firebase-এ সর্বশেষ তথ্য Sync হয়েছে।');
   return true;
 }
 window.asthaFirebaseSyncNow = async () => {
@@ -130,67 +109,78 @@ async function openUserData(user) {
   window.__asthaGoogleUser = user;
   status('Google অ্যাকাউন্ট যাচাই হচ্ছে…');
   const ref = doc(firestore, 'appSettings', user.uid);
+  const snap = await getDoc(ref);
   const previousOwner = localOwnerUid();
-  const local = localData();
-  let snap;
-  try {
-    snap = await getDoc(ref);
-  } catch (error) {
-    // On refresh without a network connection, keep this Gmail's own local data usable.
-    if (previousOwner === user.uid && validData(local)) {
-      setLocalOwnerUid(user.uid);
-      status('ইন্টারনেট সংযোগ নেই; এই Gmail-এর ডিভাইসে থাকা তথ্য দিয়ে চালু হয়েছে। অনলাইনে এলে Sync হবে।');
-      if (typeof window.openAsthaAfterGoogleLogin === 'function') window.openAsthaAfterGoogleLogin();
-      announceAuthReady(true);
-      return true;
-    }
-    throw error;
-  }
 
   if (snap.exists()) {
     const payload = snap.data();
     if (!validData(payload.data)) throw new Error('Firebase-এ পাওয়া ডেটার কাঠামো সঠিক নয়। ডেটা পরিবর্তন করা হয়নি।');
-    let localHasPendingChanges = false;
-    try { localHasPendingChanges = localStorage.getItem(DIRTY_KEY) === user.uid && validData(local); } catch (_) {}
-    if (localHasPendingChanges) {
-      // A save made just before refresh may still be waiting for the 900ms sync.
-      // Restore that same-Gmail local copy first so a refresh cannot discard it.
+    applyingCloud = true;
+    try { window.setAsthaData(payload.data); }
+    finally { applyingCloud = false; }
+    setLocalOwnerUid(user.uid);
+    status('এই Gmail-এর ক্লাউড হিসাব লোড হয়েছে।');
+  } else if (previousOwner && previousOwner !== user.uid) {
+    // Preserve the previous account's device copy before switching local storage.
+    stashLocalForUid(previousOwner);
+    const returningCopy = readStashedLocalForUid(user.uid);
+    if (returningCopy) {
       applyingCloud = true;
-      try { window.setAsthaData(cleanData(local)); }
+      try { window.setAsthaData(returningCopy); }
       finally { applyingCloud = false; }
       setLocalOwnerUid(user.uid);
+      const upload = confirm('এই Gmail-এর ক্লাউডে হিসাব পাওয়া যায়নি, তবে এই Gmail-এর আগের স্থানীয় কপি পাওয়া গেছে। সেটি ক্লাউডে ফিরিয়ে সংরক্ষণ করবেন?');
+      if (!upload) {
+        activeUser = null;
+        window.__asthaGoogleUser = null;
+        await signOut(auth);
+        status('লগইন বাতিল হয়েছে; এই Gmail-এর স্থানীয় কপি অক্ষত আছে।');
+        announceAuthReady(false);
+        return false;
+      }
       await syncNow();
-      status('রিফ্রেশের আগের অসম্পূর্ণ Sync সম্পন্ন হয়েছে।');
     } else {
-      // With no pending local save, the cloud copy is canonical. No repeated prompts.
-      applyingCloud = true;
-      try { window.setAsthaData(cleanData(payload.data)); }
-      finally { applyingCloud = false; }
-      setLocalOwnerUid(user.uid);
-      status('এই Gmail-এর ক্লাউড হিসাব লোড হয়েছে।');
-      // Rewrite once to remove legacy contract blobs and optional-feature data from cloud.
-      await syncNow();
-    }
-  } else {
-    let seed = null;
-    if (previousOwner === user.uid && validData(local)) seed = local;
-    else if (!previousOwner && nonEmptyLocal(local)) seed = local;
-    else if (previousOwner && previousOwner !== user.uid) seed = readStashedLocalForUid(user.uid);
-
-    if (seed) {
-      applyingCloud = true;
-      try { window.setAsthaData(cleanData(seed)); }
-      finally { applyingCloud = false; }
-      setLocalOwnerUid(user.uid);
-      await syncNow();
-      status('এই Gmail-এর আগের ডিভাইসের হিসাব ক্লাউডে সংরক্ষিত হয়েছে।');
-    } else {
+      // A different Gmail with no cloud data starts empty; never inherit another account's data.
       applyingCloud = true;
       try { window.setAsthaData(emptyAccountData()); }
       finally { applyingCloud = false; }
       setLocalOwnerUid(user.uid);
+      status('নতুন Gmail-এর জন্য আলাদা খালি হিসাব তৈরি হয়েছে।');
+    }
+  } else if (!previousOwner && nonEmptyLocal(localData())) {
+    const upload = confirm('এই ডিভাইসে আগে থেকে স্থানীয় হিসাব পাওয়া গেছে, কিন্তু এটি এখনো কোনো Gmail-এর নামে চিহ্নিত নয়।\n\nআপনি কি এই পুরোনো হিসাবটি প্রথমবার এই Gmail-এর ক্লাউডে নিতে চান?\n\nOK = এই Gmail-এ স্থানান্তর\nCancel = লগইন বাতিল; পুরোনো হিসাব অক্ষত থাকবে।');
+    if (!upload) {
+      activeUser = null;
+      window.__asthaGoogleUser = null;
+      await signOut(auth);
+      status('লগইন বাতিল হয়েছে। পুরোনো স্থানীয় হিসাব অক্ষত আছে।');
+      announceAuthReady(false);
+      return false;
+    }
+    setLocalOwnerUid(user.uid);
+    await syncNow();
+    status('পুরোনো স্থানীয় হিসাব এই Gmail-এর ক্লাউডে সংরক্ষিত হয়েছে।');
+  } else {
+    // First use on an empty device, or a previously-owned account whose cloud doc was removed.
+    if (previousOwner === user.uid && nonEmptyLocal(localData())) {
+      const upload = confirm('এই Gmail-এর ক্লাউডে এখনো হিসাব নেই, তবে এই ডিভাইসে একই Gmail-এর স্থানীয় হিসাব পাওয়া গেছে। সেটি ক্লাউডে সংরক্ষণ করবেন?');
+      if (!upload) {
+        activeUser = null;
+        window.__asthaGoogleUser = null;
+        await signOut(auth);
+        status('লগইন বাতিল হয়েছে; স্থানীয় হিসাব অক্ষত আছে।');
+        announceAuthReady(false);
+        return false;
+      }
       await syncNow();
-      status('এই Gmail-এর নতুন হিসাব প্রস্তুত।');
+    } else {
+      if (!validData(localData()) || !nonEmptyLocal(localData())) {
+        applyingCloud = true;
+        try { window.setAsthaData(emptyAccountData()); }
+        finally { applyingCloud = false; }
+      }
+      setLocalOwnerUid(user.uid);
+      status('এই Gmail-এর জন্য নতুন আলাদা হিসাব প্রস্তুত।');
     }
   }
 
@@ -200,7 +190,7 @@ async function openUserData(user) {
     if (!validData(payload.data)) { status('ক্লাউড ডেটার কাঠামো সঠিক নয়; বর্তমান তথ্য রাখা হয়েছে।'); return; }
     applyingCloud = true;
     try {
-      window.setAsthaData(cleanData(payload.data));
+      window.setAsthaData(payload.data);
       setLocalOwnerUid(user.uid);
       if (document.getElementById('app') && !document.getElementById('app').classList.contains('hidden')) {
         window.renderDash?.();
@@ -250,7 +240,6 @@ function attachSaveSync() {
   const wrapped = function (...args) {
     const result = originalSave.apply(this, args);
     if (activeUser && !applyingCloud && localOwnerUid() === activeUser.uid) {
-      try { localStorage.setItem(DIRTY_KEY, activeUser.uid); } catch (_) {}
       clearTimeout(syncTimer);
       syncTimer = setTimeout(() => syncNow().catch((error) => {
         console.error(error); status('ডিভাইসে সংরক্ষিত; Firebase Sync ব্যর্থ: ' + (error.message || error));
@@ -263,37 +252,26 @@ function attachSaveSync() {
 }
 attachSaveSync();
 
-// Initialize persistence before the first auth observer. This prevents startup code
-// from treating the not-yet-restored session as a signed-out user.
-(async function initializeAsthaAuth() {
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    activeUser = null;
+    stopCloudListener();
+    announceAuthReady(false);
+    return;
+  }
+  if (manualSignInPending || activeUser?.uid === user.uid) return;
   try {
-    await setPersistence(auth, browserLocalPersistence);
-    let redirectUser = null;
-    try {
+    let resolvedUser = user;
+    if (!initialRedirectChecked) {
+      initialRedirectChecked = true;
       const redirectResult = await getRedirectResult(auth);
-      if (redirectResult && redirectResult.user) redirectUser = redirectResult.user;
-    } catch (e) { console.warn('Redirect result check:', e); }
-    onAuthStateChanged(auth, async (user) => {
-      const resolvedUser = user || redirectUser;
-      if (!resolvedUser) {
-        activeUser = null;
-        stopCloudListener();
-        announceAuthReady(false);
-        return;
-      }
-      if (manualSignInPending || activeUser?.uid === resolvedUser.uid) return;
-      try {
-        await openUserData(resolvedUser);
-      } catch (error) {
-        console.error(error);
-        activeUser = null;
-        status('Firebase সংযোগ হয়নি: ' + (error.message || error));
-        announceAuthReady(false);
-      }
-    });
+      if (redirectResult?.user) resolvedUser = redirectResult.user;
+    }
+    await openUserData(resolvedUser);
   } catch (error) {
-    console.error('Firebase Auth initialization failed:', error);
-    status('Google লগইন সেশন প্রস্তুত হয়নি: ' + (error.message || error));
+    console.error(error);
+    activeUser = null;
+    status('Firebase সংযোগ হয়নি: ' + (error.message || error));
     announceAuthReady(false);
   }
-})();
+});
