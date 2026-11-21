@@ -505,7 +505,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <div class="panel"><h2>সাম্প্রতিক গ্রাহক</h2><div id="recent"></div></div><div class="notice">তথ্য এই ডিভাইসে সংরক্ষিত হয়। Google লগইনের পর Firebase Sync-এর অবস্থা দেখুন এবং নিয়মিত JSON ব্যাকআপ ডাউনলোড করে রাখুন।</div></div>
 <div id="customers" class="tab hidden"><div class="panel"><div class="row"><h2 style="flex:2">গ্রাহক তালিকা</h2><button onclick="openNew()">＋ যোগ করুন</button></div>
 <label>আইডি / নাম / মোবাইল দিয়ে খুঁজুন</label><input id="search" placeholder="যেমন: AS001" oninput="renderCustomers()"><div id="customerList"></div></div>
-<div id="newPanel" class="panel hidden"><h2>নতুন গ্রাহক যোগ করুন</h2><div class="step-indicator"><span id="stepBar1" class="on"></span><span id="stepBar2"></span></div><div id="customerStep1"><h3>ধাপ ১ · গ্রাহকের তথ্য</h3><label>গ্রাহকের নাম</label><input id="cName" placeholder="পূর্ণ নাম"><label>মোবাইল নম্বর</label><div class="field-action"><input id="cPhone" inputmode="tel" placeholder="01XXXXXXXXX"><button type="button" class="secondary" onclick="pickContact()">☎ কনট্যাক্ট</button></div><label class="loan-amount-label">লোনের পরিমাণ <svg class="loan-money-icon" viewBox="0 0 32 24" aria-hidden="true" focusable="false"><path d="M3 7 21 2l8 4-18 5z" fill="#f5d66d" stroke="#805313" stroke-width="1"/><path d="m11 11 18-5v11l-18 5z" fill="#d99b24" stroke="#805313" stroke-width="1"/><path d="M3 7v11l8 4V11z" fill="#b97812" stroke="#805313" stroke-width="1"/><path d="m6 6 15-4 3 2-15 4z" fill="#fff0a6"/><path d="M8 10v9m3-8v9m3-10v9" stroke="#ffe8a0" stroke-width="1.2"/><path d="m16 12 8-2v5l-8 2z" fill="#f7df91" opacity=".9"/></svg></label><input id="cGiven" type="number" min="0" step="1" placeholder="10000" oninput="updateAutoTotal()"><div class="nid-capture-box"><h3>ভোটার আইডি কার্ড থেকে তথ্য নিন</h3><p class="muted">কার্ডের পরিষ্কার ছবি তুলুন বা গ্যালারি থেকে দিন। OCR তথ্য শনাক্ত করে নিচের ঘরগুলো পূরণ করার চেষ্টা করবে।</p><input id="nidImageInput" type="file" accept="image/*" capture="environment" onchange="processNidImage(this)"><div id="nidOcrStatus" class="muted" aria-live="polite">ছবি দিলে এখানে ফলাফল দেখাবে।</div><img id="nidImagePreview" alt="ভোটার আইডি কার্ডের ছবি" style="display:none;max-width:100%;max-height:190px;object-fit:contain;border-radius:10px;margin-top:8px"><button type="button" class="secondary" onclick="runNidOcr()">ছবি থেকে তথ্য অটো পূরণ</button></div><label>ভোটার/NID নম্বর</label><input id="cNid" inputmode="numeric" placeholder="NID নম্বর"><label>জন্ম তারিখ</label><input id="cDob" placeholder="DD-MM-YYYY"><label>পিতার নাম</label><input id="cFather" placeholder="পিতার নাম"><label>মাতার নাম</label><input id="cMother" placeholder="মাতার নাম"><label>ঠিকানা</label><textarea id="cAddress" rows="2" placeholder="ভোটার আইডির ঠিকানা"></textarea><label>বুড়ো আঙুলের ছাপ (ঐচ্ছিক ছবি)</label><input id="thumbImageInput" type="file" accept="image/*" capture="environment" onchange="saveThumbPreview(this)"><img id="thumbImagePreview" alt="বুড়ো আঙুলের ছবির প্রিভিউ" style="display:none;max-width:110px;max-height:110px;object-fit:contain;border:1px solid #ddd;border-radius:8px;margin-top:6px"><div class="nid-capture-box"><h3>গ্রাহকের ছবি (ঐচ্ছিক)</h3><p class="muted">ক্যামেরা বা গ্যালারি থেকে গ্রাহকের ছবি দিন।</p><input id="customerPhotoInput" type="file" accept="image/*" capture="user" onchange="saveCustomerPhotoPreview(this)"><img id="customerPhotoPreview" alt="গ্রাহকের ছবির প্রিভিউ" style="display:none;max-width:110px;max-height:110px;object-fit:cover;border-radius:10px;margin-top:8px"></div><div class="step-actions"><button onclick="goCustomerStep(2)">পরবর্তী ধাপ →</button><button class="secondary" onclick="closeNew()">বাতিল</button></div></div><div id="customerStep2" class="hidden"><h3>ধাপ ২ · কিস্তির হিসাব</h3><div class="loan-summary"><div class="loan-summary-item"><span>ঋণের পরিমাণ</span><strong id="cPrincipalView">৳০</strong></div><div class="loan-summary-item"><span>সার্ভিস চার্জ (২০%)</span><strong id="cService">৳০</strong></div><div class="loan-summary-item total"><span>মোট ফেরতযোগ্য টাকা</span><strong id="cTotal">৳০</strong></div><div class="loan-summary-item"><span>মেয়াদ</span><strong>১২ সপ্তাহ</strong></div><div class="loan-summary-item installment"><span>সাপ্তাহিক কিস্তি</span><strong id="cInstall">৳০</strong></div></div><input id="cWeeks" type="hidden" value="12"><p class="muted">নিয়ম: ঋণের টাকার সঙ্গে ২০% সার্ভিস চার্জ যোগ করে ১২টি সমান সাপ্তাহিক কিস্তি নির্ধারণ করা হবে। ১২ সপ্তাহের কম মেয়াদে ঋণ দেওয়া যাবে না।</p><div class="step-actions"><button class="secondary" onclick="goCustomerStep(1)">← আগের ধাপ</button><button onclick="saveCustomer()">গ্রাহক সংরক্ষণ</button></div></div><p class="muted">লগইন আইডি AS001, AS002, AS003 এভাবে তৈরি হবে।</p></div><div id="detail" class="panel hidden"></div></div>
+<div id="newPanel" class="panel hidden"><h2>নতুন গ্রাহক যোগ করুন</h2><div class="step-indicator"><span id="stepBar1" class="on"></span><span id="stepBar2"></span></div><div id="customerStep1"><h3>ধাপ ১ · গ্রাহকের তথ্য</h3><label>গ্রাহকের নাম</label><input id="cName" placeholder="পূর্ণ নাম"><label>মোবাইল নম্বর</label><div class="field-action"><input id="cPhone" inputmode="tel" placeholder="01XXXXXXXXX"><button type="button" class="secondary" onclick="pickContact()">☎ কনট্যাক্ট</button></div><label class="loan-amount-label">লোনের পরিমাণ <svg class="loan-money-icon" viewBox="0 0 32 24" aria-hidden="true" focusable="false"><path d="M3 7 21 2l8 4-18 5z" fill="#f5d66d" stroke="#805313" stroke-width="1"/><path d="m11 11 18-5v11l-18 5z" fill="#d99b24" stroke="#805313" stroke-width="1"/><path d="M3 7v11l8 4V11z" fill="#b97812" stroke="#805313" stroke-width="1"/><path d="m6 6 15-4 3 2-15 4z" fill="#fff0a6"/><path d="M8 10v9m3-8v9m3-10v9" stroke="#ffe8a0" stroke-width="1.2"/><path d="m16 12 8-2v5l-8 2z" fill="#f7df91" opacity=".9"/></svg></label><input id="cGiven" type="number" min="0" step="1" placeholder="10000" oninput="updateAutoTotal()"><div class="nid-capture-box"><h3>ভোটার আইডি কার্ড থেকে তথ্য নিন</h3><p class="muted">কার্ডের পরিষ্কার ছবি তুলুন বা গ্যালারি থেকে দিন। OCR তথ্য শনাক্ত করে নিচের ঘরগুলো পূরণ করার চেষ্টা করবে।</p><input id="nidImageInput" type="file" accept="image/*" onchange="processNidImage(this)"><div id="nidOcrStatus" class="muted" aria-live="polite">ছবি দিলে এখানে ফলাফল দেখাবে।</div><img id="nidImagePreview" alt="ভোটার আইডি কার্ডের ছবি" style="display:none;max-width:100%;max-height:190px;object-fit:contain;border-radius:10px;margin-top:8px"><button type="button" class="secondary" onclick="runNidOcr()">ছবি থেকে তথ্য অটো পূরণ</button></div><label>ভোটার/NID নম্বর</label><input id="cNid" inputmode="numeric" placeholder="NID নম্বর"><label>জন্ম তারিখ</label><input id="cDob" placeholder="DD-MM-YYYY"><label>পিতার নাম</label><input id="cFather" placeholder="পিতার নাম"><label>মাতার নাম</label><input id="cMother" placeholder="মাতার নাম"><label>ঠিকানা</label><textarea id="cAddress" rows="2" placeholder="ভোটার আইডির ঠিকানা"></textarea><label>বুড়ো আঙুলের ছাপ (ঐচ্ছিক ছবি)</label><input id="thumbImageInput" type="file" accept="image/*" onchange="saveThumbPreview(this)"><img id="thumbImagePreview" alt="বুড়ো আঙুলের ছবির প্রিভিউ" style="display:none;max-width:110px;max-height:110px;object-fit:contain;border:1px solid #ddd;border-radius:8px;margin-top:6px"><div class="nid-capture-box"><h3>গ্রাহকের ছবি (ঐচ্ছিক)</h3><p class="muted">ক্যামেরা বা গ্যালারি থেকে গ্রাহকের ছবি দিন।</p><input id="customerPhotoInput" type="file" accept="image/*" onchange="saveCustomerPhotoPreview(this)"><img id="customerPhotoPreview" alt="গ্রাহকের ছবির প্রিভিউ" style="display:none;max-width:110px;max-height:110px;object-fit:cover;border-radius:10px;margin-top:8px"></div><div class="step-actions"><button onclick="goCustomerStep(2)">পরবর্তী ধাপ →</button><button class="secondary" onclick="closeNew()">বাতিল</button></div></div><div id="customerStep2" class="hidden"><h3>ধাপ ২ · কিস্তির হিসাব</h3><div class="loan-summary"><div class="loan-summary-item"><span>ঋণের পরিমাণ</span><strong id="cPrincipalView">৳০</strong></div><div class="loan-summary-item"><span>সার্ভিস চার্জ (২০%)</span><strong id="cService">৳০</strong></div><div class="loan-summary-item total"><span>মোট ফেরতযোগ্য টাকা</span><strong id="cTotal">৳০</strong></div><div class="loan-summary-item"><span>মেয়াদ</span><strong>১২ সপ্তাহ</strong></div><div class="loan-summary-item installment"><span>সাপ্তাহিক কিস্তি</span><strong id="cInstall">৳০</strong></div></div><input id="cWeeks" type="hidden" value="12"><p class="muted">নিয়ম: ঋণের টাকার সঙ্গে ২০% সার্ভিস চার্জ যোগ করে ১২টি সমান সাপ্তাহিক কিস্তি নির্ধারণ করা হবে। ১২ সপ্তাহের কম মেয়াদে ঋণ দেওয়া যাবে না।</p><div class="step-actions"><button class="secondary" onclick="goCustomerStep(1)">← আগের ধাপ</button><button onclick="saveCustomer()">গ্রাহক সংরক্ষণ</button></div></div><p class="muted">লগইন আইডি AS001, AS002, AS003 এভাবে তৈরি হবে।</p></div><div id="detail" class="panel hidden"></div></div>
 <div id="trash" class="tab hidden"><div class="panel"><h2>রিকোবারি</h2><p class="muted">ডিলিট করা গ্রাহকদের তালিকা</p><div id="trashList"></div></div></div>
 <div id="cash" class="tab hidden"><div class="panel"><h2>ক্যাশ ও লেনদেন</h2><label>শুরুর ক্যাশ (৳)</label><input id="openingCash" type="number" min="0" placeholder="আপনার হাতে থাকা টাকা"><button onclick="setOpeningCash()">শুরুর ক্যাশ সংরক্ষণ</button><div class="grid" style="margin-top:12px"><div class="stat"><small>বর্তমান ক্যাশ</small><strong id="cashBalance">৳০</strong></div><div class="stat"><small>মোট ঋণ বিতরণ</small><strong id="cashLoans">৳০</strong></div><div class="stat"><small>মোট আদায়</small><strong id="cashReceived">৳০</strong></div><div class="stat"><small>গ্রাহকদের বকেয়া</small><strong id="cashDue">৳০</strong></div><div class="stat"><small>মোট লাভ</small><strong id="cashProfit">৳০</strong></div></div><h3 style="margin-top:16px">মূলধন যোগ / খরচ</h3><div class="formgrid"><div><label>ধরন</label><select id="cashType"><option value="capital">মূলধন যোগ</option><option value="expense">খরচ</option></select></div><div><label>টাকা</label><input id="cashAmount" type="number" min="1"></div></div><label>বিবরণ</label><input id="cashNote" placeholder="লেনদেনের কারণ"><button onclick="addCashEntry()">লেনদেন সংরক্ষণ</button><div id="cashHistory"></div></div></div><div id="settings" class="tab hidden"><div class="panel"><h2>Google অ্যাকাউন্ট</h2><p class="muted">অ্যাডমিন অ্যাকাউন্ট থেকে বের হতে নিচের বোতাম চাপুন।</p><button type="button" class="danger" onclick="logoutGoogleAstha()">Google লগ আউট</button></div><div class="panel"><h2>অ্যাডমিন সেটিংস</h2><label>মোবাইল নম্বর</label><input id="newAdminPhone"><label>পাসওয়ার্ড / PIN</label><input id="newAdminPin" type="password" inputmode="numeric" maxlength="4" placeholder="৪ সংখ্যার PIN"><label>বিকাশ পার্সোনাল নম্বর</label><input id="bkashNumber" inputmode="tel" placeholder="019XXXXXXXX"><button style="margin-top:12px" onclick="changeAdmin()">পরিবর্তন সংরক্ষণ</button></div><div class="panel" data-owner-only><h2>অ্যাডমিন ব্যবস্থাপনা</h2>
 <label>নতুন অ্যাডমিনের নাম</label><input id="staffName" placeholder="নাম">
@@ -536,7 +536,7 @@ function init(){document.body.classList.remove('customer-view-mode');hideAll();e
 function startAdminSetup(){if(db&&db.customers&&db.customers.length)return alert('এই ব্রাউজারে গ্রাহকের হিসাব আছে।');if(!confirm('প্রথমবারের অ্যাডমিন অ্যাকাউন্ট তৈরি করবেন?'))return;db=null;hideAll();el('setup').classList.remove('hidden')}
 function finishSetup(){let p=el('setupPhone').value.trim(),pin=el('setupPin').value;if(!p||!pin)return alert('মোবাইল নম্বর ও পাসওয়ার্ড দিন');db={admin:{phone:p,pin},customers:[],trash:[]};save();init()}
 function showCustomerLogin(){hideAll();el('customerLogin').classList.remove('hidden')}
-function login(){if(db&&db.admin.phone===el('loginPhone').value.trim()&&db.admin.pin===el('loginPin').value){current='admin';hideAll();el('app').classList.remove('hidden');el('appFooterNav').classList.remove('hidden');renderDash()}else alert('মোবাইল নম্বর অথবা পাসওয়ার্ড সঠিক নয়')}
+function login(){const enteredPhone=el('loginPhone').value.trim(),enteredPin=el('loginPin').value;if(!enteredPhone||!enteredPin)return alert('মোবাইল নম্বর ও PIN দিন');if(db&&db.admin&&db.admin.phone&&db.admin.pin&&db.admin.phone===enteredPhone&&db.admin.pin===enteredPin){current='admin';hideAll();el('app').classList.remove('hidden');el('appFooterNav').classList.remove('hidden');renderDash()}else alert('মোবাইল নম্বর অথবা পাসওয়ার্ড সঠিক নয়')}
 function logout(){current=null;if(el('loginPhone'))el('loginPhone').value='';if(el('loginPin'))el('loginPin').value='';init()}
 function showTab(t){['dash','customers','trash','cash','settings'].forEach(x=>el(x).classList.toggle('hidden',x!==t));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));let b=el('tab'+t[0].toUpperCase()+t.slice(1));if(b)b.classList.add('active');el('detail').classList.add('hidden');if(t==='dash')renderDash();if(t==='customers')renderCustomers();if(t==='trash')renderTrash();if(t==='settings'){if(el('newAdminPhone'))el('newAdminPhone').value=db.admin?.phone||'';el('bkashNumber').value=db.settings?.bkashNumber||'01916636654';}if(t==='cash')renderCash();}
 function totals(c){let paid=(c.payments||[]).reduce((a,p)=>a+Number(p.amount),0);return{paid,due:Math.max(0,Number(c.total)-paid)}}
@@ -1312,7 +1312,8 @@ window.setAsthaData=(value)=>{db=value;try{localStorage.setItem(KEY,JSON.stringi
 window.openAsthaAfterGoogleLogin=function(){
  const googleUser=window.__asthaGoogleUser;
  if(!db||typeof db!=='object')db={customers:[],trash:[],cash:{entries:[]},settings:{}};
- if(!db.admin)db.admin={phone:'',pin:''};
+ if(!db.admin)db.admin={};
+ // Never create empty local credentials: Google authentication is the owner sign-in.
  db.admin.name=db.admin.name||googleUser?.displayName||'Google Admin';
  db.admin.email=googleUser?.email||db.admin.email||'';
  db.admin.uid=googleUser?.uid||db.admin.uid||'';
@@ -1786,36 +1787,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
  'use strict';
  const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const rememberKey='astha_trusted_device_v1';
-
- // Keep this device signed in after the first successful local PIN login.
- const oldLogin=window.login;
- if(typeof oldLogin==='function') window.login=function(){
-   oldLogin.apply(this,arguments);
-   try{
-     if(typeof current!=='undefined' && current && !$('app')?.classList.contains('hidden')){
-       localStorage.setItem(rememberKey,String(current.phone||''));
-     }
-   }catch(e){}
- };
- const oldLogout=window.logout;
- if(typeof oldLogout==='function') window.logout=function(){
-   try{localStorage.removeItem(rememberKey)}catch(e){}
-   oldLogout.apply(this,arguments);
- };
- document.addEventListener('DOMContentLoaded',function(){
-   try{
-     const phone=localStorage.getItem(rememberKey);
-     if(!phone || !db || !Array.isArray(db.admins))return;
-     const account=db.admins.find(a=>a.phone===phone && a.active!==false);
-     if(!account)return;
-     current=account;
-     ['setup','login','app','customerLogin','customerView','appFooterNav'].forEach(id=>$(id)?.classList.add('hidden'));
-     $('app')?.classList.remove('hidden');$('appFooterNav')?.classList.remove('hidden');
-     document.querySelectorAll('[data-owner-only]').forEach(x=>x.classList.toggle('hidden',account.role!=='owner'));
-     if(typeof renderDash==='function')renderDash();
-   }catch(e){console.warn('Trusted-device login skipped',e)}
- });
+ // Removed insecure PIN-bypass auto-login. Firebase Google session is the persistent sign-in mechanism.
 
  // Identity-first editor: personal ID details and profile photo are editable here.
  // Loan correction remains available in a separate optional section to preserve the existing feature.
@@ -1841,13 +1813,13 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      <label style="grid-column:1/-1">ঠিকানা<textarea id="aeAddress" rows="2" style="display:block;width:100%;box-sizing:border-box;padding:9px"></textarea></label>
     </div>
     <div style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0">
-     <b>গ্রাহকের প্রোফাইল ছবি</b><input id="aeProfileFile" type="file" accept="image/*" capture="user" style="display:block;margin:8px 0">
+     <b>গ্রাহকের প্রোফাইল ছবি</b><input id="aeProfileFile" type="file" accept="image/*" style="display:block;margin:8px 0">
      <img id="aeProfilePreview" alt="প্রোফাইল ছবি" style="display:none;width:82px;height:82px;object-fit:cover;border-radius:50%">
     </div>
     <div style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0">
-     <b>ভোটার আইডি কার্ডের ছবি</b><input id="aeNidFile" type="file" accept="image/*" capture="environment" style="display:block;margin:8px 0">
+     <b>ভোটার আইডি কার্ডের ছবি</b><input id="aeNidFile" type="file" accept="image/*" style="display:block;margin:8px 0">
      <img id="aeNidPreview" alt="NID ছবি" style="display:none;max-width:150px;max-height:90px;object-fit:contain">
-     <b style="display:block;margin-top:10px">আঙুলের ছাপের ছবি</b><input id="aeThumbFile" type="file" accept="image/*" capture="environment" style="display:block;margin:8px 0">
+     <b style="display:block;margin-top:10px">আঙুলের ছাপের ছবি</b><input id="aeThumbFile" type="file" accept="image/*" style="display:block;margin:8px 0">
      <img id="aeThumbPreview" alt="আঙুলের ছাপ" style="display:none;max-width:100px;max-height:100px;object-fit:contain">
     </div>
     <details style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:12px 0">
@@ -2058,3 +2030,20 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 </style>
 
 <style id="astha-white-browser-chrome">html{background:#fff}header{background:#fff!important;color:#202020!important}.head .logo img{width:68px;height:68px;object-fit:contain;display:block}#app>nav.astha-five-nav>button img.nav-logo{object-fit:contain!important;background:transparent!important}</style>
+
+<script id="astha-refresh-view-restore">
+(function(){
+ const KEY='astha_last_view_v1';
+ const safeRead=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}};
+ const saveView=(v)=>{try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}};
+ const oldShow=window.showTab;
+ if(typeof oldShow==='function')window.showTab=function(t){saveView({tab:t});return oldShow.apply(this,arguments)};
+ const oldDetail=window.openDetail;
+ if(typeof oldDetail==='function')window.openDetail=function(id){saveView({tab:'customers',detailId:String(id)});return oldDetail.apply(this,arguments)};
+ window.addEventListener('astha-firebase-auth-ready',function(e){
+   if(!e.detail?.hasUser)return;
+   const v=safeRead(); if(!v)return;
+   setTimeout(()=>{try{if(v.detailId&&typeof window.openDetail==='function')window.openDetail(v.detailId);else if(v.tab&&typeof window.showTab==='function')window.showTab(v.tab)}catch(err){console.warn('View restore skipped',err)}},120);
+ });
+})();
+</script>

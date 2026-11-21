@@ -1,46 +1,5 @@
-const CACHE_NAME = 'astha-v7-menu-icons-white-nav';
-const APP_SHELL = './';
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const names = await caches.keys();
-    await Promise.all(
-      names
-        .filter((name) => name.startsWith('astha-somiti-') && name !== CACHE_NAME)
-        .map((name) => caches.delete(name))
-    );
-    await self.clients.claim();
-  })());
-});
-
-// Network-first: GitHub Pages updates are fetched immediately when online.
-// Cached responses are used only when the network is unavailable.
-self.addEventListener('fetch', (event) => {
-  const request = event.request;
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-
-  event.respondWith((async () => {
-    try {
-      const response = await fetch(request, { cache: 'no-cache' });
-      if (response && response.ok && response.type === 'basic') {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(request, response.clone());
-      }
-      return response;
-    } catch (error) {
-      const cached = await caches.match(request);
-      if (cached) return cached;
-      if (request.mode === 'navigate') {
-        const appShell = await caches.match(APP_SHELL);
-        if (appShell) return appShell;
-      }
-      return Response.error();
-    }
-  })());
-});
+const CACHE_NAME = 'astha-somiti-final-v1';
+const CORE = ['./', './index.html', './manifest.webmanifest', './assets/astha-logo-192.png', './assets/astha-logo-512.png'];
+self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE).catch(()=>{})).then(()=>self.skipWaiting())); });
+self.addEventListener('activate', event => { event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('astha-somiti-')&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
+self.addEventListener('fetch', event => { const u=new URL(event.request.url); if(event.request.method!=='GET'||u.origin!==location.origin)return; event.respondWith(fetch(event.request).then(response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(c=>c.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request).then(r=>r||caches.match('./index.html')))); });

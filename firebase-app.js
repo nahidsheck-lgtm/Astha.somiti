@@ -22,7 +22,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
+// Do not force account selection on every manual sign-in. Existing Firebase sessions restore silently.
 let activeUser = null;
 let stopListening = null;
 let applyingCloud = false;
@@ -263,26 +263,37 @@ function attachSaveSync() {
 }
 attachSaveSync();
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    activeUser = null;
-    stopCloudListener();
-    announceAuthReady(false);
-    return;
-  }
-  if (manualSignInPending || activeUser?.uid === user.uid) return;
+// Initialize persistence before the first auth observer. This prevents startup code
+// from treating the not-yet-restored session as a signed-out user.
+(async function initializeAsthaAuth() {
   try {
-    let resolvedUser = user;
-    if (!initialRedirectChecked) {
-      initialRedirectChecked = true;
+    await setPersistence(auth, browserLocalPersistence);
+    let redirectUser = null;
+    try {
       const redirectResult = await getRedirectResult(auth);
-      if (redirectResult?.user) resolvedUser = redirectResult.user;
-    }
-    await openUserData(resolvedUser);
+      if (redirectResult && redirectResult.user) redirectUser = redirectResult.user;
+    } catch (e) { console.warn('Redirect result check:', e); }
+    onAuthStateChanged(auth, async (user) => {
+      const resolvedUser = user || redirectUser;
+      if (!resolvedUser) {
+        activeUser = null;
+        stopCloudListener();
+        announceAuthReady(false);
+        return;
+      }
+      if (manualSignInPending || activeUser?.uid === resolvedUser.uid) return;
+      try {
+        await openUserData(resolvedUser);
+      } catch (error) {
+        console.error(error);
+        activeUser = null;
+        status('Firebase সংযোগ হয়নি: ' + (error.message || error));
+        announceAuthReady(false);
+      }
+    });
   } catch (error) {
-    console.error(error);
-    activeUser = null;
-    status('Firebase সংযোগ হয়নি: ' + (error.message || error));
+    console.error('Firebase Auth initialization failed:', error);
+    status('Google লগইন সেশন প্রস্তুত হয়নি: ' + (error.message || error));
     announceAuthReady(false);
   }
-});
+})();
