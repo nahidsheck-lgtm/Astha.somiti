@@ -1,11 +1,8 @@
-# Android-এ Astha Somiti Install
+# Android-এ আস্থা সমিতি ইনস্টল
 
-1. Android ফোনে Google Chrome খুলুন।
-2. `https://nahidsheck-lgtm.github.io/Astha.somiti/` খুলুন।
-3. Chrome-এর `⋮` → **Install app** / **Add to Home screen** চাপুন।
-4. Install নিশ্চিত করুন। হোম স্ক্রিনে Astha Somiti আইকন আসবে।
-5. আইকন থেকে খুলে আগের Google Gmail দিয়ে Sign in করুন।
+1. Chrome-এ https://nahidsheck-lgtm.github.io/Astha.somiti/ খুলুন।
+2. Chrome-এর ⋮ মেনু চাপুন।
+3. Install app অথবা Add to Home screen নির্বাচন করুন।
+4. Install চাপুন।
 
-PWA-টি অনলাইনে প্রকাশিত ফাইল থেকে নিজে আপডেট হয়। নতুন সংস্করণ প্রকাশের পর অ্যাপ পুরোপুরি বন্ধ করে আবার খুলুন। Google Login-এ সমস্যা হলে Chrome browser-এ সরাসরি URL খুলে লগইন করুন।
-
-এই প্যাকেজে signed APK নেই। APK বানাতে Android SDK/Gradle এবং মালিকের signing key প্রয়োজন; পরীক্ষাহীন APK দেওয়া হয়নি।
+এটি PWA, তাই ওয়েবসাইটে নতুন সংস্করণ প্রকাশ হলে অনলাইনে নতুন ফাইল স্বয়ংক্রিয়ভাবে পাওয়া যাবে। signed APK এই প্যাকেজে নেই।

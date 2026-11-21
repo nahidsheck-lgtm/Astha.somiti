@@ -1,0 +1,17 @@
+আস্থা সমিতি — রিফ্রেশ লগইন সমস্যা (প্রাথমিক প্যাচ)
+তারিখ: 2026-11-21
+
+পর্যবেক্ষণ:
+- ভিডিওতে রিফ্রেশের পর Google account chooser / লগইন স্ক্রিনে ফিরে যাওয়ার আচরণ দেখা গেছে।
+- index.html-এর astha-startup-fallback Firebase Auth restore-এর জন্য সর্বোচ্চ 6 সেকেন্ড অপেক্ষা করছিল।
+- ধীর Android/mobile network-এ Firebase session/data restore শেষ হওয়ার আগেই fallback স্থানীয় login/setup screen দেখাতে পারত।
+
+পরিবর্তন:
+- অপেক্ষার safety timeout 6 সেকেন্ড থেকে 20 সেকেন্ড করা হয়েছে।
+- Auth-ready event listener একবার কাজ করলে সরিয়ে ফেলা হয়।
+- Firebase-এ ব্যবহারকারী শনাক্ত হয়ে গেলে অথবা app ইতিমধ্যে দৃশ্যমান হলে fallback আর login/setup screen দিয়ে app ঢেকে দেয় না।
+
+সতর্কতা:
+- এটি প্রাথমিক কোড-স্তরের সমাধান। বাস্তব Android Chrome/PWA এবং Firebase account-এ refresh test এখনো করা হয়নি।
+- Google session নিজেই যদি ব্রাউজার/ডিভাইসে persist না করে, Firebase Console-এর Authorized domains, Authentication provider, browser storage এবং বাস্তব ডিভাইস পরীক্ষা করতে হবে।
+- পুরোনো মূল ফাইলগুলো অপরিবর্তিত রাখা হয়েছে। এই পরিবর্তন শুধু Working Copy-তে।
