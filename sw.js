@@ -1,4 +1,4 @@
-const CACHE_NAME = 'astha-v7-menu-icons-white-nav';
+const CACHE_NAME = 'astha-somiti-v8-final-assets';
 const APP_SHELL = './';
 
 self.addEventListener('install', (event) => {
@@ -10,7 +10,7 @@ self.addEventListener('activate', (event) => {
     const names = await caches.keys();
     await Promise.all(
       names
-        .filter((name) => name.startsWith('astha-somiti-') && name !== CACHE_NAME)
+        .filter((name) => (name.startsWith('astha-somiti-') || name.startsWith('astha-v')) && name !== CACHE_NAME)
         .map((name) => caches.delete(name))
     );
     await self.clients.claim();

@@ -21,8 +21,9 @@ const status = (message) => {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+const authPersistenceReady = setPersistence(auth, browserLocalPersistence);
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
+// Reuse an existing Google session; do not force the account chooser.
 let activeUser = null;
 let stopListening = null;
 let applyingCloud = false;
@@ -132,6 +133,7 @@ async function openUserData(user) {
   const ref = doc(firestore, 'appSettings', user.uid);
   const previousOwner = localOwnerUid();
   const local = localData();
+  if (previousOwner && previousOwner !== user.uid) stashLocalForUid(previousOwner);
   let snap;
   try {
     snap = await getDoc(ref);
@@ -196,6 +198,12 @@ async function openUserData(user) {
 
   stopListening = onSnapshot(ref, (cloudSnap) => {
     if (!cloudSnap.exists() || applyingCloud || !activeUser || activeUser.uid !== user.uid) return;
+    let hasPendingLocal = false;
+    try { hasPendingLocal = localStorage.getItem(DIRTY_KEY) === user.uid; } catch (_) {}
+    if (hasPendingLocal) {
+      status('এই ডিভাইসে নতুন পরিবর্তন Sync হচ্ছে; ক্লাউডের পুরোনো তথ্য দিয়ে তা বদলানো হয়নি।');
+      return;
+    }
     const payload = cloudSnap.data();
     if (!validData(payload.data)) { status('ক্লাউড ডেটার কাঠামো সঠিক নয়; বর্তমান তথ্য রাখা হয়েছে।'); return; }
     applyingCloud = true;
@@ -221,7 +229,7 @@ window.googleSignIn = async function () {
     if (!firebaseConfig.apiKey || !firebaseConfig.appId || !firebaseConfig.messagingSenderId || String(firebaseConfig.apiKey).includes('YOUR_')) {
       throw new Error('Firebase কনফিগারেশন অসম্পূর্ণ।');
     }
-    await setPersistence(auth, browserLocalPersistence);
+    await authPersistenceReady;
     manualSignInPending = true;
     status('Google লগইন খুলছে…');
     try {
@@ -264,6 +272,13 @@ function attachSaveSync() {
 attachSaveSync();
 
 onAuthStateChanged(auth, async (user) => {
+  try { await authPersistenceReady; }
+  catch (error) {
+    console.error('Firebase Auth persistence unavailable', error);
+    status('Google লগইনের স্থায়ী সেশন চালাতে HTTPS Hosting ব্যবহার করুন: ' + (error.message || error));
+    announceAuthReady(false);
+    return;
+  }
   if (!user) {
     activeUser = null;
     stopCloudListener();
