@@ -1,8 +1,23 @@
 {
   "hosting": {
     "public": ".",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "README.md", "firestore.rules"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "README.md",
+      "firestore.rules",
+      "storage.rules",
+      "original-running-files/**",
+      "storage-cors.json",
+      "ANDROID-INSTALL.md"
+    ],
     "cleanUrls": false
   },
-  "firestore": { "rules": "firestore.rules" }
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
 }
