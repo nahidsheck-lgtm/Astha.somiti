@@ -113,3 +113,15 @@ Static HTML/JavaScript syntax checks are run for this package. Firebase email re
 - Home navigation tiles receive a subtle 3D treatment; customer rows are denser on mobile; customer ledger photo is reduced to a compact thumbnail; numeric text in the red ledger banner is white.
 - Cloud backup sign-in supports the app Gmail + Password account as well as legacy Google sign-in. Email/password users must verify their email before accessing backup.
 - Service worker cache is `astha-somiti-v13`. Firebase authentication and cloud sync still require a live test on the configured HTTPS deployment.
+
+
+## Owner approval + shared cloud access (2026-11-24)
+
+- Owner UID is pinned to the Firebase Authentication UID supplied by the project owner: `bjOeOH6etCYlguhidyLTDQImrJt1`. The corresponding owner sign-in must use the existing Google provider account.
+- New email/password registrations send an email verification link and create a pending `accessRequests/{uid}` record. A verified but unapproved account is signed out and cannot read/write the shared app data.
+- The owner signs in with the Google button, opens Settings, and uses **সদস্য নিবন্ধন অনুমোদন → অনুমোদনের অনুরোধ দেখুন** to approve or reject requests.
+- All approved members use the shared Firestore document `appSettings/shared`, so they see the same committee data across devices. Revision conflict checks remain enabled. Existing owner data at `appSettings/{ownerUid}` is copied to `appSettings/shared` once if the shared document does not exist. A local backup should be exported before first owner login/migration.
+- Firestore Rules are in `firestore.rules`. They MUST be published to the Firebase project before using this build. In Firebase Console open Firestore Database → Rules, replace the rules with the contents of this file, then Publish. Alternatively, from a trusted terminal in this project directory run `firebase deploy --only firestore:rules`.
+- Do not leave the previous rules active: they do not enforce member approval. Do not manually create `approvedUsers` records for members; use the owner approval UI.
+- This ZIP cannot publish rules or change Firebase Authentication settings in the live project. After publishing rules, test on the HTTPS hosted domain: owner Google login, a new email registration, verification email, pending denial, owner approval, member login on a second phone, shared edit/sync, and JSON backup/restore.
+- Security model: the owner UID is embedded in client code and enforced by Firestore Rules; only that UID can manage `approvedUsers` and `accessRequests`. Keep Firebase project owner access private.

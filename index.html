@@ -530,7 +530,8 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
    <button type="button" class="google-first-button" onclick="emailLogin()">লগইন</button>
    <button type="button" class="link-button" onclick="forgotEmailPassword()">পাসওয়ার্ড ভুলে গেছেন?</button>
    <div class="auth-divider">অথবা</div>
-   <button type="button" class="secondary" style="width:100%" onclick="toggleEmailRegistration(true)">রেজিস্ট্রেশন</button>
+   <button type="button" class="secondary" style="width:100%" onclick="googleSignIn()">মালিকের Google অ্যাকাউন্ট দিয়ে প্রবেশ</button>
+   <button type="button" class="secondary" style="width:100%;margin-top:8px" onclick="toggleEmailRegistration(true)">নতুন সদস্যের রেজিস্ট্রেশন</button>
    <div id="emailRegistration" class="email-registration hidden">
     <h3>নতুন অ্যাকাউন্ট তৈরি</h3>
     <label for="regName">নাম</label><input id="regName" type="text" autocomplete="name" placeholder="আপনার নাম">
@@ -541,7 +542,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
     <button type="button" class="link-button" onclick="toggleEmailRegistration(false)">লগইনে ফিরে যান</button>
    </div>
   </div>
-  <p id="firebaseLoginStatus" class="google-first-note" aria-live="polite">Gmail দিয়ে নিরাপদে লগইন করুন।</p>
+  <p id="firebaseLoginStatus" class="google-first-note" aria-live="polite">Gmail/Password দিয়ে লগইন করুন। মালিকের Google অ্যাকাউন্টও ব্যবহার করা যাবে। নতুন সদস্যকে মালিক অনুমোদন করবেন।</p>
  </div>
 </section>
 <section id="app" class="hidden"><nav class="no-print astha-five-nav">

@@ -7,11 +7,25 @@ import {
   verifyBeforeUpdateEmail, EmailAuthProvider, reauthenticateWithCredential
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, runTransaction
+  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, runTransaction, collection, getDocs, deleteDoc
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
+const OWNER_UID = 'bjOeOH6etCYlguhidyLTDQImrJt1';
 const OWNER_KEY = 'astha_firebase_local_owner_uid_v1';
+const SHARED_DATA_REF = () => doc(firestore, 'appSettings', 'shared');
+const isOwner = (user) => !!user && user.uid === OWNER_UID;
+async function isApproved(user) {
+  if (isOwner(user)) return true;
+  const snap = await getDoc(doc(firestore, 'approvedUsers', user.uid));
+  return snap.exists() && snap.data().active === true;
+}
+async function requestAccess(user, profile = {}) {
+  const ref = doc(firestore, 'accessRequests', user.uid);
+  const existing = await getDoc(ref);
+  if (existing.exists()) return; // A pending request is created once; only owner can alter it.
+  await setDoc(ref, { uid:user.uid, email:(user.email||'').toLowerCase(), name:profile.name||user.displayName||'', phone:profile.phone||'', status:'pending', requestedAt:serverTimestamp() });
+}
 const ACCOUNT_BACKUP_PREFIX = 'astha_local_backup_uid_v1_';
 const status = (message) => {
   const node = document.getElementById('firebaseSettingsStatus');
@@ -93,7 +107,7 @@ async function syncNow() {
   if (bytes > 850 * 1024) {
     throw new Error('ডেটা ৮৫০ KB ছাড়িয়েছে। ছবি/পুরোনো তথ্যের কারণে Firestore-এর এক ডকুমেন্ট সীমার কাছাকাছি পৌঁছেছে। নিরাপদে Sync বন্ধ রাখা হয়েছে; ডেটা মুছে ফেলা হয়নি।');
   }
-  const ref = doc(firestore, 'appSettings', activeUser.uid);
+  const ref = SHARED_DATA_REF();
   let committedRevision = baseRevision;
   await runTransaction(firestore, async (transaction) => {
     const latest = await transaction.get(ref);
@@ -133,127 +147,85 @@ window.asthaGoogleSignOut = async () => {
 
 async function openUserData(user) {
   stopCloudListener();
-  activeUser = user;
-  window.__asthaGoogleUser = user;
-  status('Google অ্যাকাউন্ট যাচাই হচ্ছে…');
-  const ref = doc(firestore, 'appSettings', user.uid);
-  const snap = await getDoc(ref);
+  if (!await isApproved(user)) {
+    await requestAccess(user);
+    activeUser = null; window.__asthaGoogleUser = null;
+    await signOut(auth);
+    status('আপনার অ্যাকাউন্টের অনুমোদনের অনুরোধ পাঠানো হয়েছে। মালিক অনুমোদন দিলে লগইন করতে পারবেন।');
+    announceAuthReady(false); return false;
+  }
+  activeUser = user; window.__asthaGoogleUser = user;
+  status('অ্যাকাউন্টের অনুমতি যাচাই হয়েছে; ক্লাউড হিসাব লোড হচ্ছে…');
+  const ref = SHARED_DATA_REF();
+  let snap = await getDoc(ref);
+  // One-time owner migration: retain the previous owner-UID document as the shared workspace.
+  if (!snap.exists() && isOwner(user)) {
+    const legacy = await getDoc(doc(firestore, 'appSettings', user.uid));
+    if (legacy.exists() && validData(legacy.data().data)) {
+      await setDoc(ref, legacy.data(), {merge:true});
+      snap = await getDoc(ref);
+    }
+  }
   const previousOwner = localOwnerUid();
-
   if (snap.exists()) {
     const payload = snap.data();
     if (!validData(payload.data)) throw new Error('Firebase-এ পাওয়া ডেটার কাঠামো সঠিক নয়। ডেটা পরিবর্তন করা হয়নি।');
-    // Preserve any pre-existing local copy before cloud data replaces the app state.
     const existingLocal = localData();
     if (nonEmptyLocal(existingLocal) && JSON.stringify(existingLocal) !== JSON.stringify(payload.data)) {
-      const backupKey = previousOwner && previousOwner !== user.uid
-        ? ACCOUNT_BACKUP_PREFIX + previousOwner
-        : ACCOUNT_BACKUP_PREFIX + user.uid + '_before_cloud_' + Date.now();
-      try { localStorage.setItem(backupKey, JSON.stringify(cleanData(existingLocal))); }
-      catch (error) { console.warn('Could not preserve pre-cloud local copy', error); }
+      const backupKey = ACCOUNT_BACKUP_PREFIX + user.uid + '_before_shared_' + Date.now();
+      try { localStorage.setItem(backupKey, JSON.stringify(cleanData(existingLocal))); } catch (error) { console.warn('Could not preserve local copy', error); }
     }
-    baseRevision = Number(payload.revision || 0);
-    localDirty = false;
-    applyingCloud = true;
-    try { window.setAsthaData(payload.data); }
-    finally { applyingCloud = false; }
-    setLocalOwnerUid(user.uid);
-    status('এই Gmail-এর ক্লাউড হিসাব লোড হয়েছে।');
-  } else if (previousOwner && previousOwner !== user.uid) {
-    baseRevision = 0; localDirty = false;
-    // Preserve the previous account's device copy before switching local storage.
-    stashLocalForUid(previousOwner);
-    const returningCopy = readStashedLocalForUid(user.uid);
-    if (returningCopy) {
-      applyingCloud = true;
-      try { window.setAsthaData(returningCopy); }
-      finally { applyingCloud = false; }
-      setLocalOwnerUid(user.uid);
-      const upload = confirm('এই Gmail-এর ক্লাউডে হিসাব পাওয়া যায়নি, তবে এই Gmail-এর আগের স্থানীয় কপি পাওয়া গেছে। সেটি ক্লাউডে ফিরিয়ে সংরক্ষণ করবেন?');
-      if (!upload) {
-        activeUser = null;
-        window.__asthaGoogleUser = null;
-        await signOut(auth);
-        status('লগইন বাতিল হয়েছে; এই Gmail-এর স্থানীয় কপি অক্ষত আছে।');
-        announceAuthReady(false);
-        return false;
-      }
-      await syncNow();
-    } else {
-      // A different Gmail with no cloud data starts empty; never inherit another account's data.
-      applyingCloud = true;
-      try { window.setAsthaData(emptyAccountData()); }
-      finally { applyingCloud = false; }
-      setLocalOwnerUid(user.uid);
-      status('নতুন Gmail-এর জন্য আলাদা খালি হিসাব তৈরি হয়েছে।');
-    }
-  } else if (!previousOwner && nonEmptyLocal(localData())) {
+    baseRevision = Number(payload.revision || 0); localDirty = false; applyingCloud = true;
+    try { window.setAsthaData(payload.data); } finally { applyingCloud = false; }
+    setLocalOwnerUid(user.uid); status('সমিতির শেয়ার করা ক্লাউড হিসাব লোড হয়েছে।');
+  } else if (isOwner(user) && nonEmptyLocal(localData())) {
     baseRevision = 0; localDirty = true;
-    const upload = confirm('এই ডিভাইসে আগে থেকে স্থানীয় হিসাব পাওয়া গেছে, কিন্তু এটি এখনো কোনো Gmail-এর নামে চিহ্নিত নয়।\n\nআপনি কি এই পুরোনো হিসাবটি প্রথমবার এই Gmail-এর ক্লাউডে নিতে চান?\n\nOK = এই Gmail-এ স্থানান্তর\nCancel = লগইন বাতিল; পুরোনো হিসাব অক্ষত থাকবে।');
-    if (!upload) {
-      activeUser = null;
-      window.__asthaGoogleUser = null;
-      await signOut(auth);
-      status('লগইন বাতিল হয়েছে। পুরোনো স্থানীয় হিসাব অক্ষত আছে।');
-      announceAuthReady(false);
-      return false;
-    }
-    setLocalOwnerUid(user.uid);
-    await syncNow();
-    status('পুরোনো স্থানীয় হিসাব এই Gmail-এর ক্লাউডে সংরক্ষিত হয়েছে।');
+    const upload = confirm('এই ডিভাইসে পুরোনো স্থানীয় হিসাব পাওয়া গেছে। এটিকে প্রথমবার সমিতির শেয়ার করা ক্লাউড হিসাবে সংরক্ষণ করবেন?');
+    if (!upload) { activeUser=null; window.__asthaGoogleUser=null; await signOut(auth); announceAuthReady(false); return false; }
+    setLocalOwnerUid(user.uid); await syncNow();
   } else {
-    baseRevision = 0; localDirty = false;
-    // First use on an empty device, or a previously-owned account whose cloud doc was removed.
-    if (previousOwner === user.uid && nonEmptyLocal(localData())) {
-      const upload = confirm('এই Gmail-এর ক্লাউডে এখনো হিসাব নেই, তবে এই ডিভাইসে একই Gmail-এর স্থানীয় হিসাব পাওয়া গেছে। সেটি ক্লাউডে সংরক্ষণ করবেন?');
-      if (!upload) {
-        activeUser = null;
-        window.__asthaGoogleUser = null;
-        await signOut(auth);
-        status('লগইন বাতিল হয়েছে; স্থানীয় হিসাব অক্ষত আছে।');
-        announceAuthReady(false);
-        return false;
-      }
-      await syncNow();
-    } else {
-      if (!validData(localData()) || !nonEmptyLocal(localData())) {
-        applyingCloud = true;
-        try { window.setAsthaData(emptyAccountData()); }
-        finally { applyingCloud = false; }
-      }
-      setLocalOwnerUid(user.uid);
-      status('এই Gmail-এর জন্য নতুন আলাদা হিসাব প্রস্তুত।');
-    }
+    baseRevision = 0; localDirty = false; applyingCloud = true;
+    try { window.setAsthaData(emptyAccountData()); } finally { applyingCloud = false; }
+    setLocalOwnerUid(user.uid);
+    if (isOwner(user)) status('নতুন শেয়ার করা হিসাব প্রস্তুত।');
   }
-
   stopListening = onSnapshot(ref, (cloudSnap) => {
     if (!cloudSnap.exists() || applyingCloud || !activeUser || activeUser.uid !== user.uid) return;
-    const payload = cloudSnap.data();
-    if (!validData(payload.data)) { status('ক্লাউড ডেটার কাঠামো সঠিক নয়; বর্তমান তথ্য রাখা হয়েছে।'); return; }
-    const incomingRevision = Number(payload.revision || 0);
-    if (incomingRevision <= baseRevision) return;
-    if (localDirty) {
-      status('অন্য ডিভাইসে নতুন তথ্য এসেছে। আপনার স্থানীয় পরিবর্তন মুছে ফেলা হয়নি; সংঘর্ষ মেটানো পর্যন্ত স্বয়ংক্রিয় Sync বন্ধ।');
-      return;
-    }
-    baseRevision = incomingRevision;
-    applyingCloud = true;
-    try {
-      window.setAsthaData(payload.data);
-      setLocalOwnerUid(user.uid);
-      if (document.getElementById('app') && !document.getElementById('app').classList.contains('hidden')) {
-        window.renderDash?.();
-        const activeTab = document.querySelector('nav button.active')?.id || '';
-        if (activeTab === 'tabCustomers') window.renderCustomers?.();
-      }
-      status('এই Gmail-এর নতুন তথ্য Firebase থেকে Sync হয়েছে।');
-    } finally { applyingCloud = false; }
+    const payload = cloudSnap.data(); if (!validData(payload.data)) return;
+    const incomingRevision = Number(payload.revision || 0); if (incomingRevision <= baseRevision) return;
+    if (localDirty) { status('অন্য ডিভাইসে নতুন তথ্য এসেছে। স্থানীয় পরিবর্তন নিরাপদে রাখা হয়েছে; সংঘর্ষ মেটানো প্রয়োজন।'); return; }
+    baseRevision = incomingRevision; applyingCloud = true;
+    try { window.setAsthaData(payload.data); setLocalOwnerUid(user.uid); window.renderDash?.(); } finally { applyingCloud = false; }
+    status('শেয়ার করা হিসাব অন্য ডিভাইস থেকে হালনাগাদ হয়েছে।');
   }, (error) => { console.error(error); status('লাইভ Sync বন্ধ: ' + (error.message || error)); });
-
   if (typeof window.openAsthaAfterGoogleLogin === 'function') window.openAsthaAfterGoogleLogin();
-  announceAuthReady(true);
-  return true;
+  if (isOwner(user)) installApprovalManager();
+  announceAuthReady(true); return true;
 }
+
+function installApprovalManager() {
+  const host = document.getElementById('firebaseSettingsStatus') || document.getElementById('firebaseLoginStatus');
+  if (!host || document.getElementById('asthaApprovalManager')) return;
+  const wrap = document.createElement('div'); wrap.id='asthaApprovalManager'; wrap.style='margin-top:12px;padding:12px;border:1px solid #cbd5e1;border-radius:12px';
+  wrap.innerHTML='<h3>সদস্য নিবন্ধন অনুমোদন</h3><p class="muted">নতুন সদস্যের অনুরোধ যাচাই করে অনুমোদন দিন বা বাতিল করুন।</p><button type="button" class="secondary" id="asthaLoadRequests">অনুমোদনের অনুরোধ দেখুন</button><div id="asthaRequestList"></div>';
+  host.parentNode?.appendChild(wrap);
+  document.getElementById('asthaLoadRequests').onclick = loadApprovalRequests;
+}
+async function loadApprovalRequests() {
+  if (!isOwner(activeUser)) return alert('শুধু মালিক এই কাজ করতে পারবেন।');
+  const box=document.getElementById('asthaRequestList'); if(!box)return; box.textContent='লোড হচ্ছে…';
+  try {
+    const snap=await getDocs(collection(firestore,'accessRequests'));
+    const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.status!=='approved');
+    if(!rows.length){box.textContent='নতুন কোনো অনুরোধ নেই।';return;}
+    box.innerHTML=rows.map(x=>`<div style="padding:10px 0;border-top:1px solid #ddd"><b>${escapeHtml(x.name||'নাম নেই')}</b><div>${escapeHtml(x.email||'')} · ${escapeHtml(x.phone||'')}</div><small>UID: ${escapeHtml(x.uid||x.id)}</small><div style="display:flex;gap:8px;margin-top:7px"><button type="button" data-approve="${escapeHtml(x.id)}">অনুমোদন</button><button type="button" class="danger" data-reject="${escapeHtml(x.id)}">বাতিল</button></div></div>`).join('');
+    box.querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>approveMember(b.dataset.approve));
+    box.querySelectorAll('[data-reject]').forEach(b=>b.onclick=()=>rejectMember(b.dataset.reject));
+  } catch(e){box.textContent='অনুরোধ লোড হয়নি: '+(e.message||e);}
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function approveMember(uid){if(!isOwner(activeUser))return;try{const req=await getDoc(doc(firestore,'accessRequests',uid));if(!req.exists())throw new Error('অনুরোধ পাওয়া যায়নি');const d=req.data();await setDoc(doc(firestore,'approvedUsers',uid),{uid,email:d.email||'',name:d.name||'',active:true,approvedAt:serverTimestamp(),approvedBy:OWNER_UID});await deleteDoc(doc(firestore,'accessRequests',uid));await loadApprovalRequests();alert('সদস্য অনুমোদিত হয়েছে।');}catch(e){alert('অনুমোদন হয়নি: '+(e.message||e));}}
+async function rejectMember(uid){if(!isOwner(activeUser)||!confirm('এই নিবন্ধন অনুরোধ বাতিল করবেন?'))return;try{await deleteDoc(doc(firestore,'accessRequests',uid));await loadApprovalRequests();}catch(e){alert('বাতিল হয়নি: '+(e.message||e));}}
 
 window.toggleEmailRegistration = function(show){ const box=document.getElementById('emailRegistration'); if(box) box.classList.toggle('hidden',!show); };
 window.registerEmailAccount = async function(){
@@ -264,27 +236,24 @@ window.registerEmailAccount = async function(){
  if(!name||!phone||!email||password.length<8){alert('নাম, মোবাইল, সঠিক Gmail এবং কমপক্ষে ৮ অক্ষরের Password দিন।');return;}
  try{
   await setPersistence(auth,browserLocalPersistence);
+  manualSignInPending=true;
   const cred=await createUserWithEmailAndPassword(auth,email,password);
   await updateProfile(cred.user,{displayName:name});
   await sendEmailVerification(cred.user);
-  await setDoc(doc(firestore, 'appSettings', cred.user.uid), {data: emptyAccountData(), profile:{name,phone,email}, revision:0, schemaVersion:1}, {merge:true});
+  await requestAccess(cred.user, {name,phone});
   try{localStorage.setItem('astha_pending_profile_'+cred.user.uid,JSON.stringify({name,phone,email}));}catch(e){}
   await signOut(auth);
-  const statusNode=document.getElementById('firebaseLoginStatus');if(statusNode)statusNode.textContent='Gmail-এ Verification Link পাঠানো হয়েছে। ইমেইল যাচাই করে তারপর Gmail ও Password দিয়ে লগইন করুন।';
-  alert('রেজিস্ট্রেশন হয়েছে। আপনার Gmail-এর Inbox/Spam থেকে Verification Link খুলে ভেরিফাই করুন। একবার ভেরিফাই হলেই পরেরবার শুধু Gmail ও Password লাগবে।');
+  manualSignInPending=false;
+  const statusNode=document.getElementById('firebaseLoginStatus');if(statusNode)statusNode.textContent='ভেরিফিকেশন লিংক পাঠানো হয়েছে। ইমেইল যাচাইয়ের পর মালিকের অনুমোদনের অপেক্ষা করুন।';
+  alert('রেজিস্ট্রেশন অনুরোধ পাঠানো হয়েছে। Gmail-এর Inbox/Spam থেকে ইমেইল ভেরিফাই করুন। মালিক অনুমোদন না দেওয়া পর্যন্ত অ্যাপে প্রবেশ করা যাবে না।');
   window.toggleEmailRegistration(false);
- }catch(error){console.error(error);alert('রেজিস্ট্রেশন হয়নি: '+(error.message||error));}
+ }catch(error){manualSignInPending=false;console.error(error);alert('রেজিস্ট্রেশন হয়নি: '+(error.message||error));}
 };
 window.emailLogin = async function(){
  const email=(document.getElementById('emailLogin')?.value||'').trim().toLowerCase();
  const password=document.getElementById('emailPassword')?.value||'';
  if(!email||!password){alert('Gmail ও Password লিখুন।');return;}
  try{await setPersistence(auth,browserLocalPersistence);manualSignInPending=true;const cred=await signInWithEmailAndPassword(auth,email,password);await cred.user.reload();if(!cred.user.emailVerified){await signOut(auth);manualSignInPending=false;alert('প্রথমে আপনার Gmail-এর Verification Link খুলে ইমেইল ভেরিফাই করুন।');announceAuthReady(false);return;}await openUserData(cred.user);manualSignInPending=false;
-  const pendingKey='astha_pending_profile_'+cred.user.uid;let profile=null;try{profile=JSON.parse(localStorage.getItem(pendingKey)||'null')}catch(e){}
-  const profileSnap=await getDoc(doc(firestore,'appSettings',cred.user.uid));
-  const remoteProfile=profileSnap.exists()?profileSnap.data().profile:null;
-  profile=profile||remoteProfile;
-  if(profile){const d=localData()||emptyAccountData();d.settings=d.settings||{};d.settings.accountProfile={name:profile.name||cred.user.displayName||'',phone:profile.phone||'',email:profile.email||cred.user.email};window.setAsthaData(d);try{localStorage.removeItem(pendingKey)}catch(e){}await syncNow();}
  }catch(error){manualSignInPending=false;console.error(error);alert('লগইন হয়নি: '+(error.message||error));announceAuthReady(false);}
 };
 window.forgotEmailPassword=async function(){const email=(document.getElementById('emailLogin')?.value||document.getElementById('regEmail')?.value||'').trim();if(!email){alert('প্রথমে Gmail ঘরে আপনার Gmail লিখুন।');return;}try{await sendPasswordResetEmail(auth,email);alert('Password reset link আপনার Gmail-এ পাঠানো হয়েছে।');}catch(error){alert('রিকভারি ইমেইল পাঠানো যায়নি: '+(error.message||error));}};
