@@ -1,11 +1,11 @@
-const CACHE_NAME = 'astha-somiti-v15';
+const CACHE_NAME = 'astha-somiti-v16-share-ledger';
 const APP_SHELL_URL = new URL('./', self.registration.scope).href;
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(
@@ -16,41 +16,36 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Fast page refresh: show the saved app shell immediately, then refresh the
-  // cached copy in the background. First visit still waits for the network.
+  // Network-first navigation prevents an old cached HTML shell from breaking
+  // Firebase auth restoration after refresh. Cache is only an offline fallback.
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(request) || await cache.match(APP_SHELL_URL);
-      const update = fetch(request, {cache:'no-cache'}).then(async response => {
+      try {
+        const response = await fetch(request, { cache: 'no-store' });
         if (response && response.ok && response.type === 'basic') {
           await cache.put(request, response.clone());
+          await cache.put(APP_SHELL_URL, response.clone());
         }
         return response;
-      });
-      if (cached) {
-        event.waitUntil(update.catch(() => {}));
-        return cached;
-      }
-      try { return await update; }
-      catch (error) {
-        const shell = await cache.match(APP_SHELL_URL);
-        if (shell) return shell;
-        return Response.error();
+      } catch (error) {
+        const cached = await cache.match(request) || await cache.match(APP_SHELL_URL);
+        return cached || Response.error();
       }
     })());
     return;
   }
 
+  // Other same-origin assets also prefer the current network version.
   event.respondWith((async () => {
     try {
-      const response = await fetch(request, {cache:'no-cache'});
+      const response = await fetch(request, { cache: 'no-cache' });
       if (response && response.ok && response.type === 'basic') {
         const cache = await caches.open(CACHE_NAME);
         await cache.put(request, response.clone());

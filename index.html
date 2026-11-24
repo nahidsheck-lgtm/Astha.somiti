@@ -566,19 +566,15 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <div class="divider-space"></div><label>নতুন Password</label><input id="newAccountPassword" type="password" autocomplete="new-password" minlength="8" placeholder="কমপক্ষে ৮ অক্ষর">
 <button type="button" onclick="changeAccountPassword()">Password পরিবর্তন করুন</button>
 <p id="accountChangeStatus" class="muted" aria-live="polite"></p></div>
-<div class="panel"><h2>নোটিশ সেটিংস</h2><label>নোটিশের লেখা সম্পাদনা করুন</label><p class="muted">উপরের “✎ মেসেজ এডিট” বোতাম থেকেও এখানে আসতে পারবেন। {name}, {id}, {date}, {payment}, {paid}, {total}, {due}, {deadline}, {bkash} লিখলে পাঠানোর সময় স্বয়ংক্রিয়ভাবে তথ্য বসবে।</p>
+<div class="panel" id="customerSharePanel"><h2>গ্রাহকের হিসাব দেখার লিংক</h2><p class="muted">একটি লিংক তৈরি করে সব গ্রাহককে দিতে পারবেন। গ্রাহক লিংক খুলে শুধু নিজের আইডি (যেমন AS001) লিখলেই নিজের কিস্তির হিসাব দেখতে পারবে।</p><button type="button" onclick="window.asthaCreateCustomerShareLink?.()">গ্রাহক হিসাবের লিংক তৈরি / আপডেট</button><div id="customerShareResult" class="report-output" aria-live="polite"></div></div><div class="panel"><h2>নোটিশ সেটিংস</h2><label>নোটিশের লেখা সম্পাদনা করুন</label><p class="muted">উপরের “✎ মেসেজ এডিট” বোতাম থেকেও এখানে আসতে পারবেন। {name}, {id}, {date}, {payment}, {paid}, {total}, {due}, {deadline}, {bkash} লিখলে পাঠানোর সময় স্বয়ংক্রিয়ভাবে তথ্য বসবে।</p>
 <textarea id="noticeTemplate" rows="10" style="width:100%;padding:12px;background:#e5e7eb;border:1.5px solid #737373;border-radius:10px"></textarea>
 <button onclick="saveNoticeTemplate()">নোটিশ সংরক্ষণ</button></div><div class="panel"><h2>ডেটা ব্যাকআপ</h2><p class="muted">Google লগইনের পর Firebase-এ তথ্য Sync করা যায়। Sync-এর অবস্থা Firebase বার্তায় দেখুন। নিরাপত্তার জন্য JSON ব্যাকআপও আলাদা করে ডাউনলোড করে রাখুন।</p><div class="top-actions"><button onclick="window.asthaFirebaseSyncNow?.()">Firebase-এ Sync করুন</button><a class="btn secondary" href="./backup.html" style="display:inline-block;text-decoration:none;margin:0">ক্লাউড ব্যাকআপ / ফিরিয়ে আনুন</a><button class="secondary" onclick="exportData()">এই ডিভাইসের JSON ডাউনলোড</button><label class="btn secondary" style="margin:0">JSON ইমপোর্ট<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label></div></div><div class="panel"><h2>রিপোর্ট ও হিসাব</h2><div class="top-actions"><button onclick="exportExcelReport()">Excel রিপোর্ট ডাউনলোড</button><button class="secondary" onclick="showFinancialReport()">লাভ-ক্ষতি রিপোর্ট</button></div><div id="financialReport" class="report-output"></div></div><div class="panel"><h2>নিরাপত্তা ও কার্যক্রমের রেকর্ড</h2><p class="muted">অ্যাপের গুরুত্বপূর্ণ পরিবর্তনের সময়, কাজ ও বিবরণ এখানে সংরক্ষিত হবে। এই রেকর্ডও ব্যাকআপের সঙ্গে থাকবে।</p><button class="secondary" onclick="showAuditLog()">অডিট রেকর্ড দেখুন</button><div id="auditOutput" class="report-output"></div></div><div class="panel" id="logoutPanel"><h2>অ্যাকাউন্ট</h2><p class="muted">কাজ শেষ হলে নিরাপদে অ্যাকাউন্ট থেকে বের হয়ে যান।</p><button class="danger" type="button" style="width:100%;margin-top:8px" onclick="asthaLogout()">লগ আউট</button></div></div>
 </section>
 <section id="customerLogin" class="panel hidden"><h2>গ্রাহক লগইন</h2><label>লগইন আইডি</label><input id="custLoginId" placeholder="যেমন AS001"><button style="width:100%;margin-top:14px" onclick="customerLogin()">প্রবেশ করুন</button><button class="secondary" style="width:100%;margin-top:9px" onclick="init()">অ্যাডমিন লগইনে ফিরুন</button></section>
 <section id="customerView" class="hidden"></section>
 </main>
-<div id="appFooterNav" class="app-footer-nav hidden no-print">
-<button data-bottom="settings" onclick="showTab('settings')">⚙️<span>সেটিংস</span></button>
-<button data-bottom="cash" onclick="showTab('cash')">💵<span>ক্যাশ</span></button>
-<button data-bottom="customers" onclick="showTab('customers')">📋<span>গ্রাহক</span></button>
-<button data-bottom="dash" class="active" onclick="showTab('dash')">⌂<span>হোম</span></button>
-<button data-bottom="docs" onclick="showTab('docs')">📁<span>চুক্তিপত্র</span></button>
+<div id="appFooterNav" class="app-footer-nav hidden no-print astha-account-footer">
+<button type="button" data-bottom="settings" onclick="showTab('settings')">⚙️<span>সেটিংস</span></button>
 <button type="button" data-bottom="logout" onclick="asthaLogout()">↪<span>লগআউট</span></button>
 </div>
 <script>
@@ -1508,7 +1504,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       let finished=false;
       const done=()=>{ if(finished)return; finished=true; clearTimeout(timer); resolve(); };
       window.addEventListener('astha-firebase-auth-ready',done,{once:true});
-      const timer=setTimeout(done,8000);
+      const timer=setTimeout(done,18000);
     });
   }
 
@@ -1526,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   target?.classList.remove('hidden');
   if(!window.__asthaFirebaseAuthReady){
     const s=byId('firebaseLoginStatus');
-    if(s) s.textContent='Firebase যাচাই করতে সময় লাগছে। ইন্টারনেট থাকলে পরে Sync করুন; স্থানীয় লগইন চালু আছে।';
+    if(s) s.textContent='Firebase সেশন যাচাই শেষ হয়নি। ইন্টারনেট ও Firestore Rules পরীক্ষা করে আবার লগইন করুন।';
   }
 });
 </script>
@@ -2169,6 +2165,8 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
     };
   }
 })();
+
+
 </script>
 
 
@@ -2281,3 +2279,8 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 
 </body>
 </html>
+
+<style id="astha-two-button-footer">
+#appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
+#appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
+</style>
