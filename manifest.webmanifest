@@ -5,10 +5,10 @@
   "scope": "/Astha.somiti/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#8B0000",
+  "theme_color": "#ffffff",
   "description": "আস্থা সমিতির গ্রাহক, ঋণ ও কিস্তির হিসাব পরিচালনার অ্যাপ",
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
