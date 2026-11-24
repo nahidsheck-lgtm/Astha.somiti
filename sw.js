@@ -1,4 +1,4 @@
-const CACHE_NAME = 'astha-somiti-v14';
+const CACHE_NAME = 'astha-somiti-v15';
 const APP_SHELL_URL = new URL('./', self.registration.scope).href;
 
 self.addEventListener('install', (event) => {

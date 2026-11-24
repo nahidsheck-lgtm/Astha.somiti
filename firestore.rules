@@ -2,38 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function owner() { return signedIn() && request.auth.uid == 'bjOeOH6etCYlguhidyLTDQImrJt1'; }
-    function approved() {
-      return owner() || (signedIn() &&
-        exists(/databases/$(database)/documents/approvedUsers/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/approvedUsers/$(request.auth.uid)).data.active == true);
+
+    // Each authenticated Gmail account can access only its own private workspace.
+    match /appSettings/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
     }
 
-    // One shared workspace for every owner-approved member.
-    match /appSettings/shared {
-      allow read, write: if approved();
+    // No shared approval queue or cross-account data access is used by this app.
+    match /{document=**} {
+      allow read, write: if false;
     }
-    // Legacy owner document is retained for one-time migration only.
-    match /appSettings/{userId} {
-      allow read: if owner() && userId == request.auth.uid;
-      allow write: if owner() && userId == request.auth.uid;
-    }
-
-    // Any signed-in user may create/read their own pending request; only owner can list/manage all.
-    match /accessRequests/{uid} {
-      allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.uid == uid
-        && request.resource.data.status == 'pending';
-      allow get: if owner() || (signedIn() && request.auth.uid == uid);
-      allow list, update, delete: if owner();
-    }
-
-    // Only owner can grant/revoke membership. Members can read their own approval state.
-    match /approvedUsers/{uid} {
-      allow get: if owner() || (signedIn() && request.auth.uid == uid);
-      allow list, create, update, delete: if owner();
-    }
-    match /members/{document=**} { allow read, write: if approved(); }
-    match /transactions/{document=**} { allow read, write: if approved(); }
   }
 }
