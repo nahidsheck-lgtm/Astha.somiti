@@ -2422,3 +2422,36 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 </body>
 </html>
 
+
+<style id="astha-personal-ledger-layout-v2">
+/* Mobile-safe layout fixes restricted to the Personal Ledger screen. */
+#personalLedger{display:block;width:100%;max-width:100%;min-width:0;overflow-x:hidden;padding:0 0 140px!important;margin:0;}
+#personalLedger.hidden{display:none!important}
+#personalLedger,#personalLedger *{box-sizing:border-box;min-width:0;}
+#personalLedger .row{width:100%;max-width:100%;flex-wrap:wrap;align-items:center;}
+#personalLedger .pl-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px;width:100%;max-width:100%;}
+#personalLedger .pl-stat{width:100%;max-width:100%;overflow-wrap:anywhere;word-break:break-word;}
+#personalLedger .pl-stat strong{display:block;overflow-wrap:anywhere;word-break:break-word;}
+#personalLedger .panel{width:100%;max-width:100%;min-width:0;overflow:visible;}
+#personalLedger input,#personalLedger select,#personalLedger textarea{width:100%;max-width:100%;min-width:0;font-size:16px;}
+#personalLedger button{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+#personalLedger #paNewName{width:100%;}
+#personalLedger .pl-entry,#personalLedger .pa-entry{width:100%;max-width:100%;overflow-wrap:anywhere;}
+#personalLedger .pa-person-card{width:100%;max-width:100%;}
+#personalLedger #paPersonView .pl-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+#personalLedger .pa-neutral,#personalLedger #paNet,#personalLedger #paPersonBalance{color:#111!important;}
+@media(max-width:480px){
+ #personalLedger{padding-left:0!important;padding-right:0!important;}
+ #personalLedger>.row:first-child{display:flex;gap:8px!important;align-items:flex-start!important;}
+ #personalLedger>.row:first-child>div{flex:1 1 100%;}
+ #personalLedger>.row:first-child>button{flex:1 1 100%;}
+ #personalLedger .pl-grid{gap:8px!important;}
+ #personalLedger .pl-stat{padding:10px!important;}
+ #personalLedger #paPersonView .pl-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+ #personalLedger .row button{flex:1 1 auto;}
+}
+@media(max-width:360px){
+ #personalLedger .pl-grid{grid-template-columns:minmax(0,1fr)!important;}
+ #personalLedger #paPersonView .pl-grid{grid-template-columns:minmax(0,1fr)!important;}
+}
+</style>
