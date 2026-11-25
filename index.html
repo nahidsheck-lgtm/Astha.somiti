@@ -438,7 +438,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <style id="astha-five-3d-menu-logos">
 #app>nav.astha-five-nav{
   display:grid!important;
-  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-columns: repeat(6,minmax(0,1fr))!important;
   gap:5px!important;
   width:100%!important;
   padding:8px 3px!important;
@@ -1335,13 +1335,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #app>nav.astha-five-nav>button:active{transform:translateY(2px);box-shadow:inset 0 2px 4px #0003!important}
 /* 2) Compact customer rows; keep all details legible and in one tight row. */
 #customerList .compact-customer{
-  display:grid!important;grid-template-columns:46px minmax(0,1fr) auto 24px!important;
+  display:grid!important;grid-template-columns:56px minmax(0,1fr) auto 24px!important;
   column-gap:6px!important;row-gap:0!important;align-items:center!important;
   padding:4px 2px!important;margin:0!important;min-height:0!important;
   border:0!important;border-bottom:1px solid #e5e7eb!important;border-radius:0!important;
 }
 #customerList .compact-customer>.cust-avatar-wrap{
-  width:44px!important;min-width:44px!important;max-width:44px!important;
+  width:54px!important;min-width:54px!important;max-width:54px!important;
   gap:2px!important;align-items:center!important;justify-content:center!important;
 }
 #customerList .compact-customer .weeks-count-badge{
@@ -1351,8 +1351,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #customerList .compact-customer .cust-avatar.customer-photo-slot,
 #customerList .compact-customer .cust-avatar,
 #customerList .compact-customer .customer-photo-mini{
-  width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
-  max-width:38px!important;max-height:38px!important;flex:0 0 38px!important;
+  width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;
+  max-width:48px!important;max-height:48px!important;flex:0 0 48px!important;
   border-radius:50%!important;object-fit:cover!important;
 }
 #customerList .compact-customer .cust-main{min-width:0!important;gap:1px!important}
@@ -1365,11 +1365,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #customerList .compact-customer .cust-open{width:24px!important;min-width:24px!important;flex:0 0 24px!important;padding:0!important}
 #customerList .compact-customer .schedule-tap.shortcut-3d{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;font-size:14px!important}
 @media(max-width:380px){
- #customerList .compact-customer{grid-template-columns:42px minmax(0,1fr) auto 22px!important;column-gap:4px!important}
- #customerList .compact-customer>.cust-avatar-wrap{width:40px!important;min-width:40px!important}
+ #customerList .compact-customer{grid-template-columns:48px minmax(0,1fr) auto 22px!important;column-gap:4px!important}
+ #customerList .compact-customer>.cust-avatar-wrap{width:46px!important;min-width:46px!important}
  #customerList .compact-customer .cust-avatar.customer-photo-slot,
  #customerList .compact-customer .cust-avatar,
- #customerList .compact-customer .customer-photo-mini{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;flex-basis:34px!important}
+ #customerList .compact-customer .customer-photo-mini{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;max-width:42px!important;max-height:42px!important;flex-basis:42px!important}
  #customerList .compact-customer .cust-main>b{font-size:11px!important}
  #customerList .compact-customer .cust-values strong{font-size:11px!important}
 }
@@ -1392,6 +1392,29 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 
+
+<style id="astha-final-layout-and-personal-ledger">
+#app>nav.astha-five-nav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:3px!important;width:100%!important;overflow:hidden!important;padding:6px 2px!important;box-sizing:border-box!important}
+#app>nav.astha-five-nav>button{min-width:0!important;width:100%!important;min-height:68px!important;padding:4px 1px!important;white-space:normal!important;font-size:8.5px!important;line-height:1.15!important;gap:3px!important;}
+#app>nav.astha-five-nav>button img.nav-logo{width:31px!important;height:31px!important;object-fit:contain!important}
+#app>nav.astha-five-nav>button .nav-logo:not(img){font-size:25px!important;line-height:1!important}
+#app>nav.astha-five-nav>button .nav-label{display:block!important;text-align:center!important;overflow-wrap:anywhere!important}
+.pa-grid,.pl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.pl-stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;min-width:0}
+.pl-stat small{display:block;color:#64748b;margin-bottom:5px}.pl-stat strong{font-size:18px;overflow-wrap:anywhere}
+.pa-red{color:#dc2626!important}.pa-green{color:#15803d!important}.pa-neutral{color:#475569!important}
+.pa-person-card{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;width:100%!important;margin:7px 0!important;padding:13px!important;border:1px solid #e5e7eb!important;border-radius:12px!important;background:#fff!important;color:#172033!important;text-align:left!important;box-shadow:0 2px 8px #0000000a!important}
+.pa-person-name{font-size:16px;font-weight:700}.pa-person-meta{font-size:12px;color:#64748b}.pa-status{font-weight:700;font-size:14px}
+.pa-entry{border:1px solid #e5e7eb;border-radius:11px;padding:12px;margin:8px 0;background:#fff;overflow-wrap:anywhere}.pa-entry small{display:block;color:#64748b;margin:4px 0}
+.pa-modal{position:fixed;inset:0;z-index:100000;background:#0009;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}.pa-modal.hidden{display:none!important}.pa-modal-card{width:min(620px,100%);max-height:94vh;overflow:auto;background:#fff;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0004}
+.pa-customer-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}.pa-customer-dates>div{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:7px;min-width:0}.pa-customer-dates small{display:block;color:#64748b;font-size:10px}.pa-customer-dates b{font-size:12px;overflow-wrap:anywhere}.pa-edit-all{margin-top:8px!important}.pa-detail-dates{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.pa-detail-dates span{font-size:12px;background:#ffffff22;border-radius:7px;padding:5px 7px}
+@media(max-width:360px){#app>nav.astha-five-nav>button{font-size:7.5px!important;min-height:62px!important}#app>nav.astha-five-nav>button img.nav-logo{width:27px!important;height:27px!important}.pl-grid{gap:6px}.pl-stat{padding:9px}.pl-stat strong{font-size:15px}}
+</style>
+
+<style id="astha-two-button-footer">
+#appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
+#appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
+</style>
 </body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
@@ -2310,55 +2333,76 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #customerList .customer-info-panel .date-info-edit{margin-top:8px;font-size:11px;padding:6px 9px}
 @media(max-width:360px){#app>nav.astha-five-nav>button{font-size:8px!important;padding:6px 1px!important}#app>nav.astha-five-nav>button .nav-logo{width:23px!important;height:23px!important;font-size:20px!important}}
 </style>
-<section id="personalLedger" class="panel">
- <div class="row" style="align-items:center;justify-content:space-between;gap:8px"><div><h2>ব্যক্তিগত হিসাব</h2><p class="muted">সমিতির দৈনন্দিন টাকা গ্রহণ, প্রদান ও খরচের খাতা</p></div><button type="button" class="secondary" onclick="showTab('dash')">ফিরে যান</button></div>
- <div class="pl-grid" id="personalLedgerStats">
-  <div class="pl-stat"><small>মোট টাকা গ্রহণ</small><strong id="plTotalIn">৳০</strong></div>
-  <div class="pl-stat"><small>মোট টাকা প্রদান / খরচ</small><strong id="plTotalOut">৳০</strong></div>
-  <div class="pl-stat" style="grid-column:1/-1"><small>বর্তমান অবশিষ্ট</small><strong id="plBalance">৳০</strong></div>
+<section id="personalLedger" class="tab hidden astha-personal-ledger">
+ <div class="row" style="align-items:center;justify-content:space-between;gap:8px"><div><h2>ব্যক্তিগত হিসাব</h2><p class="muted">প্রত্যেক ব্যক্তির আলাদা খাতা। এটি সমিতির ক্যাশ হিসাব থেকে আলাদা থাকবে।</p></div><button type="button" class="secondary" onclick="showTab('dash')">ফিরে যান</button></div>
+ <div class="pl-grid" id="paOverview"><div class="pl-stat"><small>মোট আমি পাব</small><strong id="paTotalReceive" class="pa-red">৳০</strong></div><div class="pl-stat"><small>মোট আমি দিব</small><strong id="paTotalPay" class="pa-green">৳০</strong></div><div class="pl-stat" style="grid-column:1/-1"><small>সবার সঙ্গে নিট হিসাব</small><strong id="paNet">৳০</strong></div></div>
+ <div id="paPeopleView">
+  <div class="panel" style="margin-top:12px"><h3>নতুন ব্যক্তির নাম যোগ করুন</h3><div class="row" style="gap:8px;align-items:end"><div style="flex:1;min-width:0"><label for="paNewName">ব্যক্তির নাম</label><input id="paNewName" maxlength="80" placeholder="যার সঙ্গে হিসাব থাকবে"></div><button type="button" onclick="addPersonalPerson()">＋ নাম যোগ</button></div></div>
+  <h3 style="margin-top:18px">ব্যক্তিদের হিসাবের তালিকা</h3><div id="paPeopleList"></div>
+  <details class="panel" style="margin-top:14px"><summary>আগের ব্যক্তিগত লেনদেন (পুরোনো হিসাব)</summary><p class="muted">আগের সংস্করণের লেনদেনগুলো এখানে রাখা হয়েছে। সেগুলোর ধরন স্পষ্ট না থাকায় নতুন ব্যক্তির পাওনা/দেনার হিসাবে যোগ করা হয়নি।</p><div id="paLegacyList"></div></details>
  </div>
- <div class="panel" style="background:#fafafa;margin-top:12px">
-  <h3 id="plFormTitle">নতুন লেনদেন লিখুন</h3>
-  <div class="pl-grid">
-   <div><label for="plDate">তারিখ</label><input id="plDate" type="date"></div>
-   <div><label for="plType">লেনদেনের ধরন</label><select id="plType"><option value="in">টাকা গ্রহণ</option><option value="out">টাকা প্রদান / খরচ</option></select></div>
-   <div><label for="plAmount">টাকার পরিমাণ</label><input id="plAmount" type="number" min="0.01" step="0.01" placeholder="যেমন ১০০০"></div>
-   <div><label for="plPerson">কার কাছ থেকে / কাকে</label><input id="plPerson" type="text" placeholder="নাম লিখুন"></div>
-  </div>
-  <div style="margin-top:9px"><label for="plNote">কোন কাজে / কী কারণে</label><textarea id="plNote" rows="2" placeholder="যেমন: অফিস ভাড়া, যাতায়াত খরচ, সমিতির জন্য টাকা গ্রহণ..."></textarea></div>
-  <div class="row" style="margin-top:10px;gap:8px"><button type="button" onclick="savePersonalEntry()" id="plSaveButton">হিসাব সংরক্ষণ</button><button type="button" class="secondary" onclick="cancelPersonalEdit()" id="plCancelButton" style="display:none">বাতিল</button></div>
+ <div id="paPersonView" class="hidden">
+  <div class="row" style="justify-content:space-between;align-items:center"><div><h3 id="paPersonTitle">ব্যক্তির খাতা</h3><small id="paPersonSince" class="muted"></small></div><button class="secondary" type="button" onclick="closePersonalPerson()">← তালিকায় ফিরুন</button></div>
+  <div class="pl-grid"><div class="pl-stat"><small>আমি পাব</small><strong id="paPersonReceive" class="pa-red">৳০</strong></div><div class="pl-stat"><small>আমি দিব</small><strong id="paPersonPay" class="pa-green">৳০</strong></div><div class="pl-stat" style="grid-column:1/-1"><small>বর্তমান অবস্থা</small><strong id="paPersonBalance">সমান</strong></div></div>
+  <div class="panel" style="margin-top:12px"><h3 id="paEntryTitle">নতুন লেনদেন</h3><div class="pl-grid"><div><label for="paEntryDate">তারিখ</label><input id="paEntryDate" type="date"></div><div><label for="paEntryType">হিসাবের ধরন</label><select id="paEntryType"><option value="receive">আমি পাব (লাল)</option><option value="pay">আমি দিব (সবুজ)</option><option value="expense">খরচ — আমি দিব (সবুজ)</option></select></div><div><label for="paEntryAmount">টাকার পরিমাণ</label><input id="paEntryAmount" type="number" min="0.01" step="0.01" placeholder="টাকার পরিমাণ"></div><div><label for="paEntryNote">বিবরণ / খরচের কারণ</label><input id="paEntryNote" maxlength="300" placeholder="যেমন: ধার, বাজার, ভাড়া"></div></div><div class="row" style="margin-top:10px;gap:8px"><button type="button" onclick="savePersonalTransaction()" id="paEntrySave">লেনদেন সংরক্ষণ</button><button type="button" class="secondary hidden" onclick="cancelPersonalTransactionEdit()" id="paEntryCancel">বাতিল</button></div><small class="muted">খরচ এখানে “আমি দিব” হিসাবে গণনা হবে। “আমি পাব” লাল এবং “আমি দিব” সবুজ দেখানো হবে।</small></div>
+  <h3>লেনদেনের ইতিহাস</h3><div id="paEntryList"></div>
+  <div class="row" style="margin-top:12px;gap:8px"><button type="button" class="secondary" onclick="renamePersonalPerson()">নাম পরিবর্তন</button><button type="button" class="danger" onclick="deletePersonalPerson()">এই ব্যক্তির খাতা মুছুন</button></div>
  </div>
- <h3>লেনদেনের তালিকা</h3><div id="personalLedgerList"></div>
 </section>
-<script id="astha-personal-ledger-and-dates">
+<div id="customerEditModal" class="pa-modal hidden" role="dialog" aria-modal="true" aria-labelledby="customerEditTitle">
+ <div class="pa-modal-card"><div class="row" style="justify-content:space-between"><h3 id="customerEditTitle">গ্রাহকের সম্পূর্ণ তথ্য এডিট</h3><button type="button" class="secondary" onclick="closeCustomerEdit()">✕</button></div>
+ <input id="ceId" type="hidden"><div class="pl-grid">
+ <div><label for="ceName">গ্রাহকের নাম</label><input id="ceName" maxlength="100"></div><div><label for="cePhone">মোবাইল নম্বর</label><input id="cePhone" inputmode="tel"></div>
+ <div><label for="ceGiven">ঋণের পরিমাণ</label><input id="ceGiven" type="number" min="0" step="0.01"></div><div><label for="ceService">সার্ভিস চার্জ</label><input id="ceService" type="number" min="0" step="0.01"></div>
+ <div><label for="ceWeeks">ঋণের মেয়াদ (সপ্তাহ)</label><input id="ceWeeks" type="number" min="1" max="520"></div><div><label for="ceInstallment">প্রতি কিস্তি</label><input id="ceInstallment" type="number" min="0" step="0.01"></div>
+ <div><label for="ceCreated">গ্রাহক যোগের তারিখ</label><input id="ceCreated" type="date"></div><div><label for="ceLoanDate">ঋণ দেওয়ার তারিখ</label><input id="ceLoanDate" type="date"></div>
+ <div><label for="ceStartDate">কিস্তি শুরুর তারিখ</label><input id="ceStartDate" type="date"></div>
+ </div><div style="margin-top:10px"><label for="cePhotoInput">গ্রাহকের ছবি পরিবর্তন</label><input id="cePhotoInput" type="file" accept="image/*" capture="user" onchange="previewEditCustomerPhoto(this)"><img id="cePhotoPreview" alt="গ্রাহকের ছবির প্রিভিউ" style="display:none;width:82px;height:82px;object-fit:cover;border-radius:12px;margin-top:8px"><label style="display:flex;align-items:center;gap:7px;margin-top:8px"><input id="ceRemovePhoto" type="checkbox" style="width:auto">বর্তমান ছবি মুছে ফেলুন</label></div><p class="muted">মোট পরিশোধযোগ্য = ঋণের পরিমাণ + সার্ভিস চার্জ। কিস্তির তারিখ আলাদাভাবে প্রতিটি জমার এডিট থেকে পরিবর্তন করা যাবে।</p>
+ <div class="row" style="justify-content:flex-end;gap:8px"><button type="button" class="secondary" onclick="closeCustomerEdit()">বাতিল</button><button type="button" onclick="saveCustomerEdit()">সব পরিবর্তন সংরক্ষণ</button></div></div>
+</div>
+<script id="astha-personal-ledger-and-customer-edit">
 (function(){
+ 'use strict';
  const $=id=>document.getElementById(id);
  const today=()=>new Date().toISOString().slice(0,10);
- const bnMoney=n=>'৳'+Number(n||0).toLocaleString('bn-BD',{maximumFractionDigits:2});
+ const money=n=>'৳'+Number(n||0).toLocaleString('bn-BD',{maximumFractionDigits:2});
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- let editingId=null;
- function data(){if(!window.db && typeof db!=='undefined'){} return (typeof db!=='undefined'&&db)?db:null;}
- function persist(){const d=data();if(!d)return false;d.personalLedger=Array.isArray(d.personalLedger)?d.personalLedger:[];const ok=typeof save==='function'?save():false;if(window.asthaScheduleFirebaseSync){window.asthaScheduleFirebaseSync();}else if(window.asthaFirebaseSyncNow){window.asthaFirebaseSyncNow().catch(e=>console.warn('Firebase sync pending:',e));}return ok;}
- window.renderPersonalLedger=function(){const d=data();if(!d)return;d.personalLedger=Array.isArray(d.personalLedger)?d.personalLedger:[];const entries=d.personalLedger;const incoming=entries.filter(x=>x.type==='in').reduce((a,x)=>a+Number(x.amount||0),0);const outgoing=entries.filter(x=>x.type==='out').reduce((a,x)=>a+Number(x.amount||0),0);$('plTotalIn').textContent=bnMoney(incoming);$('plTotalOut').textContent=bnMoney(outgoing);$('plBalance').textContent=bnMoney(incoming-outgoing);const sorted=entries.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));$('personalLedgerList').innerHTML=sorted.map(x=>`<article class="pl-entry"><div class="row" style="justify-content:space-between;gap:8px"><b>${x.type==='in'?'🟢 টাকা গ্রহণ':'🔴 টাকা প্রদান / খরচ'}</b><strong>${bnMoney(x.amount)}</strong></div><small>${safe(x.date||'তারিখ নেই')} · ${safe(x.person||'নাম উল্লেখ নেই')}</small><div style="margin-top:6px">${safe(x.note||'বিবরণ দেওয়া হয়নি')}</div><div class="pl-entry-actions"><button type="button" class="secondary" onclick="editPersonalEntry('${safe(x.id)}')">এডিট</button><button type="button" class="danger" onclick="deletePersonalEntry('${safe(x.id)}')">ডিলিট</button></div></article>`).join('')||'<p class="muted">এখনো কোনো ব্যক্তিগত লেনদেন লেখা হয়নি।</p>';};
- window.savePersonalEntry=function(){const d=data();if(!d)return alert('অ্যাপের ডেটা প্রস্তুত নয়।');const amount=Number($('plAmount').value),date=$('plDate').value;if(!date||!Number.isFinite(amount)||amount<=0)return alert('সঠিক তারিখ ও টাকার পরিমাণ লিখুন।');d.personalLedger=Array.isArray(d.personalLedger)?d.personalLedger:[];const record={id:editingId||('pl_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),date,type:$('plType').value,amount,person:$('plPerson').value.trim(),note:$('plNote').value.trim(),updatedAt:new Date().toISOString()};if(editingId){const i=d.personalLedger.findIndex(x=>x.id===editingId);if(i<0)return alert('লেনদেনটি পাওয়া যায়নি।');d.personalLedger[i]={...d.personalLedger[i],...record};}else{record.createdAt=new Date().toISOString();d.personalLedger.push(record);}persist();cancelPersonalEdit();renderPersonalLedger();};
- window.editPersonalEntry=function(id){const d=data(),x=d?.personalLedger?.find(v=>v.id===id);if(!x)return;editingId=id;$('plDate').value=x.date||today();$('plType').value=x.type||'out';$('plAmount').value=x.amount||'';$('plPerson').value=x.person||'';$('plNote').value=x.note||'';$('plFormTitle').textContent='লেনদেন সংশোধন করুন';$('plSaveButton').textContent='পরিবর্তন সংরক্ষণ';$('plCancelButton').style.display='inline-block';$('plFormTitle').scrollIntoView({behavior:'smooth',block:'center'});};
- window.cancelPersonalEdit=function(){editingId=null;$('plDate').value=today();$('plType').value='in';$('plAmount').value='';$('plPerson').value='';$('plNote').value='';$('plFormTitle').textContent='নতুন লেনদেন লিখুন';$('plSaveButton').textContent='হিসাব সংরক্ষণ';$('plCancelButton').style.display='none';};
- window.deletePersonalEntry=function(id){const d=data();if(!d||!confirm('এই ব্যক্তিগত লেনদেনটি মুছে ফেলবেন?'))return;d.personalLedger=(d.personalLedger||[]).filter(x=>x.id!==id);persist();renderPersonalLedger();};
- window.editCustomerDates=function(id){const d=data(),c=d?.customers?.find(x=>x.id===id);if(!c)return;const created=prompt('গ্রাহক যোগ করার তারিখ (YYYY-MM-DD):',c.createdAt||'');if(created===null)return;if(created&&!/^\d{4}-\d{2}-\d{2}$/.test(created))return alert('তারিখ YYYY-MM-DD ফরম্যাটে লিখুন।');const loan=prompt('ঋণের টাকা দেওয়ার তারিখ (YYYY-MM-DD):',c.loanDate||c.startDate||'');if(loan===null)return;if(loan&&!/^\d{4}-\d{2}-\d{2}$/.test(loan))return alert('তারিখ YYYY-MM-DD ফরম্যাটে লিখুন।');c.createdAt=created||'';c.loanDate=loan||'';c.startDate=c.loanDate||c.startDate;persist();if(typeof renderCustomers==='function')renderCustomers();if(typeof renderDetail==='function')renderDetail(c);};
- const baseRenderCustomers=window.renderCustomers;
- if(typeof baseRenderCustomers==='function')window.renderCustomers=function(){const r=baseRenderCustomers.apply(this,arguments);const d=data();if(!d)return r;d.customers.forEach(c=>{const panel=$('customerInfo_'+c.id);if(!panel||panel.querySelector('.date-info-grid'))return;const grid=document.createElement('div');grid.className='date-info-grid';grid.innerHTML=`<div class="date-info-cell"><small>গ্রাহক যোগের তারিখ</small><b>${safe(c.createdAt||'তথ্য নেই')}</b></div><div class="date-info-cell"><small>ঋণের টাকা দেওয়ার তারিখ</small><b>${safe(c.loanDate||c.startDate||'তথ্য নেই')}</b></div>`;panel.appendChild(grid);const btn=document.createElement('button');btn.type='button';btn.className='secondary date-info-edit';btn.textContent='তারিখ এডিট করুন';btn.onclick=e=>{e.stopPropagation();editCustomerDates(c.id)};panel.appendChild(btn);});return r;};
- const originalShow=window.showTab;
- if(typeof originalShow==='function')window.showTab=function(tab){if(tab==='personal'){['dash','customers','trash','cash','docs','settings','detail','newPanel','setup','login'].forEach(id=>$(id)?.classList.add('hidden'));$('personalLedger').style.display='block';document.querySelectorAll('#app>nav button').forEach(b=>b.classList.remove('active'));$('tabPersonal')?.classList.add('active');renderPersonalLedger();try{localStorage.setItem('astha_last_open_tab_v1','personal')}catch(e){}return;}if($('personalLedger'))$('personalLedger').style.display='none';return originalShow.apply(this,arguments);};
- // New customer records get an explicit creation date even if the original save routine is called elsewhere.
- const originalSaveCustomer=window.saveCustomer;
- if(typeof originalSaveCustomer==='function')window.saveCustomer=function(){const before=data()?.customers?.length||0;const r=originalSaveCustomer.apply(this,arguments);const d=data();if(d&&d.customers.length>before){const c=d.customers[d.customers.length-1];c.createdAt=c.createdAt||today();c.loanDate=c.loanDate||c.startDate||today();persist();}return r;};
- document.addEventListener('DOMContentLoaded',()=>{if($('plDate'))$('plDate').value=today();});
+ let activePersonId=null,editingEntryId=null,editPhotoData='';
+ const getData=()=>typeof db!=='undefined'&&db?db:null;
+ function ensurePeople(){const d=getData();if(!d)return null;d.personalAccounts=Array.isArray(d.personalAccounts)?d.personalAccounts:[];d.personalLedger=Array.isArray(d.personalLedger)?d.personalLedger:[];return d;}
+ function persist(){if(typeof save==='function')save();if(window.asthaScheduleFirebaseSync)window.asthaScheduleFirebaseSync();}
+ function totals(person){let receive=0,pay=0;for(const e of person.entries||[]){const a=Number(e.amount||0);if(e.type==='receive')receive+=a;else if(e.type==='pay'||e.type==='expense')pay+=a;}return{receive,pay,net:receive-pay};}
+ function status(t){if(t.net>0)return `<span class="pa-status pa-red">আমি পাব · ${money(t.net)}</span>`;if(t.net<0)return `<span class="pa-status pa-green">আমি দিব · ${money(Math.abs(t.net))}</span>`;return '<span class="pa-status pa-neutral">হিসাব সমান</span>';}
+ window.renderPersonalLedger=function(){const d=ensurePeople();if(!d)return;const all=d.personalAccounts.map(p=>({p,t:totals(p)}));const receive=all.reduce((s,x)=>s+x.t.receive,0),pay=all.reduce((s,x)=>s+x.t.pay,0);$('paTotalReceive').textContent=money(receive);$('paTotalPay').textContent=money(pay);const net=receive-pay;$('paNet').textContent=net===0?'৳০':money(Math.abs(net))+(net>0?' · আমি পাব':' · আমি দিব');$('paNet').className=net>0?'pa-red':net<0?'pa-green':'';
+ $('paPeopleList').innerHTML=all.slice().sort((a,b)=>a.p.name.localeCompare(b.p.name,'bn')).map(({p,t})=>`<button type="button" class="pa-person-card" onclick="openPersonalPerson('${safe(p.id)}')"><span class="pa-person-name">${safe(p.name)}</span><span class="pa-person-meta">${(p.entries||[]).length.toLocaleString('bn-BD')}টি লেনদেন</span>${status(t)}</button>`).join('')||'<p class="muted">এখনো কারও নাম যোগ করা হয়নি। উপরে নাম লিখে যোগ করুন।</p>';
+ const old=d.personalLedger||[];$('paLegacyList').innerHTML=old.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(x=>`<article class="pa-entry"><b>${x.type==='in'?'পুরোনো: টাকা গ্রহণ':'পুরোনো: টাকা প্রদান / খরচ'} · ${money(x.amount)}</b><small>${safe(x.date||'তারিখ নেই')} · ${safe(x.person||'নাম উল্লেখ নেই')}</small><div>${safe(x.note||'বিবরণ নেই')}</div></article>`).join('')||'<p class="muted">পুরোনো লেনদেন নেই।</p>';
+ if(activePersonId){const person=d.personalAccounts.find(x=>x.id===activePersonId);if(person)renderPerson(person);else closePersonalPerson();}
+ };
+ window.addPersonalPerson=function(){const d=ensurePeople(),name=$('paNewName').value.trim();if(!name)return alert('ব্যক্তির নাম লিখুন।');if(d.personalAccounts.some(p=>p.name.trim().toLowerCase()===name.toLowerCase()))return alert('এই নামে হিসাব আগে থেকেই আছে।');const p={id:'pa_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,createdAt:today(),entries:[]};d.personalAccounts.push(p);$('paNewName').value='';persist();renderPersonalLedger();openPersonalPerson(p.id);};
+ window.openPersonalPerson=function(id){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===id);if(!p)return;activePersonId=id;$('paPeopleView').classList.add('hidden');$('paPersonView').classList.remove('hidden');cancelPersonalTransactionEdit();renderPerson(p);};
+ function renderPerson(p){const t=totals(p);$('paPersonTitle').textContent=p.name;$('paPersonSince').textContent='খাতা খোলা: '+(p.createdAt||'তারিখ নেই');$('paPersonReceive').textContent=money(t.receive);$('paPersonPay').textContent=money(t.pay);$('paPersonBalance').textContent=t.net>0?'আমি পাব · '+money(t.net):t.net<0?'আমি দিব · '+money(Math.abs(t.net)):'হিসাব সমান';$('paPersonBalance').className=t.net>0?'pa-red':t.net<0?'pa-green':'';
+ const entries=(p.entries||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));$('paEntryList').innerHTML=entries.map(e=>{const label=e.type==='receive'?'আমি পাব':e.type==='expense'?'খরচ · আমি দিব':'আমি দিব',cl=e.type==='receive'?'pa-red':'pa-green';return `<article class="pa-entry"><div class="row" style="justify-content:space-between;gap:8px"><b class="${cl}">${label}</b><strong>${money(e.amount)}</strong></div><small>${safe(e.date||'তারিখ নেই')}</small><div>${safe(e.note||'বিবরণ দেওয়া হয়নি')}</div><div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px"><button type="button" class="secondary" onclick="editPersonalTransaction('${safe(e.id)}')">এডিট</button><button type="button" class="danger" onclick="deletePersonalTransaction('${safe(e.id)}')">ডিলিট</button></div></article>`;}).join('')||'<p class="muted">এই ব্যক্তির কোনো লেনদেন এখনো যোগ করা হয়নি।</p>';}
+ window.closePersonalPerson=function(){activePersonId=null;editingEntryId=null;$('paPersonView').classList.add('hidden');$('paPeopleView').classList.remove('hidden');cancelPersonalTransactionEdit();};
+ window.savePersonalTransaction=function(){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===activePersonId);if(!p)return alert('ব্যক্তির খাতা খোলা নেই।');const date=$('paEntryDate').value,type=$('paEntryType').value,amount=Number($('paEntryAmount').value),note=$('paEntryNote').value.trim();if(!date||!Number.isFinite(amount)||amount<=0)return alert('সঠিক তারিখ ও টাকার পরিমাণ দিন।');const e={id:editingEntryId||'pae_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),date,type,amount,note,updatedAt:new Date().toISOString()};p.entries=Array.isArray(p.entries)?p.entries:[];if(editingEntryId){const i=p.entries.findIndex(x=>x.id===editingEntryId);if(i<0)return alert('লেনদেনটি পাওয়া যায়নি।');p.entries[i]={...p.entries[i],...e};}else{e.createdAt=new Date().toISOString();p.entries.push(e);}persist();cancelPersonalTransactionEdit();renderPerson(p);renderPersonalLedger();};
+ window.editPersonalTransaction=function(id){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===activePersonId),e=p?.entries?.find(x=>x.id===id);if(!e)return;editingEntryId=id;$('paEntryDate').value=e.date||today();$('paEntryType').value=e.type||'pay';$('paEntryAmount').value=e.amount||'';$('paEntryNote').value=e.note||'';$('paEntryTitle').textContent='লেনদেন সংশোধন';$('paEntrySave').textContent='পরিবর্তন সংরক্ষণ';$('paEntryCancel').classList.remove('hidden');};
+ window.cancelPersonalTransactionEdit=function(){editingEntryId=null;if($('paEntryDate'))$('paEntryDate').value=today();if($('paEntryType'))$('paEntryType').value='receive';if($('paEntryAmount'))$('paEntryAmount').value='';if($('paEntryNote'))$('paEntryNote').value='';if($('paEntryTitle'))$('paEntryTitle').textContent='নতুন লেনদেন';if($('paEntrySave'))$('paEntrySave').textContent='লেনদেন সংরক্ষণ';$('paEntryCancel')?.classList.add('hidden');};
+ window.deletePersonalTransaction=function(id){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===activePersonId);if(!p||!confirm('এই লেনদেনটি মুছে ফেলবেন?'))return;p.entries=p.entries.filter(x=>x.id!==id);persist();renderPerson(p);renderPersonalLedger();};
+ window.renamePersonalPerson=function(){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===activePersonId);if(!p)return;const name=prompt('ব্যক্তির নতুন নাম:',p.name);if(name===null)return;if(!name.trim())return alert('নাম খালি রাখা যাবে না।');if(d.personalAccounts.some(x=>x.id!==p.id&&x.name.trim().toLowerCase()===name.trim().toLowerCase()))return alert('এই নামে অন্য একটি খাতা আছে।');p.name=name.trim();persist();renderPersonalLedger();};
+ window.deletePersonalPerson=function(){const d=ensurePeople(),i=d.personalAccounts.findIndex(x=>x.id===activePersonId);if(i<0)return;const p=d.personalAccounts[i];if(!confirm(p.name+'-এর খাতা ও সব লেনদেন মুছে ফেলবেন? এই কাজ ফিরিয়ে আনা যাবে না।'))return;d.personalAccounts.splice(i,1);persist();closePersonalPerson();renderPersonalLedger();};
+ // Customer full edit dialog. Missing historical dates remain blank rather than being fabricated.
+ window.editCustomer=function(id){const d=getData(),c=d?.customers?.find(x=>x.id===id);if(!c)return;$('ceId').value=id;$('ceName').value=c.name||'';$('cePhone').value=c.phone||'';$('ceGiven').value=Number(c.given||0);$('ceService').value=Number(c.serviceCharge||0);$('ceWeeks').value=Number(c.weeks||12);$('ceInstallment').value=Number(c.installment||0);$('ceCreated').value=/^\d{4}-\d{2}-\d{2}$/.test(c.createdAt||'')?c.createdAt:'';$('ceLoanDate').value=/^\d{4}-\d{2}-\d{2}$/.test(c.loanDate||'')?c.loanDate:'';$('ceStartDate').value=/^\d{4}-\d{2}-\d{2}$/.test(c.startDate||'')?c.startDate:'';editPhotoData='';$('cePhotoInput').value='';$('ceRemovePhoto').checked=false;$('cePhotoPreview').src=c.photo||'';$('cePhotoPreview').style.display=c.photo?'block':'none';$('customerEditModal').classList.remove('hidden');};
+ window.closeCustomerEdit=function(){$('customerEditModal').classList.add('hidden');};
+ window.previewEditCustomerPhoto=function(input){const f=input.files&&input.files[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('ছবির ফাইল নির্বাচন করুন।');const reader=new FileReader();reader.onload=()=>{const im=new Image();im.onload=()=>{const scale=Math.min(1,900/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(im.width*scale));cv.height=Math.max(1,Math.round(im.height*scale));cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);let q=.72,data=cv.toDataURL('image/jpeg',q);while(data.length>96000&&q>.28){q-=.08;data=cv.toDataURL('image/jpeg',q);}editPhotoData=data;$('cePhotoPreview').src=data;$('cePhotoPreview').style.display='block';$('ceRemovePhoto').checked=false;};im.onerror=()=>alert('ছবিটি খোলা যায়নি।');im.src=reader.result;};reader.readAsDataURL(f);};
+ window.saveCustomerEdit=function(){const d=getData(),c=d?.customers?.find(x=>x.id===$('ceId').value);if(!c)return;const name=$('ceName').value.trim(),phone=$('cePhone').value.trim(),given=Number($('ceGiven').value),service=Number($('ceService').value),weeks=Number($('ceWeeks').value),installment=Number($('ceInstallment').value);if(!name||!phone||!Number.isFinite(given)||given<0||!Number.isFinite(service)||service<0||!Number.isInteger(weeks)||weeks<1||!Number.isFinite(installment)||installment<0)return alert('সব তথ্য সঠিকভাবে পূরণ করুন।');const dates=['ceCreated','ceLoanDate','ceStartDate'];for(const id of dates){const v=$(id).value;if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return alert('তারিখ সঠিক নয়।');}const total=Math.round((given+service)*100)/100,paid=(c.payments||[]).reduce((a,p)=>a+Number(p.amount||0),0);if(total<paid)return alert('মোট পরিশোধযোগ্য টাকা আগের জমার চেয়ে কম হতে পারবে না।');c.name=name;c.phone=phone;c.given=given;c.serviceCharge=service;c.weeks=weeks;c.total=total;c.installment=installment;c.createdAt=$('ceCreated').value||'';c.loanDate=$('ceLoanDate').value||'';c.startDate=$('ceStartDate').value||c.loanDate||'';if($('ceRemovePhoto').checked)c.photo='';else if(editPhotoData)c.photo=editPhotoData;persist();closeCustomerEdit();if(typeof renderCustomers==='function')renderCustomers();if(typeof renderDetail==='function')renderDetail(c);};
+ const oldRenderCustomers=window.renderCustomers;
+ if(typeof oldRenderCustomers==='function')window.renderCustomers=function(){const r=oldRenderCustomers.apply(this,arguments),d=getData();if(!d)return r;for(const c of d.customers||[]){const panel=$('customerInfo_'+c.id);if(!panel)continue;let dates=panel.querySelector('.pa-customer-dates');if(!dates){dates=document.createElement('div');dates.className='pa-customer-dates';panel.appendChild(dates);}dates.innerHTML=`<div><small>গ্রাহক যোগের তারিখ</small><b>${safe(c.createdAt||'তথ্য নেই')}</b></div><div><small>ঋণ দেওয়ার তারিখ</small><b>${safe(c.loanDate||'তথ্য নেই')}</b></div><div><small>কিস্তি শুরুর তারিখ</small><b>${safe(c.startDate||'তথ্য নেই')}</b></div>`;let btn=panel.querySelector('.pa-edit-all');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='secondary pa-edit-all';btn.textContent='সম্পূর্ণ তথ্য এডিট';btn.onclick=e=>{e.stopPropagation();editCustomer(c.id);};panel.appendChild(btn);}}return r;};
+ const oldRenderDetail=window.renderDetail;
+ if(typeof oldRenderDetail==='function')window.renderDetail=function(c){const r=oldRenderDetail.apply(this,arguments);const hero=$('detail')?.querySelector('.detail-hero');if(hero&&!hero.querySelector('.pa-detail-dates')){const box=document.createElement('div');box.className='pa-detail-dates';box.innerHTML=`<span>গ্রাহক যোগ: ${safe(c.createdAt||'তথ্য নেই')}</span><span>ঋণ দেওয়া: ${safe(c.loanDate||'তথ্য নেই')}</span><span>কিস্তি শুরু: ${safe(c.startDate||'তথ্য নেই')}</span>`;hero.appendChild(box);}return r;};
+ const oldShowTab=window.showTab;
+ if(typeof oldShowTab==='function')window.showTab=function(tab){if(tab==='personal'){['dash','customers','trash','cash','docs','settings','detail','newPanel'].forEach(id=>$(id)?.classList.add('hidden'));$('personalLedger').classList.remove('hidden');document.querySelectorAll('#app>nav button').forEach(b=>b.classList.remove('active'));$('tabPersonal')?.classList.add('active');renderPersonalLedger();return;}$('personalLedger')?.classList.add('hidden');return oldShowTab.apply(this,arguments);};
+ document.addEventListener('DOMContentLoaded',()=>{if($('paEntryDate'))$('paEntryDate').value=today();});
 })();
 </script>
 </body>
 </html>
 
-<style id="astha-two-button-footer">
-#appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
-#appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
-</style>

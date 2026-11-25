@@ -1,4 +1,4 @@
-const CACHE_NAME = 'astha-somiti-v18-personal-ledger';
+const CACHE_NAME = 'astha-somiti-v19-personal-accounts';
 const APP_SHELL_URL = new URL('./', self.registration.scope).href;
 
 self.addEventListener('install', event => {
