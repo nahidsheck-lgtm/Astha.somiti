@@ -1014,7 +1014,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 </script>
 
-<script>
+<script id="astha-recent-activity-renderer">
 (function(){
  const originalShowTab=window.showTab;
  if(typeof originalShowTab==='function'){
@@ -1029,16 +1029,51 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   window.renderDash=function(){
    originalDash.apply(this,arguments);
    const target=document.getElementById('recent');
-   if(target && typeof db!=='undefined' && db){
-    target.innerHTML=(db.customers||[]).slice(-5).reverse().map(c=>{
-      const due=typeof totals==='function'?totals(c).due:0;
-      return `<div class="recent-customer" onclick="showTab('customers');openDetail('${c.id}')"><div class="rc-left"><b>${String(c.name||'').replace(/[&<>"]/g,'')}</b><small>${String(c.loginId||'')} · ${String(c.phone||'')}</small></div><div class="rc-due">${typeof money==='function'?money(due):due} বাকি</div></div>`;
-    }).join('')||'<p class="muted">এখনো কোনো গ্রাহক যোগ করা হয়নি।</p>';
-   }
+   if(!target || typeof db==='undefined' || !db)return;
+   const activities=[];
+   (db.customers||[]).forEach(c=>{
+    const name=String(c.name||'গ্রাহক');
+    const id=String(c.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+    if(Number(c.given)>0)activities.push({kind:'loan',name,amount:Number(c.given),date:c.startDate||'',id,loginId:c.loginId||''});
+    (c.payments||[]).forEach(pay=>activities.push({kind:'deposit',name,amount:Number(pay.amount)||0,date:pay.date||'',id,loginId:c.loginId||''}));
+   });
+   activities.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+   const rows=activities.slice(0,5).map(a=>{
+    const loan=a.kind==='loan';
+    const dateText=a.date?new Date(a.date+'T00:00:00').toLocaleDateString('bn-BD',{day:'2-digit',month:'2-digit',year:'numeric'}):'তারিখ নেই';
+    const safeName=String(a.name).replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));
+    return `<div class="activity-row" role="button" tabindex="0" onclick="showTab('customers');openDetail('${a.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showTab('customers');openDetail('${a.id}')}"><div class="activity-symbol ${loan?'loan':'deposit'}">${loan?'+':'↓'}</div><div class="activity-main"><b>${safeName}</b><span>${loan?'ঋণ প্রদান':'জমা প্রদান'}</span></div><div class="activity-value"><b class="${loan?'loan-text':'deposit-text'}">${typeof money==='function'?money(a.amount):a.amount}</b><span>${dateText}</span></div><span class="activity-chevron">›</span></div>`;
+   }).join('');
+   target.innerHTML=rows||'<p class="muted activity-empty">এখনো কোনো কার্যক্রম নেই।</p>';
+   const panel=target.closest('.panel');
+   if(panel){panel.classList.add('recent-activity-panel');let bar=panel.querySelector('.activity-heading');if(!bar){bar=document.createElement('div');bar.className='activity-heading';const heading=panel.querySelector('h2');if(heading){heading.textContent='সাম্প্রতিক কার্যক্রম';bar.appendChild(heading);panel.insertBefore(bar,target);}}if(bar&&!bar.querySelector('button')){const all=document.createElement('button');all.type='button';all.className='activity-see-all';all.textContent='সকল দেখুন →';all.onclick=()=>showTab('customers');bar.appendChild(all);}}
   };
  }
 })();
 </script>
+<style id="astha-recent-activity-card-style">
+#dash .recent-activity-panel{padding:0!important;overflow:hidden;border:2px solid #e5e7eb!important;border-radius:22px!important;background:#fff!important;box-shadow:0 3px 12px #0000000a!important}
+#dash .activity-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 10px 5px 0;background:#f1f1f3}
+#dash .activity-heading h2{display:inline-flex;align-items:center;gap:9px;margin:0!important;padding:12px 22px!important;min-width:58%;border-radius:0 0 28px 0;background:linear-gradient(110deg,#a30d12,#c51f25)!important;color:#fff!important;font-size:19px!important;font-weight:850!important}
+#dash .activity-see-all{flex:0 0 auto;min-height:38px;padding:6px 13px;border:1px solid #d8d8dc;border-radius:24px;background:#f8f8f9;color:#171717;font-size:14px;font-weight:750}
+#dash .activity-heading h2:before{content:'◷';font-size:25px;line-height:1}
+#dash #recent{padding:2px 12px 8px!important}
+#dash .activity-row{display:flex;align-items:center;gap:12px;min-height:78px;padding:10px 4px;border-bottom:1px solid #ececec;cursor:pointer}
+#dash .activity-row:last-child{border-bottom:0}
+#dash .activity-symbol{width:52px;height:52px;flex:0 0 52px;border-radius:50%;display:grid;place-items:center;font-size:34px;font-weight:900}
+#dash .activity-symbol.loan{background:#f1efff;color:#b91c1c}
+#dash .activity-symbol.deposit{background:#e3f7e9;color:#15803d}
+#dash .activity-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+#dash .activity-main b{font-size:18px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#171717}
+#dash .activity-main span{font-size:15px;color:#555}
+#dash .activity-value{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+#dash .activity-value b{font-size:20px;font-weight:900}
+#dash .activity-value span{font-size:13px;color:#555}
+#dash .loan-text{color:#b91c1c}#dash .deposit-text{color:#15803d}
+#dash .activity-chevron{font-size:34px;line-height:1;color:#555;margin-left:2px}
+#dash .activity-empty{padding:20px 8px;text-align:center}
+@media(max-width:420px){#dash .activity-heading h2{font-size:17px!important;padding:10px 16px!important;min-width:0}#dash .activity-see-all{font-size:12px;padding:5px 9px}#dash .activity-row{gap:9px;min-height:70px}#dash .activity-symbol{width:44px;height:44px;flex-basis:44px;font-size:29px}#dash .activity-main b{font-size:15px}#dash .activity-main span{font-size:13px}#dash .activity-value b{font-size:16px}#dash .activity-value span{font-size:11px}#dash .activity-chevron{font-size:29px}}
+</style>
 
 
 <!-- User-requested interface refinements; existing data model and features are preserved. -->
