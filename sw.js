@@ -1,4 +1,4 @@
-const CACHE_NAME = 'astha-somiti-v17-compact-logo';
+const CACHE_NAME = 'astha-somiti-v18-personal-ledger';
 const APP_SHELL_URL = new URL('./', self.registration.scope).href;
 
 self.addEventListener('install', event => {

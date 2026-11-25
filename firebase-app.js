@@ -177,6 +177,7 @@ function scheduleSync() {
     status('ডিভাইসে সংরক্ষিত; ক্লাউড Sync হয়নি: ' + (error.message || error));
   }), 1100);
 }
+window.asthaScheduleFirebaseSync = () => scheduleSync();
 window.asthaFirebaseSyncNow = async () => {
   try { await syncNow(); alert('আপনার অ্যাকাউন্টের ডেটা Sync হয়েছে।'); }
   catch (error) { console.error(error); alert('Sync হয়নি: ' + (error.message || error)); }
