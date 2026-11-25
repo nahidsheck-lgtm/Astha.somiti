@@ -2388,3 +2388,48 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 </body>
 </html>
 
+
+<!-- Final targeted fixes: responsive customer info card and Personal Ledger home overview -->
+<style id="astha-two-screenshot-fixes">
+/* Customer expanded details: compact 2-column grid like the supplied reference */
+#customerList .customer-info-panel{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:13px!important;border:1px solid #dbe2ea!important;border-radius:15px!important;background:#f1fbf5!important;box-sizing:border-box!important;width:100%!important;}
+#customerList .customer-info-panel[hidden]{display:none!important}
+#customerList .customer-info-panel>div{background:#f0f1f3!important;border-radius:11px!important;padding:11px!important;min-width:0!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+#customerList .customer-info-panel>div b{display:block!important;margin-top:4px!important}
+#customerList .customer-info-panel .pa-customer-dates{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin:0!important}
+#customerList .customer-info-panel .pa-customer-dates>div{background:#f0f1f3!important;border-radius:11px!important;padding:11px!important;min-width:0!important}
+#customerList .customer-info-panel .pa-customer-dates small{display:block!important;color:#666!important;margin-bottom:4px!important}
+#customerList .customer-info-panel .pa-customer-dates b{overflow-wrap:anywhere!important}
+#customerList .customer-info-panel .pa-edit-all{grid-column:1/-1!important;width:100%!important;margin-top:2px!important}
+@media(max-width:390px){#customerList .customer-info-panel,#customerList .customer-info-panel .pa-customer-dates{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}#customerList .customer-info-panel>div,#customerList .customer-info-panel .pa-customer-dates>div{padding:8px!important;font-size:12px!important}}
+/* Dashboard: personal account overview fills blank home area */
+#dash>.panel:not(#personalHomeOverview),#dash>.notice{display:none!important}
+#dash #personalHomeOverview{margin:10px 0!important;border-radius:18px!important;padding:12px!important;border:1px solid #e1e5ec!important;background:#fff!important}
+#dash #personalHomeOverview .ph-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#dash #personalHomeOverview .ph-card{padding:10px 7px;border-radius:13px;background:#f6f7f9;border:1px solid #e1e5ec;text-align:center;min-width:0}
+#dash #personalHomeOverview .ph-card small{display:block;font-size:11px;color:#596579}
+#dash #personalHomeOverview .ph-card strong{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere}
+#dash #personalHomeOverview .ph-recent{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 5px;border-bottom:1px solid #e8ebef}
+#dash #personalHomeOverview .ph-recent:last-child{border-bottom:0}
+#dash #personalHomeOverview .ph-recent .ph-name{min-width:0;overflow-wrap:anywhere}
+#dash #personalHomeOverview .ph-recent .ph-amount{font-weight:800;white-space:nowrap}
+#dash #personalHomeOverview .ph-red{color:#b42323!important}#dash #personalHomeOverview .ph-green{color:#15803d!important}#dash #personalHomeOverview .ph-black{color:#222!important}
+@media(max-width:390px){#dash #personalHomeOverview .ph-card strong{font-size:12px!important}#dash #personalHomeOverview .ph-card{padding:8px 4px!important}}
+</style>
+<script id="astha-final-home-personal-ledger-fix">
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const moneyBD=n=>'৳'+Number(n||0).toLocaleString('bn-BD',{maximumFractionDigits:2});
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function calc(p){let receive=0,pay=0;(p.entries||[]).forEach(e=>{let a=Number(e.amount||0);if(e.type==='receive')receive+=a;else if(e.type==='pay'||e.type==='expense')pay+=a;});return {receive,pay,net:receive-pay};}
+ function ensureHome(){const dash=$('dash');if(!dash)return;let widget=$('personalHomeOverview');if(!widget){widget=document.createElement('section');widget.id='personalHomeOverview';widget.className='panel';widget.innerHTML='<h2>ব্যক্তিগত হিসাবের সারাংশ</h2><div class="ph-summary"><div class="ph-card"><small>মোট খাতা</small><strong id="phCount" class="ph-black">০ জন</strong></div><div class="ph-card"><small>মোট আমি পাব</small><strong id="phReceive" class="ph-red">৳০</strong></div><div class="ph-card"><small>মোট আমি দিব</small><strong id="phPay" class="ph-green">৳০</strong></div></div><h3 style="margin:14px 0 4px">সাম্প্রতিক ব্যক্তিগত লেনদেন</h3><div id="phRecent"></div><button type="button" class="secondary" style="width:100%;margin-top:9px" onclick="showTab(\'personal\')">ব্যক্তিগত হিসাব খুলুন</button>';dash.insertBefore(widget,dash.firstChild);}
+ const data=(typeof db!=='undefined'&&db)?db:null;if(!data)return;const people=Array.isArray(data.personalAccounts)?data.personalAccounts:[];let r=0,pay=0,recent=[];people.forEach(p=>{(p.entries||[]).forEach(e=>{const a=Number(e.amount||0);if(e.type==='receive')r+=a;else if(e.type==='pay'||e.type==='expense')pay+=a;recent.push({name:p.name,type:e.type,amount:a,date:e.date,note:e.note});});});$('phCount').textContent=people.length.toLocaleString('bn-BD')+' জন';$('phReceive').textContent=moneyBD(r);$('phPay').textContent=moneyBD(pay);
+ const list=$('phRecent');if(list){recent.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));list.innerHTML=recent.slice(0,5).map(x=>{const isReceive=x.type==='receive';return `<div class="ph-recent"><div class="ph-name"><b>${esc(x.name)}</b><small style="display:block;color:#6b7280">${esc(x.date||'তারিখ নেই')} · ${esc(x.note|| (isReceive?'আমি পাব':'আমি দিব'))}</small></div><span class="ph-amount ${isReceive?'ph-red':'ph-green'}">${isReceive?'আমি পাব':'আমি দিব'}<br>${moneyBD(x.amount)}</span></div>`;}).join('')||'<p class="muted">এখনো ব্যক্তিগত লেনদেন নেই। ব্যক্তিগত হিসাব থেকে নাম যোগ করুন।</p>';}
+ }
+ const originalDash=window.renderDash; if(typeof originalDash==='function')window.renderDash=function(){const res=originalDash.apply(this,arguments);ensureHome();return res};
+ const originalShow=window.showTab;if(typeof originalShow==='function')window.showTab=function(tab){const res=originalShow.apply(this,arguments);if(tab==='dash')ensureHome();return res};
+ const originalLedger=window.renderPersonalLedger;if(typeof originalLedger==='function')window.renderPersonalLedger=function(){const res=originalLedger.apply(this,arguments);ensureHome();return res};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureHome);else ensureHome();
+})();
+</script>
