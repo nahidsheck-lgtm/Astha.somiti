@@ -572,23 +572,29 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <button onclick="saveNoticeTemplate()">নোটিশ সংরক্ষণ</button></div><div class="panel"><h2>ডেটা ব্যাকআপ</h2><p class="muted">Google লগইনের পর Firebase-এ তথ্য Sync করা যায়। Sync-এর অবস্থা Firebase বার্তায় দেখুন। নিরাপত্তার জন্য JSON ব্যাকআপও আলাদা করে ডাউনলোড করে রাখুন।</p><div class="top-actions"><button onclick="window.asthaFirebaseSyncNow?.()">Firebase-এ Sync করুন</button><a class="btn secondary" href="./backup.html" style="display:inline-block;text-decoration:none;margin:0">ক্লাউড ব্যাকআপ / ফিরিয়ে আনুন</a><button class="secondary" onclick="exportData()">এই ডিভাইসের JSON ডাউনলোড</button><label class="btn secondary" style="margin:0">JSON ইমপোর্ট<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label></div></div><div class="panel"><h2>রিপোর্ট ও হিসাব</h2><div class="top-actions"><button onclick="exportExcelReport()">Excel রিপোর্ট ডাউনলোড</button><button class="secondary" onclick="showFinancialReport()">লাভ-ক্ষতি রিপোর্ট</button></div><div id="financialReport" class="report-output"></div></div><div class="panel"><h2>নিরাপত্তা ও কার্যক্রমের রেকর্ড</h2><p class="muted">অ্যাপের গুরুত্বপূর্ণ পরিবর্তনের সময়, কাজ ও বিবরণ এখানে সংরক্ষিত হবে। এই রেকর্ডও ব্যাকআপের সঙ্গে থাকবে।</p><button class="secondary" onclick="showAuditLog()">অডিট রেকর্ড দেখুন</button><div id="auditOutput" class="report-output"></div></div><div class="panel" id="logoutPanel"><h2>অ্যাকাউন্ট</h2><p class="muted">কাজ শেষ হলে নিরাপদে অ্যাকাউন্ট থেকে বের হয়ে যান।</p><button class="danger" type="button" style="width:100%;margin-top:8px" onclick="asthaLogout()">লগ আউট</button></div></div>
 <div id="personal" class="tab hidden">
  <div class="panel personal-ledger-panel">
-  <h2>ব্যক্তিগত হিসাব</h2>
-  <p class="muted">এটি সম্পূর্ণ আপনার ব্যক্তিগত খাতা। সমিতির গ্রাহক, ঋণ, কিস্তি, রিকভারি বা ক্যাশ হিসাবের সঙ্গে এর কোনো সম্পর্ক নেই।</p>
-  <div class="grid personal-ledger-summary">
-   <div class="stat"><small>মোট আমি পাব</small><strong id="personalReceivable">৳০</strong></div>
-   <div class="stat"><small>মোট আমি দিব</small><strong id="personalPayable">৳০</strong></div>
-   <div class="stat"><small>নিট হিসাব</small><strong id="personalNet">৳০</strong></div>
+  <div class="personal-head"><div><span class="personal-kicker">PRIVATE MONEY BOOK</span><h2>ব্যক্তিগত হিসাব</h2></div><span class="personal-head-icon" aria-hidden="true">📒</span></div>
+  <p class="muted personal-intro">এটি শুধু আপনার নিজের টাকা-পয়সার খাতা। সমিতির গ্রাহক, ঋণ, কিস্তি, রিকভারি ও ক্যাশ হিসাবের সঙ্গে এর কোনো সম্পর্ক নেই।</p>
+  <div class="personal-ledger-summary">
+   <div class="personal-stat receivable"><span class="personal-stat-icon">↗</span><small>আমি মোট পাব</small><strong id="personalReceivable">৳০</strong></div>
+   <div class="personal-stat payable"><span class="personal-stat-icon">↙</span><small>আমার মোট দেনা</small><strong id="personalPayable">৳০</strong></div>
+   <div class="personal-stat net"><span class="personal-stat-icon">＝</span><small>সর্বশেষ নিট হিসাব</small><strong id="personalNet">৳০</strong></div>
   </div>
-  <div class="panel" style="background:#fafafa;margin-top:14px">
-   <h3>নতুন ব্যক্তিগত লেনদেন</h3>
+  <div class="personal-form-card">
+   <div class="personal-section-title"><span>＋</span><div><h3>নতুন ব্যক্তিগত লেনদেন</h3><small>যাকে টাকা দিলেন বা যার কাছ থেকে নিলেন</small></div></div>
    <label for="personalType">লেনদেনের ধরন</label>
-   <select id="personalType"><option value="receive">আমি টাকা পাব (অন্যের কাছে পাওনা)</option><option value="pay">আমি টাকা দিব (অন্যকে দেনা)</option></select>
-   <label for="personalPerson">ব্যক্তির নাম</label><input id="personalPerson" type="text" maxlength="100" placeholder="যার সঙ্গে ব্যক্তিগত হিসাব">
-   <div class="formgrid"><div><label for="personalAmount">টাকার পরিমাণ (৳)</label><input id="personalAmount" type="number" min="1" step="0.01" inputmode="decimal" placeholder="যেমন ৫০০০"></div><div><label for="personalDate">তারিখ</label><input id="personalDate" type="date"></div></div>
-   <label for="personalNote">বিবরণ (ঐচ্ছিক)</label><input id="personalNote" type="text" maxlength="250" placeholder="কেন টাকা নেওয়া বা দেওয়া হলো">
-   <button type="button" style="width:100%;margin-top:12px" onclick="addPersonalEntry()">＋ ব্যক্তিগত হিসাব সংরক্ষণ</button>
+   <select id="personalType">
+    <option value="receive">আমি কাউকে টাকা দিলাম — আমার পাওনা বাড়বে</option>
+    <option value="pay">আমি কারো কাছ থেকে টাকা নিলাম — আমার দেনা বাড়বে</option>
+    <option value="collect">আমি পাওনা টাকা ফেরত পেলাম — পাওনা কমবে</option>
+    <option value="settle">আমি দেনা টাকা পরিশোধ করলাম — দেনা কমবে</option>
+   </select>
+   <label for="personalPerson">ব্যক্তির নাম</label><input id="personalPerson" type="text" maxlength="100" placeholder="যেমন: সালাউদ্দিন">
+   <div class="formgrid personal-form-grid"><div><label for="personalAmount">টাকার পরিমাণ (৳)</label><input id="personalAmount" type="number" min="1" step="0.01" inputmode="decimal" placeholder="যেমন ৫০০০"></div><div><label for="personalDate">তারিখ</label><input id="personalDate" type="date"></div></div>
+   <label for="personalNote">বিবরণ (ঐচ্ছিক)</label><input id="personalNote" type="text" maxlength="250" placeholder="লেনদেনের কারণ বা বিস্তারিত">
+   <button type="button" class="personal-save-btn" onclick="addPersonalEntry()">＋ ব্যক্তিগত লেনদেন সংরক্ষণ</button>
   </div>
-  <h3 style="margin-top:18px">ব্যক্তিগত লেনদেনের তালিকা</h3>
+  <div class="personal-list-head"><div><h3>ব্যক্তিভিত্তিক হিসাব</h3><small>প্রত্যেকের পাওনা ও দেনা আলাদা দেখা যাবে</small></div><span id="personalPeopleCount">০ জন</span></div>
+  <input id="personalSearch" class="personal-search" type="search" placeholder="নাম দিয়ে ব্যক্তিগত হিসাব খুঁজুন" oninput="renderPersonalLedger()">
   <div id="personalLedgerList"></div>
  </div>
 </div>
@@ -2303,23 +2309,70 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 
 
 <script id="astha-independent-personal-ledger">
-// Personal ledger is stored in its own db.personalLedger collection and never touches cooperative records.
+// Personal ledger stays isolated in db.personalLedger; cooperative accounts are never read or changed here.
 function ensurePersonalLedger(){if(!db.personalLedger||!Array.isArray(db.personalLedger.entries))db.personalLedger={entries:[]};}
-function personalLedgerTotals(){ensurePersonalLedger();return db.personalLedger.entries.reduce((a,x)=>{const n=Math.max(0,Number(x.amount)||0);if(x.type==='receive')a.receive+=n;else if(x.type==='pay')a.pay+=n;return a;},{receive:0,pay:0});}
-function renderPersonalLedger(){if(!db)return;ensurePersonalLedger();const t=personalLedgerTotals();if(el('personalReceivable'))el('personalReceivable').textContent=money(t.receive);if(el('personalPayable'))el('personalPayable').textContent=money(t.pay);if(el('personalNet')){const net=t.receive-t.pay;el('personalNet').textContent=(net<0?'দেনা ':'পাওনা ')+money(Math.abs(net));el('personalNet').style.color=net<0?'#b91c1c':'#166534'}if(el('personalDate')&&!el('personalDate').value)el('personalDate').value=new Date().toISOString().slice(0,10);const list=el('personalLedgerList');if(!list)return;const rows=db.personalLedger.entries.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||Number(b.createdAt||0)-Number(a.createdAt||0));list.innerHTML=rows.map(x=>{const receive=x.type==='receive';return '<div class="customer personal-entry"><div style="min-width:0;flex:1"><b>'+esc(x.person||'নাম দেওয়া হয়নি')+'</b><small>'+esc(x.date||'তারিখ নেই')+' · '+(receive?'আমি পাব':'আমি দিব')+(x.note?' · '+esc(x.note):'')+'</small></div><strong style="color:'+(receive?'#166534':'#b91c1c')+';white-space:nowrap">'+money(x.amount)+'</strong><button type="button" class="secondary" onclick="editPersonalEntry(\''+x.id+'\')">এডিট</button><button type="button" class="danger" onclick="deletePersonalEntry(\''+x.id+'\')">মুছুন</button></div>'}).join('')||'<p class="muted">এখনো কোনো ব্যক্তিগত লেনদেন যোগ করা হয়নি।</p>';}
+function personalLedgerTotals(){ensurePersonalLedger();return db.personalLedger.entries.reduce((a,x)=>{const n=Math.max(0,Number(x.amount)||0);if(x.type==='receive')a.receive+=n;else if(x.type==='pay')a.pay+=n;else if(x.type==='collect')a.receive-=n;else if(x.type==='settle')a.pay-=n;return a;},{receive:0,pay:0});}
+function personalTypeLabel(type){return ({receive:'আমি টাকা দিয়েছি · পাওনা',pay:'আমি টাকা নিয়েছি · দেনা',collect:'পাওনা টাকা ফেরত পেয়েছি',settle:'দেনা টাকা পরিশোধ করেছি'})[type]||'ব্যক্তিগত লেনদেন';}
+function renderPersonalLedger(){
+ if(!db)return;ensurePersonalLedger();const t=personalLedgerTotals();
+ const receivable=Math.max(0,t.receive),payable=Math.max(0,t.pay),net=receivable-payable;
+ if(el('personalReceivable'))el('personalReceivable').textContent=money(receivable);
+ if(el('personalPayable'))el('personalPayable').textContent=money(payable);
+ if(el('personalNet')){el('personalNet').textContent=(net<0?'দেনা ':'পাওনা ')+money(Math.abs(net));el('personalNet').style.color=net<0?'#b4232b':'#147a45';}
+ if(el('personalDate')&&!el('personalDate').value)el('personalDate').value=new Date().toISOString().slice(0,10);
+ const search=(el('personalSearch')?.value||'').trim().toLocaleLowerCase();
+ const groups=new Map();
+ db.personalLedger.entries.forEach(x=>{const name=String(x.person||'নাম দেওয়া হয়নি').trim()||'নাম দেওয়া হয়নি';const key=name.toLocaleLowerCase();if(!groups.has(key))groups.set(key,{name,receive:0,pay:0,entries:[]});const g=groups.get(key),n=Math.max(0,Number(x.amount)||0);if(x.type==='receive')g.receive+=n;else if(x.type==='pay')g.pay+=n;else if(x.type==='collect')g.receive-=n;else if(x.type==='settle')g.pay-=n;g.entries.push(x);});
+ const all=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'bn'));
+ if(el('personalPeopleCount'))el('personalPeopleCount').textContent=bn(all.length)+' জন';
+ const filtered=all.filter(g=>g.name.toLocaleLowerCase().includes(search));
+ const list=el('personalLedgerList');if(!list)return;
+ list.innerHTML=filtered.map((g,i)=>{const balance=g.receive-g.pay;const entries=g.entries.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||Number(b.createdAt||0)-Number(a.createdAt||0));return `<article class="personal-person-card"><div class="personal-person-top"><div class="personal-person-avatar">${esc(g.name.slice(0,1))}</div><div class="personal-person-name"><b>${esc(g.name)}</b><small>${bn(entries.length)}টি লেনদেন</small></div><div class="personal-person-balance ${balance<0?'is-payable':balance>0?'is-receivable':'is-clear'}"><small>${balance<0?'আমি দিব':balance>0?'আমি পাব':'হিসাব সমান'}</small><strong>${money(Math.abs(balance))}</strong></div></div><div class="personal-entry-list">${entries.map(x=>{const positive=x.type==='receive'||x.type==='pay';const label=personalTypeLabel(x.type);const incoming=x.type==='receive'||x.type==='collect';return `<div class="personal-entry-row"><div class="personal-entry-mark ${incoming?'in':'out'}">${incoming?'＋':'−'}</div><div class="personal-entry-meta"><b>${label}</b><small>${esc(x.date||'তারিখ নেই')}${x.note?' · '+esc(x.note):''}</small></div><strong class="${incoming?'text-green':'text-red'}">${money(x.amount)}</strong><button type="button" class="secondary" aria-label="এডিট" onclick="editPersonalEntry('${x.id}')">এডিট</button><button type="button" class="danger" aria-label="মুছুন" onclick="deletePersonalEntry('${x.id}')">মুছুন</button></div>`}).join('')}</div></article>`}).join('')||`<div class="personal-empty"><span>📒</span><b>${search?'কোনো নাম পাওয়া যায়নি':'এখনো কোনো ব্যক্তিগত হিসাব নেই'}</b><small>${search?'অন্য নাম দিয়ে খুঁজে দেখুন।':'উপরের ফর্ম থেকে প্রথম ব্যক্তিগত লেনদেন যোগ করুন।'}</small></div>`;
+}
 function addPersonalEntry(){if(!db||!current)return alert('আগে অ্যাডমিন হিসেবে প্রবেশ করুন।');ensurePersonalLedger();const type=el('personalType').value,person=el('personalPerson').value.trim(),amount=Number(el('personalAmount').value),date=el('personalDate').value,note=el('personalNote').value.trim();if(!person)return alert('ব্যক্তির নাম লিখুন।');if(!Number.isFinite(amount)||amount<=0)return alert('সঠিক টাকার পরিমাণ লিখুন।');if(!date)return alert('তারিখ নির্বাচন করুন।');db.personalLedger.entries.push({id:'pl_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7),type,person,amount,date,note,createdAt:Date.now()});if(!save())return;el('personalPerson').value='';el('personalAmount').value='';el('personalNote').value='';renderPersonalLedger();}
 function editPersonalEntry(id){ensurePersonalLedger();const x=db.personalLedger.entries.find(y=>y.id===id);if(!x)return;const person=prompt('ব্যক্তির নাম:',x.person);if(person===null)return;const amount=prompt('টাকার পরিমাণ:',x.amount);if(amount===null)return;const date=prompt('তারিখ (YYYY-MM-DD):',x.date);if(date===null)return;const note=prompt('বিবরণ:',x.note||'');if(note===null)return;const n=Number(amount);if(!person.trim()||!Number.isFinite(n)||n<=0||!/^\d{4}-\d{2}-\d{2}$/.test(date))return alert('তথ্য সঠিক নয়।');x.person=person.trim();x.amount=n;x.date=date;x.note=note.trim();save();renderPersonalLedger();}
 function deletePersonalEntry(id){ensurePersonalLedger();const i=db.personalLedger.entries.findIndex(x=>x.id===id);if(i<0)return;if(!confirm('এই ব্যক্তিগত লেনদেনটি মুছে ফেলবেন?'))return;db.personalLedger.entries.splice(i,1);save();renderPersonalLedger();}
 </script>
 <style id="astha-personal-ledger-style">
-#app>nav.no-print{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:5px!important}
-#app>nav.no-print>button{min-width:0!important;flex:1 1 0!important;padding:7px 2px!important;font-size:10px!important}
-#app>nav.no-print>button .nav-logo{font-size:26px!important;width:38px!important;height:38px!important;display:grid;place-items:center}
-@media(max-width:390px){#app>nav.no-print>button{font-size:9px!important}#app>nav.no-print>button .nav-logo{font-size:23px!important;width:32px!important;height:32px!important}}
-.personal-ledger-summary .stat{border:1px solid #e5e7eb;border-radius:14px;background:#fff;text-align:center;padding:12px 6px;min-width:0}
-.personal-ledger-summary .stat strong{font-size:clamp(15px,4vw,22px);display:block;overflow-wrap:anywhere}
-.personal-entry{gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:12px;border:1px solid #e5e7eb;border-radius:13px;background:#fff}
-.personal-entry button{padding:8px 10px;font-size:12px}
+/* Personal ledger page only: no shared navigation or cooperative dashboard styling is changed. */
+#personal .personal-ledger-panel{padding:16px!important;border-radius:22px!important;background:#fff!important;}
+#personal .personal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+#personal .personal-head h2{margin:2px 0 0;font-size:clamp(22px,5vw,29px);font-weight:800;color:#202124}
+#personal .personal-kicker{font-size:10px;letter-spacing:1.6px;font-weight:800;color:#a51d24}
+#personal .personal-head-icon{width:48px;height:48px;border-radius:15px;background:#fff1f1;display:grid;place-items:center;font-size:27px}
+#personal .personal-intro{line-height:1.65;margin:8px 0 16px;font-size:14px}
+#personal .personal-ledger-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 17px}
+#personal .personal-stat{position:relative;min-width:0;border:1px solid #e5e7eb;border-radius:17px;padding:13px 12px;background:linear-gradient(145deg,#fff,#fafafa);display:flex;flex-direction:column;gap:5px;overflow:hidden}
+#personal .personal-stat.net{grid-column:1/-1;background:#f4faf5;border-color:#d8eadc}
+#personal .personal-stat-icon{position:absolute;right:11px;top:8px;font-size:23px;font-weight:900;opacity:.18}
+#personal .personal-stat small{font-size:13px;color:#687078}
+#personal .personal-stat strong{font-size:clamp(19px,5vw,25px);font-weight:850;overflow-wrap:anywhere;color:#202124}
+#personal .personal-stat.receivable strong{color:#147a45}#personal .personal-stat.payable strong{color:#b4232b}
+#personal .personal-form-card{padding:15px;border:1px solid #e2e4e7;border-radius:19px;background:#fafafa;box-shadow:0 3px 12px #10182808}
+#personal .personal-section-title,#personal .personal-list-head{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+#personal .personal-section-title>span{width:34px;height:34px;border-radius:11px;background:#b51f25;color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700}
+#personal .personal-section-title h3,#personal .personal-list-head h3{margin:0;font-size:17px;font-weight:800;color:#222}
+#personal .personal-section-title small,#personal .personal-list-head small{display:block;color:#737980;font-size:12px;margin-top:2px}
+#personal .personal-form-card label{display:block;margin:12px 0 6px;font-size:14px;font-weight:750;color:#333}
+#personal .personal-form-card input,#personal .personal-form-card select,#personal .personal-search{width:100%;min-height:49px;border:1.5px solid #d4d7dc;border-radius:12px;background:#fff;padding:11px 13px;font-size:15px;color:#242424;box-sizing:border-box}
+#personal .personal-form-grid{gap:10px}
+#personal .personal-save-btn{width:100%;min-height:51px;margin-top:15px;border:0;border-radius:13px;background:linear-gradient(110deg,#a9141b,#c3262c);color:#fff;font-size:15px;font-weight:800;box-shadow:0 4px 10px #b51f2525}
+#personal .personal-list-head{justify-content:space-between;margin:21px 0 10px}
+#personal .personal-list-head>span{font-size:12px;font-weight:700;color:#a51d24;background:#fff1f1;border-radius:20px;padding:6px 10px;white-space:nowrap}
+#personal .personal-search{margin:0 0 12px;background:#fff}
+#personal .personal-person-card{border:1px solid #e1e4e8;border-radius:17px;background:#fff;margin:10px 0;overflow:hidden;box-shadow:0 2px 8px #10182808}
+#personal .personal-person-top{display:flex;align-items:center;gap:10px;padding:13px 12px;background:linear-gradient(110deg,#fff,#fbfbfc)}
+#personal .personal-person-avatar{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fce9e9;color:#a51d24;font-size:19px;font-weight:800}
+#personal .personal-person-name{min-width:0;flex:1}.personal-person-name b{display:block;overflow-wrap:anywhere;font-size:16px;color:#222}.personal-person-name small{display:block;color:#7b8188;font-size:12px;margin-top:2px}
+#personal .personal-person-balance{text-align:right;min-width:100px}.personal-person-balance small{display:block;color:#70777f;font-size:11px}.personal-person-balance strong{display:block;font-size:17px;white-space:nowrap}.personal-person-balance.is-receivable strong{color:#147a45}.personal-person-balance.is-payable strong{color:#b4232b}.personal-person-balance.is-clear strong{color:#687078}
+#personal .personal-entry-list{border-top:1px solid #eef0f2;padding:2px 11px}
+#personal .personal-entry-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f1f2}.personal-entry-row:last-child{border-bottom:0}
+#personal .personal-entry-mark{flex:0 0 28px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:900}.personal-entry-mark.in{background:#e8f6ed;color:#16834b}.personal-entry-mark.out{background:#fff0f0;color:#b4232b}
+#personal .personal-entry-meta{flex:1;min-width:0}.personal-entry-meta b{display:block;font-size:12px;color:#343a40}.personal-entry-meta small{display:block;font-size:11px;color:#7b8188;overflow-wrap:anywhere;margin-top:2px}
+#personal .personal-entry-row>strong{font-size:13px;white-space:nowrap}.text-green{color:#147a45}.text-red{color:#b4232b}
+#personal .personal-entry-row button{padding:6px 8px!important;font-size:11px!important;min-width:0}
+#personal .personal-empty{padding:28px 12px;text-align:center;border:1px dashed #d8dce1;border-radius:16px;color:#777}.personal-empty span{display:block;font-size:30px;margin-bottom:6px}.personal-empty b,.personal-empty small{display:block}.personal-empty b{color:#333}.personal-empty small{margin-top:4px}
+@media(max-width:390px){#personal .personal-ledger-panel{padding:12px!important}#personal .personal-form-card{padding:12px}#personal .personal-person-balance{min-width:88px}#personal .personal-entry-row{gap:5px}#personal .personal-entry-row button{padding:6px!important}}
 </style>
 
 </body>
