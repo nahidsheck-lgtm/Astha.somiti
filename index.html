@@ -508,26 +508,6 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 
 
 
-<style id="astha-user-requested-final-fixes-v1">
-/* Personal ledger: visible when selected; hidden only by the shared .hidden class. */
-#personalLedger.hidden{display:none!important}
-#personalLedger:not(.hidden){display:block!important}
-/* Personal net total stays black; individual receive/pay statuses keep their red/green colors. */
-#personalLedger #paNet{color:#111827!important;font-weight:900!important}
-#personalLedger .pa-neutral{color:#111827!important}
-/* Customer quick-details card: compact two-column tiles on mobile, full width below the row. */
-#customerList .compact-customer .customer-info-panel{flex:0 0 100%!important;width:100%!important;box-sizing:border-box!important;display:block!important}
-#customerList .compact-customer .customer-info-panel[hidden]{display:none!important}
-#customerList .compact-customer .customer-info-panel>div:not(.pa-customer-dates){display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;margin:5px 0!important;padding:8px!important;background:#fff!important;border:1px solid #dcefe1!important;border-radius:9px!important;line-height:1.4!important}
-#customerList .compact-customer .customer-info-panel>div:not(.pa-customer-dates) b{font-weight:800!important}
-#customerList .compact-customer .customer-info-panel .pa-customer-dates{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:8px!important}
-#customerList .compact-customer .customer-info-panel .pa-customer-dates>div{background:#fff!important;border:1px solid #dcefe1!important;border-radius:9px!important;padding:8px!important;min-width:0!important}
-#customerList .compact-customer .customer-info-panel .pa-customer-dates small{display:block!important;color:#64748b!important;font-size:10px!important}
-#customerList .compact-customer .customer-info-panel .pa-customer-dates b{display:block!important;font-size:12px!important;overflow-wrap:anywhere!important}
-#customerList .compact-customer .customer-info-panel .pa-edit-all{width:100%!important;margin-top:8px!important}
-@media(max-width:360px){#customerList .compact-customer .customer-info-panel>div:not(.pa-customer-dates){padding:6px!important;font-size:11px!important}}
-</style>
-
 </head>
 <body>
 <section id="authSplash" class="auth-splash hidden" aria-live="polite">
@@ -1435,6 +1415,22 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
 #appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
 </style>
+
+<style id="astha-requested-personal-cards-only">
+/* Personal account: black net total, separate red/green balances, compact entries. */
+#personalLedger #paNet,#personalLedger #paPersonBalance{color:#111827!important;font-weight:800}
+#personalLedger .pa-person-card{border-radius:14px!important;padding:13px!important}
+#personalLedger .pa-entry{border-radius:12px!important;line-height:1.6}
+/* Customer quick-detail panel: 2-column cards, compact and mobile-friendly. */
+#customerList .compact-customer .customer-info-panel{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;line-height:1.45!important}
+#customerList .compact-customer .customer-info-panel[hidden]{display:none!important}
+#customerList .compact-customer .customer-info-panel>div{background:#fff!important;border:1px solid #dcefe1!important;border-radius:9px!important;padding:9px!important;min-width:0!important;margin:0!important;overflow-wrap:anywhere!important}
+#customerList .compact-customer .customer-info-panel .pa-customer-dates{display:contents!important}
+#customerList .compact-customer .customer-info-panel .pa-customer-dates>div{background:#fff!important;border:1px solid #dcefe1!important;border-radius:9px!important;padding:9px!important;min-width:0!important}
+#customerList .compact-customer .customer-info-panel .pa-edit-all{grid-column:1/-1!important;width:100%!important;margin-top:2px!important}
+@media(max-width:340px){#customerList .compact-customer .customer-info-panel{gap:5px!important}#customerList .compact-customer .customer-info-panel>div{padding:7px!important;font-size:11px!important}}
+</style>
+
 </body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
@@ -2340,6 +2336,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 }
 #app>nav.astha-five-nav>button .nav-logo{width:27px!important;height:27px!important;max-width:27px!important;max-height:27px!important;font-size:23px!important;object-fit:contain!important}
 #app>nav.astha-five-nav>button .nav-label{display:block!important;text-align:center!important;font-size:inherit!important;line-height:1.15!important}
+#personalLedger{display:none}
 #personalLedger .pl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 #personalLedger input,#personalLedger select,#personalLedger textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}
 #personalLedger .pl-stat{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:10px;min-width:0}
@@ -2392,14 +2389,14 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
  function persist(){if(typeof save==='function')save();if(window.asthaScheduleFirebaseSync)window.asthaScheduleFirebaseSync();}
  function totals(person){let receive=0,pay=0;for(const e of person.entries||[]){const a=Number(e.amount||0);if(e.type==='receive')receive+=a;else if(e.type==='pay'||e.type==='expense')pay+=a;}return{receive,pay,net:receive-pay};}
  function status(t){if(t.net>0)return `<span class="pa-status pa-red">আমি পাব · ${money(t.net)}</span>`;if(t.net<0)return `<span class="pa-status pa-green">আমি দিব · ${money(Math.abs(t.net))}</span>`;return '<span class="pa-status pa-neutral">হিসাব সমান</span>';}
- window.renderPersonalLedger=function(){const d=ensurePeople();if(!d)return;const all=d.personalAccounts.map(p=>({p,t:totals(p)}));const receive=all.reduce((s,x)=>s+x.t.receive,0),pay=all.reduce((s,x)=>s+x.t.pay,0);$('paTotalReceive').textContent=money(receive);$('paTotalPay').textContent=money(pay);const net=receive-pay;$('paNet').textContent=net===0?'৳০':money(Math.abs(net))+(net>0?' · আমি পাব':' · আমি দিব');$('paNet').className=net>0?'pa-red':net<0?'pa-green':'';
+ window.renderPersonalLedger=function(){const d=ensurePeople();if(!d)return;const all=d.personalAccounts.map(p=>({p,t:totals(p)}));const receive=all.reduce((s,x)=>s+x.t.receive,0),pay=all.reduce((s,x)=>s+x.t.pay,0);$('paTotalReceive').textContent=money(receive);$('paTotalPay').textContent=money(pay);const net=receive-pay;$('paNet').textContent=net===0?'৳০':money(Math.abs(net))+(net>0?' · আমি পাব':' · আমি দিব');$('paNet').className='pa-neutral';
  $('paPeopleList').innerHTML=all.slice().sort((a,b)=>a.p.name.localeCompare(b.p.name,'bn')).map(({p,t})=>`<button type="button" class="pa-person-card" onclick="openPersonalPerson('${safe(p.id)}')"><span class="pa-person-name">${safe(p.name)}</span><span class="pa-person-meta">${(p.entries||[]).length.toLocaleString('bn-BD')}টি লেনদেন</span>${status(t)}</button>`).join('')||'<p class="muted">এখনো কারও নাম যোগ করা হয়নি। উপরে নাম লিখে যোগ করুন।</p>';
  const old=d.personalLedger||[];$('paLegacyList').innerHTML=old.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(x=>`<article class="pa-entry"><b>${x.type==='in'?'পুরোনো: টাকা গ্রহণ':'পুরোনো: টাকা প্রদান / খরচ'} · ${money(x.amount)}</b><small>${safe(x.date||'তারিখ নেই')} · ${safe(x.person||'নাম উল্লেখ নেই')}</small><div>${safe(x.note||'বিবরণ নেই')}</div></article>`).join('')||'<p class="muted">পুরোনো লেনদেন নেই।</p>';
  if(activePersonId){const person=d.personalAccounts.find(x=>x.id===activePersonId);if(person)renderPerson(person);else closePersonalPerson();}
  };
  window.addPersonalPerson=function(){const d=ensurePeople(),name=$('paNewName').value.trim();if(!name)return alert('ব্যক্তির নাম লিখুন।');if(d.personalAccounts.some(p=>p.name.trim().toLowerCase()===name.toLowerCase()))return alert('এই নামে হিসাব আগে থেকেই আছে।');const p={id:'pa_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,createdAt:today(),entries:[]};d.personalAccounts.push(p);$('paNewName').value='';persist();renderPersonalLedger();openPersonalPerson(p.id);};
  window.openPersonalPerson=function(id){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===id);if(!p)return;activePersonId=id;$('paPeopleView').classList.add('hidden');$('paPersonView').classList.remove('hidden');cancelPersonalTransactionEdit();renderPerson(p);};
- function renderPerson(p){const t=totals(p);$('paPersonTitle').textContent=p.name;$('paPersonSince').textContent='খাতা খোলা: '+(p.createdAt||'তারিখ নেই');$('paPersonReceive').textContent=money(t.receive);$('paPersonPay').textContent=money(t.pay);$('paPersonBalance').textContent=t.net>0?'আমি পাব · '+money(t.net):t.net<0?'আমি দিব · '+money(Math.abs(t.net)):'হিসাব সমান';$('paPersonBalance').className=t.net>0?'pa-red':t.net<0?'pa-green':'';
+ function renderPerson(p){const t=totals(p);$('paPersonTitle').textContent=p.name;$('paPersonSince').textContent='খাতা খোলা: '+(p.createdAt||'তারিখ নেই');$('paPersonReceive').textContent=money(t.receive);$('paPersonPay').textContent=money(t.pay);$('paPersonBalance').textContent=t.net>0?'আমি পাব · '+money(t.net):t.net<0?'আমি দিব · '+money(Math.abs(t.net)):'হিসাব সমান';$('paPersonBalance').className='pa-neutral';
  const entries=(p.entries||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));$('paEntryList').innerHTML=entries.map(e=>{const label=e.type==='receive'?'আমি পাব':e.type==='expense'?'খরচ · আমি দিব':'আমি দিব',cl=e.type==='receive'?'pa-red':'pa-green';return `<article class="pa-entry"><div class="row" style="justify-content:space-between;gap:8px"><b class="${cl}">${label}</b><strong>${money(e.amount)}</strong></div><small>${safe(e.date||'তারিখ নেই')}</small><div>${safe(e.note||'বিবরণ দেওয়া হয়নি')}</div><div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px"><button type="button" class="secondary" onclick="editPersonalTransaction('${safe(e.id)}')">এডিট</button><button type="button" class="danger" onclick="deletePersonalTransaction('${safe(e.id)}')">ডিলিট</button></div></article>`;}).join('')||'<p class="muted">এই ব্যক্তির কোনো লেনদেন এখনো যোগ করা হয়নি।</p>';}
  window.closePersonalPerson=function(){activePersonId=null;editingEntryId=null;$('paPersonView').classList.add('hidden');$('paPeopleView').classList.remove('hidden');cancelPersonalTransactionEdit();};
  window.savePersonalTransaction=function(){const d=ensurePeople(),p=d.personalAccounts.find(x=>x.id===activePersonId);if(!p)return alert('ব্যক্তির খাতা খোলা নেই।');const date=$('paEntryDate').value,type=$('paEntryType').value,amount=Number($('paEntryAmount').value),note=$('paEntryNote').value.trim();if(!date||!Number.isFinite(amount)||amount<=0)return alert('সঠিক তারিখ ও টাকার পরিমাণ দিন।');const e={id:editingEntryId||'pae_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),date,type,amount,note,updatedAt:new Date().toISOString()};p.entries=Array.isArray(p.entries)?p.entries:[];if(editingEntryId){const i=p.entries.findIndex(x=>x.id===editingEntryId);if(i<0)return alert('লেনদেনটি পাওয়া যায়নি।');p.entries[i]={...p.entries[i],...e};}else{e.createdAt=new Date().toISOString();p.entries.push(e);}persist();cancelPersonalTransactionEdit();renderPerson(p);renderPersonalLedger();};
