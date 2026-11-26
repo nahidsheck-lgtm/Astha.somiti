@@ -523,26 +523,9 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <section id="login" class="panel hidden">
  <div class="first-google-access">
   <h2>আস্থা সমিতি · লগইন</h2>
-  <p class="muted">আপনার Gmail ও Password দিয়ে প্রবেশ করুন</p>
-  <div class="email-auth-card">
-   <label for="emailLogin">Gmail</label><input id="emailLogin" type="email" autocomplete="username" placeholder="আপনার Gmail লিখুন">
-   <label for="emailPassword">Password</label><input id="emailPassword" type="password" autocomplete="current-password" placeholder="আপনার Password লিখুন">
-   <button type="button" class="google-first-button" onclick="emailLogin()">লগইন</button>
-   <button type="button" class="link-button" onclick="forgotEmailPassword()">পাসওয়ার্ড ভুলে গেছেন?</button>
-   <button type="button" class="secondary" style="width:100%;margin-top:8px" onclick="toggleEmailRegistration(true)">রেজিস্ট্রেশন</button>
-   <div class="auth-divider">অথবা</div>
-   <button type="button" class="secondary" style="width:100%" onclick="googleSignIn()">Google দিয়ে প্রবেশ</button>
-   <div id="emailRegistration" class="email-registration hidden">
-    <h3>নতুন অ্যাকাউন্ট তৈরি</h3>
-    <label for="regName">নাম</label><input id="regName" type="text" autocomplete="name" placeholder="আপনার নাম">
-    <label for="regPhone">মোবাইল নম্বর</label><input id="regPhone" type="tel" autocomplete="tel" placeholder="01XXXXXXXXX">
-    <label for="regEmail">Gmail</label><input id="regEmail" type="email" autocomplete="email" placeholder="আপনার Gmail">
-    <label for="regPassword">Password</label><input id="regPassword" type="password" autocomplete="new-password" minlength="8" placeholder="কমপক্ষে ৮ অক্ষর">
-    <button type="button" class="google-first-button" onclick="registerEmailAccount()">রেজিস্ট্রেশন সম্পন্ন করুন</button>
-    <button type="button" class="link-button" onclick="toggleEmailRegistration(false)">লগইনে ফিরে যান</button>
-   </div>
-  </div>
-  <p id="firebaseLoginStatus" class="google-first-note" aria-live="polite">Gmail ও Password দিয়ে লগইন করুন, অথবা Google Login ব্যবহার করুন। নতুন রেজিস্ট্রেশনে প্রত্যেকের আলাদা ব্যক্তিগত ডেটা থাকবে।</p>
+  <p class="muted">আপনার Google অ্যাকাউন্ট দিয়ে নিরাপদে প্রবেশ করুন</p>
+  <button id="googleSignInButton" type="button" class="google-first-button" onclick="googleSignIn()">🌐 Google দিয়ে প্রবেশ</button>
+  <p id="firebaseLoginStatus" class="google-first-note" aria-live="polite">Google অ্যাকাউন্ট নির্বাচন করে প্রবেশ করুন।</p>
  </div>
 </section>
 <section id="app" class="hidden"><nav class="no-print astha-five-nav">
@@ -1063,7 +1046,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script>
 (function(){
  'use strict';
- const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  // Remove the two header controls requested by the owner.
  window.toggleCustomerInfo=function(id){const panel=document.getElementById('customerInfo_'+id);if(panel)panel.hidden=!panel.hidden;};
@@ -1225,7 +1207,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script>
 (function(){
  'use strict';
- const $=id=>document.getElementById(id);
  const escText=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function addLogosToTopMenu(){
   const nav=document.querySelector('#app>nav.no-print'); if(!nav)return;
@@ -1388,7 +1369,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 
-</body></html>`;
+
+
+\n</body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
   frame.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
@@ -1428,6 +1411,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="astha-firebase-bridge">
 // Narrow bridge used by the Firebase module; the existing app data model remains intact.
 window.getAsthaData=()=>db;
+Object.defineProperty(window,"db",{configurable:true,get:()=>db});
 window.setAsthaData=(value,uid)=>{if(uid)KEY='astha_somiti_v5_user_'+uid;db=value;try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){console.error(e)}};
 window.clearAsthaSessionData=()=>{db={customers:[],trash:[],cash:{opening:0,entries:[]},settings:{},branches:[],audit:[],auditLog:[]};current=null;try{localStorage.removeItem(KEY)}catch(e){}KEY='astha_somiti_v5_fresh'};
 window.openAsthaAfterGoogleLogin=function(){
@@ -1539,7 +1523,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 <script>
 (function(){
  'use strict';
- const $=id=>document.getElementById(id);
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let nidPhotoData='',thumbPhotoData='',ocrText='';
  function compressImage(file,max=1500,quality=.72){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onerror=reject;fr.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const scale=Math.min(1,max/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*scale);cv.height=Math.round(im.height*scale);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);resolve(cv.toDataURL('image/jpeg',quality))};im.src=fr.result};fr.readAsDataURL(file)})}
@@ -1834,7 +1817,6 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 <script id="astha-requested-features">
 (function(){
  'use strict';
- const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const rememberKey='astha_trusted_device_v1';
 
@@ -2020,8 +2002,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 (function(){
   if(window.__asthaBackNavigationInstalled)return;
   window.__asthaBackNavigationInstalled=true;
-  const $=id=>document.getElementById(id);
-  const historyStack=[];
+   const historyStack=[];
   let currentDetailId=null;
   let restoring=false;
   const originalShowTab=window.showTab;
@@ -2309,7 +2290,6 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 </style>
 <script id="astha-standalone-cash-module">
 (function(){
- const $=id=>document.getElementById(id);
  function initStore(){db.cash=db.cash&&typeof db.cash==='object'?db.cash:{};if(!Array.isArray(db.cash.accounts))db.cash.accounts=[];db.cash.accounts.forEach(a=>{if(!Array.isArray(a.entries))a.entries=[];if(typeof a.opening!=='number')a.opening=Number(a.opening||0)});}
  let activeCashAccount=null, cashEntryMode='deposit';
  function cMoney(v){return money(Number(v||0))}
@@ -2338,10 +2318,93 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 })();
 </script>
 
-</body>
-</html>
+
+<style id="astha-final-login-and-weekly-status">
+/* Login must remain Google-only; prevent the fixed footer from appearing on auth screens. */
+#appFooterNav.hidden{display:none!important}
+#login .first-google-access{padding:22px 8px 26px;text-align:center}
+#login .google-first-button{background:#b91c1c!important;color:#fff!important;max-width:460px;margin:18px auto 10px}
+#login .google-first-note{min-height:20px}
+#bioLoginBtn{display:none!important}
+/* Compact weekly-payment indicator, placed at the left of each customer photo. */
+#customerList .compact-customer .cust-avatar-wrap{position:relative!important;overflow:visible!important}
+#customerList .weekly-status-mark{
+ position:absolute;left:-10px;top:-5px;z-index:3;width:22px;height:22px;min-width:22px;
+ border-radius:50%;display:flex;align-items:center;justify-content:center;
+ border:2px solid #fff;font-size:14px;font-weight:900;line-height:1;
+ box-shadow:0 1px 4px #0002;padding:0!important;min-height:22px!important;
+}
+#customerList .weekly-status-mark.is-paid{background:#16a34a;color:#fff}
+#customerList .weekly-status-mark.is-overdue{background:#dc2626;color:#fff}
+#customerList .weekly-status-mark.is-upcoming{background:#16a34a;color:#fff}
+#customerList .weekly-status-date{display:none}
+#customerList .weekly-status-label{display:block!important;font-size:10px!important;line-height:1.35!important;margin-top:2px!important;color:#64748b!important}
+#customerList .weekly-status-label.is-overdue{color:#b91c1c!important;font-weight:800!important}
+#customerList .weekly-status-label.is-paid{color:#15803d!important;font-weight:700!important}
+#customerList .weekly-status-label:not(.is-overdue){color:#15803d!important}
+</style>
+<script id="astha-weekly-status-indicator">
+(function(){
+ function localDate(d){
+   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ }
+ function statusFor(c){
+   const startRaw=String(c.startDate||localDate(new Date()));
+   const parts=startRaw.split('-').map(Number);
+   const start=new Date(parts[0],(parts[1]||1)-1,parts[2]||1);start.setHours(0,0,0,0);
+   const today=new Date();today.setHours(0,0,0,0);
+   const weekly=Math.max(0,Number(c.installment||0));
+   let remaining=(c.payments||[]).reduce((s,p)=>s+Math.max(0,Number(p.amount||0)),0);
+   const weeks=Math.max(1,Number(c.weeks||12));
+   for(let i=0;i<weeks;i++){
+     const allocated=Math.min(weekly,remaining);remaining=Math.max(0,remaining-allocated);
+     const due=new Date(start);due.setDate(due.getDate()+7*(i+1));due.setHours(0,0,0,0);
+     if(weekly-allocated>0){
+       return {kind:due<=today?'overdue':'upcoming',week:i+1,date:localDate(due),dateBn:new Intl.DateTimeFormat('bn-BD',{day:'numeric',month:'short'}).format(due)};
+     }
+   }
+   return {kind:'paid',week:weeks,date:''};
+ }
+ function decorate(){
+   document.querySelectorAll('#customerList .compact-customer').forEach(card=>{
+     const click=card.getAttribute('onclick')||'';
+     const idMatch=click.match(/openDetail\\(['"]([^'"]+)['"]\\)/);
+     const id=card.getAttribute('data-customer')||(idMatch&&idMatch[1]);
+     const c=(window.db&&Array.isArray(window.db.customers)?window.db.customers:[]).find(x=>String(x.id)===String(id));
+     const wrap=card.querySelector('.cust-avatar-wrap');
+     if(!c||!wrap)return;
+     let mark=wrap.querySelector('.weekly-status-mark');
+     if(!mark){mark=document.createElement('span');mark.className='weekly-status-mark';wrap.appendChild(mark);}
+     const s=statusFor(c);
+     mark.className='weekly-status-mark '+(s.kind==='paid'?'is-paid':s.kind==='overdue'?'is-overdue':'is-upcoming');
+     mark.textContent=s.kind==='overdue'?'!':'✓';
+     mark.title=s.kind==='paid'?'সব কিস্তি পরিশোধিত':s.kind==='overdue'?`সপ্তাহ ${s.week}: ${s.date} তারিখ পার হয়েছে, টাকা বাকি`:`সপ্তাহ ${s.week}: জমার তারিখ ${s.date}`;
+     mark.setAttribute('aria-label',mark.title);
+     const main=card.querySelector('.cust-main');
+     if(main){
+       let label=main.querySelector('.weekly-status-label');
+       if(!label){label=document.createElement('small');label.className='weekly-status-label';main.appendChild(label);}
+       label.className='weekly-status-label '+(s.kind==='paid'?'is-paid':s.kind==='overdue'?'is-overdue':'');
+       label.textContent=s.kind==='paid'?'✓ সব কিস্তি পরিশোধিত':s.kind==='overdue'?`সপ্তাহ ${s.week} · তারিখ পার: ${s.dateBn}`:`সপ্তাহ ${s.week} · জমার তারিখ: ${s.dateBn}`;
+     }
+   });
+ }
+ const oldRender=window.renderCustomers;
+ if(typeof oldRender==='function'&&!oldRender.__weeklyStatusWrapped){
+   const wrapped=function(){const result=oldRender.apply(this,arguments);decorate();return result};
+   wrapped.__weeklyStatusWrapped=true;window.renderCustomers=wrapped;
+ }
+ document.addEventListener('DOMContentLoaded',decorate);
+ window.addEventListener('pageshow',decorate);
+ setTimeout(decorate,0);
+})();
+</script>
 
 <style id="astha-two-button-footer">
 #appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
 #appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
 </style>
+</body>
+</html>
+
+
