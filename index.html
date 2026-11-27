@@ -1406,45 +1406,6 @@ body{padding-bottom:58px!important}
 @media(max-width:390px){#appFooterNav.astha-account-footer{padding-left:8px!important;padding-right:8px!important;gap:10px!important}#appFooterNav.astha-account-footer>button{min-height:37px!important;font-size:10px!important}}
 </style>
 
-
-<style id="astha-requested-ui-adjustments">
-/* Requested compact action icons, ordinary sizing */
-#customerList .weekly-status-mark{position:absolute!important;bottom:-3px!important;right:-2px!important;width:17px!important;height:17px!important;min-width:17px!important;font-size:10px!important;line-height:17px!important;border-radius:50%!important;box-shadow:0 1px 2px #0002!important}
-#customerList .cust-avatar-wrap{padding-bottom:2px!important}
-#customerList .weekly-status-label{display:none!important}
-#cashStandaloneRoot .cash-top-heading .cash-title-wrap{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;gap:12px!important}
-#cashStandaloneRoot .cash-top-heading .cash-title-wrap h2{order:1!important;flex:1!important;margin:0!important}
-#cashStandaloneRoot .cash-top-heading .cash-create-toggle{order:2!important;float:none!important;margin-left:auto!important;min-width:44px!important;min-height:44px!important;border-radius:50%!important;font-size:24px!important;background:linear-gradient(135deg,#16a34a,#047857)!important;color:#fff!important;box-shadow:0 3px 8px #0002!important}
-#cashStandaloneRoot .cash-summary .cash-stat:nth-child(2) strong{color:#15803d!important}
-#cashStandaloneRoot .cash-summary .cash-stat:nth-child(3) strong{color:#b91c1c!important}
-#cashStandaloneRoot .cash-stat.astha-onhand strong{color:#111!important}
-#cashStandaloneRoot .cash-summary{gap:9px!important}
-#asthaLedgerOverlay .astha-payment-date-edit{display:inline-flex;align-items:center;justify-content:center;margin-left:3px;border:0;border-radius:6px;background:#e8f3ff;color:#1555a6;padding:2px 5px;font-size:10px;min-height:22px}
-</style>
-<script id="astha-requested-edit-actions">
-(function(){
- let timer=null,startX=0,startY=0;
- const list=document.getElementById('customerList');
- if(list){
-  list.addEventListener('touchstart',function(e){const row=e.target.closest('.compact-customer');if(!row||e.target.closest('button,.customer-id-label'))return;const id=row.getAttribute('data-customer');if(!id)return;startX=e.touches[0].clientX;startY=e.touches[0].clientY;timer=setTimeout(()=>{if(window.editCustomer)window.editCustomer(id);},600);},{passive:true});
-  list.addEventListener('touchmove',function(e){if(!timer)return;if(Math.abs(e.touches[0].clientX-startX)>12||Math.abs(e.touches[0].clientY-startY)>12){clearTimeout(timer);timer=null;}},{passive:true});
-  ['touchend','touchcancel'].forEach(ev=>list.addEventListener(ev,function(){clearTimeout(timer);timer=null;}));
- }
- const originalLedger=window.openAsthaLedger;
- if(typeof originalLedger==='function'){
-  window.openAsthaLedger=function(id){
-   originalLedger.apply(this,arguments);
-   try{const c=(window.db?.customers||[]).find(x=>String(x.id)===String(id));if(!c)return;const payments=(c.payments||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const body=document.querySelector('#asthaLedgerOverlay tbody');if(!body)return;
-    Array.from(body.rows).forEach((row,i)=>{const payment=payments[i];if(!payment||!row.cells[1])return;row.cells[1].innerHTML=`<span>${payment.date||''}</span><button class="astha-payment-date-edit" title="তারিখ এডিট" onclick="window.editAsthaPaymentDate('${id}',${i})">✎</button>`;});
-   }catch(e){console.warn('Payment date edit UI',e);}
-  };
- }
- window.editAsthaPaymentDate=function(id,sortedIndex){const c=(window.db?.customers||[]).find(x=>String(x.id)===String(id));if(!c)return;const arr=(c.payments||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const payment=arr[sortedIndex];if(!payment)return;const modal=document.createElement('div');modal.style.cssText='position:fixed;inset:0;z-index:1000000;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px';modal.innerHTML=`<div style="width:min(330px,100%);background:white;border-radius:14px;padding:16px;box-shadow:0 8px 24px #0003"><h3 style="margin:0 0 12px">টাকা নেওয়ার তারিখ পরিবর্তন</h3><label style="display:block;font-size:13px">তারিখ<input id="asthaPayDateEditInput" type="date" value="${payment.date||''}" style="display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px;border:1px solid #ccd3dc;border-radius:8px"></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="secondary" id="asthaPayDateCancel">বাতিল</button><button id="asthaPayDateSave">সংরক্ষণ</button></div></div>`;document.body.appendChild(modal);modal.querySelector('#asthaPayDateCancel').onclick=()=>modal.remove();modal.querySelector('#asthaPayDateSave').onclick=()=>{const value=modal.querySelector('#asthaPayDateEditInput').value;if(!value)return alert('তারিখ নির্বাচন করুন');payment.date=value;save();modal.remove();window.openAsthaLedger(id);};};
- const oldCash=window.renderCash;
- if(typeof oldCash==='function'){window.renderCash=function(){oldCash.apply(this,arguments);try{const root=document.getElementById('cashStandaloneRoot');if(!root)return;const top=root.querySelector('.cash-top-heading');if(!top)return;if(top){const toggle=top.querySelector('.cash-create-toggle');if(toggle){toggle.style.marginLeft='auto';toggle.style.order='2';}const title=top.querySelector('h2');if(title)title.style.order='1';}const stats=root.querySelectorAll('.cash-stat');if(stats.length>=4){const stat=stats[3],small=stat.querySelector('small');if(small)small.textContent='আমার কাছে (খরচ করার পরে কত আছে)';stat.classList.add('astha-onhand');stat.style.background='#f1f5f9';stat.style.border='1px solid #d7dee8';stat.style.color='#111';}else if(stats.length>=3){const small=stats[2].querySelector('small');if(small)small.textContent='আমার কাছে (খরচ করার পরে কত আছে)';stats[2].classList.add('astha-onhand');}}catch(e){console.warn('Cash UI update',e);}};}
-})();
-</script>
-
 </body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
@@ -2481,40 +2442,12 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
 </style>
 
-<style id="astha-requested-ui-adjustments">
-/* Requested compact action icons, ordinary sizing */
-#customerList .weekly-status-mark{position:absolute!important;bottom:-3px!important;right:-2px!important;width:17px!important;height:17px!important;min-width:17px!important;font-size:10px!important;line-height:17px!important;border-radius:50%!important;box-shadow:0 1px 2px #0002!important}
-#customerList .cust-avatar-wrap{padding-bottom:2px!important}
-#customerList .weekly-status-label{display:none!important}
-#cashStandaloneRoot .cash-top-heading .cash-title-wrap{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;gap:12px!important}
-#cashStandaloneRoot .cash-top-heading .cash-title-wrap h2{order:1!important;flex:1!important;margin:0!important}
-#cashStandaloneRoot .cash-top-heading .cash-create-toggle{order:2!important;float:none!important;margin-left:auto!important;min-width:44px!important;min-height:44px!important;border-radius:50%!important;font-size:24px!important;background:linear-gradient(135deg,#16a34a,#047857)!important;color:#fff!important;box-shadow:0 3px 8px #0002!important}
-#cashStandaloneRoot .cash-summary .cash-stat:nth-child(2) strong{color:#15803d!important}
-#cashStandaloneRoot .cash-summary .cash-stat:nth-child(3) strong{color:#b91c1c!important}
-#cashStandaloneRoot .cash-stat.astha-onhand strong{color:#111!important}
-#cashStandaloneRoot .cash-summary{gap:9px!important}
-#asthaLedgerOverlay .astha-payment-date-edit{display:inline-flex;align-items:center;justify-content:center;margin-left:3px;border:0;border-radius:6px;background:#e8f3ff;color:#1555a6;padding:2px 5px;font-size:10px;min-height:22px}
+<style id="astha-safe-icon-size-fix">
+/* Compact customer status markers without changing normal page sizing */
+#customerList .cust-avatar-wrap{position:relative!important;overflow:visible!important}
+#customerList .weekly-status-mark{width:12px!important;height:12px!important;min-width:12px!important;min-height:12px!important;font-size:8px!important;line-height:12px!important;border-radius:50%!important;position:absolute!important;bottom:-1px!important;left:1px!important;right:auto!important;padding:0!important}
+#customerList .weeks-count-badge{font-size:8px!important;padding:1px 3px!important;line-height:1.1!important}
 </style>
-<script id="astha-requested-edit-actions">
-(function(){
- // Long-press a customer row/name to open the existing full customer editor.
- let timer=null, startX=0,startY=0, fired=false;
- const list=document.getElementById('customerList'); if(list){
-  list.addEventListener('touchstart',function(e){const row=e.target.closest('.compact-customer');if(!row||e.target.closest('button,.customer-id-label'))return;const id=row.getAttribute('data-customer');if(!id)return;fired=false;startX=e.touches[0].clientX;startY=e.touches[0].clientY;timer=setTimeout(()=>{fired=true;if(window.editCustomer)window.editCustomer(id);},600);},{passive:true});
-  list.addEventListener('touchmove',function(e){if(!timer)return;const dx=Math.abs(e.touches[0].clientX-startX),dy=Math.abs(e.touches[0].clientY-startY);if(dx>12||dy>12){clearTimeout(timer);timer=null;}},{passive:true});
-  ['touchend','touchcancel'].forEach(ev=>list.addEventListener(ev,function(){clearTimeout(timer);timer=null;}));
- }
- // Add a discreet date editor next to each recorded payment date in the customer ledger.
- const originalLedger=window.openAsthaLedger;
- if(typeof originalLedger==='function'){window.openAsthaLedger=function(id){originalLedger.apply(this,arguments);try{const c=(window.db?.customers||[]).find(x=>String(x.id)===String(id));if(!c)return;const payments=(c.payments||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const body=document.querySelector('#asthaLedgerOverlay tbody');if(!body)return;Array.from(body.rows).forEach((row,i)=>{const payment=payments[i];if(!payment)return;const dateCell=row.cells[1];if(!dateCell)return;dateCell.innerHTML=`<span>${payment.date||''}</span><button class="astha-payment-date-edit" title="তারিখ এডিট" onclick="window.editAsthaPaymentDate('${id}',${i})">✎</button>`;});}catch(e){console.warn('Payment date edit UI',e)} }};
- window.editAsthaPaymentDate=function(id,sortedIndex){const c=(window.db?.customers||[]).find(x=>String(x.id)===String(id));if(!c)return;const arr=(c.payments||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const payment=arr[sortedIndex];if(!payment)return;const current=payment.date||'';const modal=document.createElement('div');modal.style.cssText='position:fixed;inset:0;z-index:1000000;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px';modal.innerHTML=`<div style="width:min(330px,100%);background:white;border-radius:14px;padding:16px;box-shadow:0 8px 24px #0003"><h3 style="margin:0 0 12px">টাকা নেওয়ার তারিখ পরিবর্তন</h3><label style="display:block;font-size:13px">তারিখ<input id="asthaPayDateEditInput" type="date" value="${current}" style="display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px;border:1px solid #ccd3dc;border-radius:8px"></label><div style="display:flex;gap:8px;justify-content:flex-end"><button class="secondary" id="asthaPayDateCancel">বাতিল</button><button id="asthaPayDateSave">সংরক্ষণ</button></div></div>`;document.body.appendChild(modal);modal.querySelector('#asthaPayDateCancel').onclick=()=>modal.remove();modal.querySelector('#asthaPayDateSave').onclick=()=>{const value=modal.querySelector('#asthaPayDateEditInput').value;if(!value)return alert('তারিখ নির্বাচন করুন');payment.date=value;save();modal.remove();window.openAsthaLedger(id);};};
- // Refine cash overview text, summary colors, and move + button to the right.
- const oldCash=window.renderCash; if(typeof oldCash==='function'){window.renderCash=function(){oldCash.apply(this,arguments);try{const root=document.getElementById('cashStandaloneRoot');if(!root||root.querySelector('.cash-account'))return;const top=root.querySelector('.cash-top-heading');if(top){const toggle=top.querySelector('.cash-create-toggle');if(toggle){toggle.style.marginLeft='auto';toggle.style.order='2';}const title=top.querySelector('h2');if(title)title.style.order='1';}
- const stats=root.querySelectorAll('.cash-stat');if(stats.length>=4){const last=stats[3];const small=last.querySelector('small');if(small)small.textContent='আমার কাছে (খরচ করার পরে কত আছে)';last.classList.add('astha-onhand');last.style.background='#f1f5f9';last.style.border='1px solid #d7dee8';last.style.color='#111';}else if(stats.length>=3){const third=stats[2].querySelector('small');if(third)third.textContent='আমার কাছে (খরচ করার পরে কত আছে)';stats[2].classList.add('astha-onhand');}
- }catch(e){console.warn('Cash UI update',e)}}}
-})();
-</script>
-
 </body>
 </html>
 
