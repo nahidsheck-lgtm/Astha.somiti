@@ -150,10 +150,21 @@ async function openUserData(user) {
   stopCloudListener();
   activeUser = user;
   window.__asthaGoogleUser = user;
-  status('আপনার Gmail-এর ব্যক্তিগত ডেটা লোড হচ্ছে…');
+  window.__asthaLocalCacheLoaded = false;
+  status('আপনার Gmail-এর ব্যক্তিগত ডেটা যাচাই হচ্ছে…');
   try {
     const ref = doc(firestore, 'appSettings', user.uid);
-    const snap = await getDoc(ref);
+    // Show this Gmail's own saved device copy immediately; cloud refresh continues in background.
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem('astha_somiti_v5_user_' + user.uid) || 'null'); } catch (_) {}
+    if (validData(cached)) {
+      window.setAsthaData(cached, user.uid);
+      window.openAsthaAfterGoogleLogin?.();
+      window.__asthaLocalCacheLoaded = true;
+      announceAuthReady(true);
+      status('ডিভাইসে সংরক্ষিত হিসাব খুলেছে; ক্লাউডের সর্বশেষ তথ্য মিলিয়ে নেওয়া হচ্ছে…');
+    }
+    const snap = await withTimeout(getDoc(ref), 9000, 'ক্লাউড যাচাই করতে দেরি হচ্ছে। ডিভাইসে সংরক্ষিত হিসাব দেখানো হয়েছে; ইন্টারনেট ঠিক হলে আবার Sync হবে।');
     if (activeUser?.uid !== user.uid) return;
     if (snap.exists()) {
       const payload = snap.data();
@@ -273,6 +284,7 @@ window.asthaLogout = async function () {
     stopCloudListener();
     activeUser = null;
     window.__asthaGoogleUser = null;
+    window.__asthaLocalCacheLoaded = false;
     openingUid = null;
     applyingCloud = false;
     localDirty = false;
@@ -342,10 +354,16 @@ if (publicLedgerId) {
     })(), 15000, 'Firebase সেশন যাচাই করতে ১৫ সেকেন্ডের বেশি সময় লাগছে। ইন্টারনেট ও Firestore Rules যাচাই করে আবার চেষ্টা করুন।');
   } catch (error) {
     console.error('Auth restore failed', error);
-    activeUser = null;
-    window.__asthaGoogleUser = null;
     stopCloudListener();
-    status('সেশন যাচাই সম্পন্ন হয়নি: ' + (error.message || error));
-    announceAuthReady(false);
+    if (window.__asthaLocalCacheLoaded && window.__asthaGoogleUser?.uid === user.uid) {
+      // Keep the already-open local copy usable if the network/Firestore is slow.
+      status('ডিভাইসের সংরক্ষিত হিসাব চালু আছে। ক্লাউড Sync এখন পাওয়া যাচ্ছে না: ' + (error.message || error));
+      announceAuthReady(true);
+    } else {
+      activeUser = null;
+      window.__asthaGoogleUser = null;
+      status('সেশন যাচাই সম্পন্ন হয়নি: ' + (error.message || error));
+      announceAuthReady(false);
+    }
   }
 });

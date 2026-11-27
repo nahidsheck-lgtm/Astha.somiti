@@ -1406,6 +1406,9 @@ body{padding-bottom:58px!important}
 @media(max-width:390px){#appFooterNav.astha-account-footer{padding-left:8px!important;padding-right:8px!important;gap:10px!important}#appFooterNav.astha-account-footer>button{min-height:37px!important;font-size:10px!important}}
 </style>
 
+
+
+
 </body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
@@ -1523,7 +1526,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       let finished=false;
       const done=()=>{ if(finished)return; finished=true; clearTimeout(timer); resolve(); };
       window.addEventListener('astha-firebase-auth-ready',done,{once:true});
-      const timer=setTimeout(done,18000);
+      const timer=setTimeout(done,10000);
     });
   }
 
@@ -1783,7 +1786,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   overlay.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto';
   const box=document.createElement('div');
   box.style.cssText='background:#fff;color:#222;width:min(560px,100%);max-height:94vh;overflow:auto;padding:18px;border-radius:12px;box-shadow:0 8px 30px #0004';
-  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">গ্রাহকের তথ্য ও লোনের টাকা এডিট</h3><button type="button" id="asthaEditClose" class="secondary">বন্ধ</button></div><p style="font-size:13px;color:#666">ভুল করে দেওয়া লোনের মূল টাকা এখানে সংশোধন করুন। আগের জমা/পেমেন্টের রেকর্ড মুছবে না।</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0"><label>গ্রাহকের নাম<input id="aeName" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>মোবাইল নম্বর<input id="aePhone" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label style="grid-column:1/-1">লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:11px;font-size:18px" /></label><label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" step="1" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>লোন শুরুর তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><div style="grid-column:1/-1;background:#f7f7f7;padding:10px;border-radius:8px;font-size:14px"><div>সার্ভিস চার্জ (২০%): <b id="aeService"></b></div><div>মোট ফেরত: <b id="aeTotal"></b></div><div>সাপ্তাহিক কিস্তি: <b id="aeInstall"></b></div></div></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="secondary" id="aeCancel">বাতিল</button><button type="button" id="aeSave">পরিবর্তন সংরক্ষণ</button></div>';
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">গ্রাহকের তথ্য ও লোনের টাকা এডিট</h3><button type="button" id="asthaEditClose" class="secondary">বন্ধ</button></div><p style="font-size:13px;color:#666">ভুল করে দেওয়া লোনের মূল টাকা এখানে সংশোধন করুন। আগের জমা/পেমেন্টের রেকর্ড মুছবে না।</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0"><label>গ্রাহকের নাম<input id="aeName" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>মোবাইল নম্বর<input id="aePhone" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label style="grid-column:1/-1">লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:11px;font-size:18px" /></label><label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" step="1" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>লোন দেওয়ার আসল তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><div style="grid-column:1/-1;background:#f7f7f7;padding:10px;border-radius:8px;font-size:14px"><div>সার্ভিস চার্জ (২০%): <b id="aeService"></b></div><div>মোট ফেরত: <b id="aeTotal"></b></div><div>সাপ্তাহিক কিস্তি: <b id="aeInstall"></b></div></div></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="secondary" id="aeCancel">বাতিল</button><button type="button" id="aeSave">পরিবর্তন সংরক্ষণ</button></div>';
   overlay.appendChild(box);document.body.appendChild(overlay);
   const $=s=>box.querySelector(s), moneyFmt=n=>'৳ '+Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2});
   $('#aeName').value=c.name||'';$('#aePhone').value=c.phone||'';
@@ -1937,7 +1940,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      <p style="font-size:12px;color:#64748b">লোনের টাকা ভুল হলে এখানে সংশোধন করুন। আগের জমার রেকর্ড থাকবে।</p>
      <label>লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
      <label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" max="260" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
-     <label>লোন শুরুর তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
+     <label>লোন দেওয়ার আসল তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
      <div id="aeLoanPreview" style="font-size:12px;color:#475569;margin-top:8px"></div>
     </details>
     <div style="display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:-16px;background:#fff;padding:12px 0 0">
@@ -2332,7 +2335,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
  function cashTotalsFor(a){return a.entries.reduce((t,x)=>{t[x.type==='deposit'?'deposit':'withdraw']+=Number(x.amount||0);return t},{deposit:0,withdraw:0})}
  window.renderCash=function(){const root=$('cashStandaloneRoot');if(!root)return;initStore();if(activeCashAccount){let a=db.cash.accounts.find(x=>x.id===activeCashAccount);if(!a){activeCashAccount=null;return renderCash()}return renderCashDetail(a)}
  const all=db.cash.accounts;let total=all.reduce((s,a)=>s+cashBalance(a),0),deposit=all.reduce((s,a)=>s+cashTotalsFor(a).deposit,0),withdraw=all.reduce((s,a)=>s+cashTotalsFor(a).withdraw,0);
- root.innerHTML=`<div class="cash-top cash-top-heading"><div class="cash-title-wrap"><button type="button" class="cash-create-toggle" aria-label="নতুন ব্যক্তিগত হিসাব যোগ করুন" title="নতুন ব্যক্তিগত হিসাব যোগ করুন" onclick="toggleCashCreate()">＋</button><h2>ক্যাশ হিসাব</h2></div></div><div class="cash-summary"><div class="cash-stat"><small>মোট হিসাব</small><strong>${bn(all.length)}</strong></div><div class="cash-stat"><small>মোট জমা</small><strong>${cMoney(deposit)}</strong></div><div class="cash-stat"><small>মোট ব্যালেন্স</small><strong>${cMoney(total)}</strong></div></div><div class="cash-stat" style="margin-bottom:10px"><small>খরচ</small><strong>${cMoney(withdraw)}</strong></div><div class="row" style="align-items:center"><h3 style="margin:8px 0">ব্যক্তিগত হিসাবের তালিকা</h3><span class="muted">${bn(all.length)} টি</span></div><div id="cashAccountList">${all.map(a=>`<div class="cash-account"><div class="cash-account-main"><div class="cash-avatar">${esc((a.name||'?').trim().slice(0,1))}</div><div class="cash-account-name">${esc(a.name)}</div><div class="cash-account-balance">${cMoney(cashBalance(a))}</div></div><div class="cash-account-actions"><button onclick="openStandaloneCashAccount('${a.id}')">হিসাব খুলুন</button><button class="secondary" onclick="renameStandaloneCashAccount('${a.id}')">নাম এডিট</button><button class="danger" onclick="deleteStandaloneCashAccount('${a.id}')">ডিলিট</button></div></div>`).join('')||'<div class="panel muted">এখনো কোনো ব্যক্তিগত ক্যাশ হিসাব যোগ করা হয়নি। নিচের বাটনে চাপ দিয়ে নতুন হিসাব খুলুন।</div>'}</div><div id="cashCreateForm" class="${cashCreateExpanded?'':'hidden'}"></div>`;
+ root.innerHTML=`<div class="cash-top cash-top-heading"><div class="cash-title-wrap"><h2>ক্যাশ হিসাব</h2><button type="button" class="cash-create-toggle" aria-label="নতুন ব্যক্তিগত হিসাব যোগ করুন" title="নতুন ব্যক্তিগত হিসাব যোগ করুন" onclick="toggleCashCreate()">＋</button></div></div><div class="cash-summary"><div class="cash-stat"><small>মোট জমা</small><strong>${cMoney(deposit)}</strong></div><div class="cash-stat"><small>মোট ব্যালেন্স</small><strong>${cMoney(total)}</strong></div></div><div class="cash-stat" style="margin-bottom:10px"><small>খরচ</small><strong>${cMoney(withdraw)}</strong></div><div class="row" style="align-items:center"><h3 style="margin:8px 0">ব্যক্তিগত হিসাবের তালিকা</h3><span class="muted">${bn(all.length)} টি</span></div><div id="cashAccountList">${all.map(a=>`<div class="cash-account"><div class="cash-account-main"><div class="cash-avatar">${esc((a.name||'?').trim().slice(0,1))}</div><div class="cash-account-name">${esc(a.name)}</div><div class="cash-account-balance">${cMoney(cashBalance(a))}</div></div><div class="cash-account-actions"><button onclick="openStandaloneCashAccount('${a.id}')">হিসাব খুলুন</button><button class="secondary" onclick="renameStandaloneCashAccount('${a.id}')">নাম এডিট</button><button class="danger" onclick="deleteStandaloneCashAccount('${a.id}')">ডিলিট</button></div></div>`).join('')||'<div class="panel muted">এখনো কোনো ব্যক্তিগত ক্যাশ হিসাব যোগ করা হয়নি। নিচের বাটনে চাপ দিয়ে নতুন হিসাব খুলুন।</div>'}</div><div id="cashCreateForm" class="${cashCreateExpanded?'':'hidden'}"></div>`;
  };
  window.toggleCashCreate=function(){cashCreateExpanded=!cashCreateExpanded;const box=$('cashCreateForm');if(!box)return;box.classList.toggle('hidden',!cashCreateExpanded);if(cashCreateExpanded)window.showStandaloneCashCreate();else box.innerHTML='';};
  window.showStandaloneCashCreate=function(){let box=$('cashCreateForm');if(!box)return;box.innerHTML=`<div class="cash-form"><h3>নতুন ব্যক্তিগত হিসাব</h3><label>হিসাবের নাম</label><input id="newCashAccountName" placeholder="যেমন: নিজের ক্যাশ / দোকানের ক্যাশ"><label>শুরুর ব্যালেন্স (৳)</label><input id="newCashAccountOpening" type="number" min="0" value="0" placeholder="০"><div class="row" style="margin-top:10px"><button onclick="createStandaloneCashAccount()">হিসাব সংরক্ষণ</button><button class="secondary" onclick="$('cashCreateForm').innerHTML=''">বাতিল</button></div></div>`;box.scrollIntoView({behavior:'smooth',block:'nearest'})};
@@ -2340,7 +2343,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
  window.openStandaloneCashAccount=function(id){activeCashAccount=id;renderCash()};
  window.renameStandaloneCashAccount=function(id){let a=db.cash.accounts.find(x=>x.id===id);if(!a)return;let n=prompt('হিসাবের নাম:',a.name);if(n===null)return;if(!n.trim())return alert('নাম খালি রাখা যাবে না');a.name=n.trim();save();renderCash()};
  window.deleteStandaloneCashAccount=function(id){let a=db.cash.accounts.find(x=>x.id===id);if(!a)return;if(!confirm('“'+a.name+'” হিসাবটি ও এর সব লেনদেন ডিলিট করবেন?'))return;db.cash.accounts=db.cash.accounts.filter(x=>x.id!==id);save();renderCash()};
- function renderCashDetail(a){let t=cashTotalsFor(a);const root=$('cashStandaloneRoot');root.innerHTML=`<div class="cash-top"><div class="row" style="align-items:center"><button class="secondary" style="background:#fff;color:#b91c1c;padding:6px 10px" onclick="backStandaloneCashList()">‹ ফিরে যান</button><h2 style="flex:1;text-align:center">${esc(a.name)}</h2><button class="secondary" style="background:#fff;color:#b91c1c;padding:6px 10px" onclick="renameStandaloneCashAccount('${a.id}')">এডিট</button></div></div><div class="cash-summary"><div class="cash-stat cash-opening-edit" title="দীর্ঘক্ষণ চাপ দিয়ে আমার টাকা পরিবর্তন করুন" onpointerdown="cashOpeningHoldStart('${a.id}')" onpointerup="cashOpeningHoldEnd()" onpointerleave="cashOpeningHoldEnd()" onpointercancel="cashOpeningHoldEnd()" oncontextmenu="event.preventDefault();editStandaloneCashOpening('${a.id}')"><small>আমার টাকা</small><strong>${cMoney(a.opening)}</strong><small class="cash-edit-hint">চেপে ধরে এডিট</small></div><div class="cash-stat"><small>মোট জমা</small><strong>${cMoney(t.deposit)}</strong></div><div class="cash-stat"><small>খরচ</small><strong>${cMoney(t.withdraw)}</strong></div></div><div class="cash-stat cash-current"><small>বর্তমান ব্যালেন্স</small><strong>${cMoney(cashBalance(a))}</strong></div><div class="cash-switch"><button class="${cashEntryMode==='deposit'?'active':''}" onclick="setStandaloneCashMode('deposit')">জমা নিছি</button><button class="${cashEntryMode==='withdraw'?'active':''}" onclick="setStandaloneCashMode('withdraw')">খরচ</button></div><div class="cash-form"><h3>${cashEntryMode==='deposit'?'জমা এন্ট্রি':'খরচ / উত্তোলন এন্ট্রি'}</h3><label>টাকার পরিমাণ (৳)</label><input id="standaloneCashAmount" type="number" min="1" inputmode="decimal" placeholder="টাকার পরিমাণ"><label>তারিখ</label><input id="standaloneCashDate" type="date" value="${new Date().toISOString().slice(0,10)}"><label>বিবরণ</label><textarea id="standaloneCashNote" rows="2" placeholder="লেনদেনের বিবরণ"></textarea><button style="width:100%;margin-top:10px;background:#168344" onclick="saveStandaloneCashEntry()">${cashEntryMode==='deposit'?'জমা সংরক্ষণ':'খরচ সংরক্ষণ'}</button></div><h3 style="margin:14px 2px 8px">লেনদেনের ইতিহাস</h3><div>${a.entries.slice().map((x,i)=>({...x,_i:i})).reverse().map(x=>`<div class="cash-history-item"><div style="min-width:0;flex:1"><b class="${x.type==='deposit'?'in':'out'}">${x.type==='deposit'?'জমা +':'খরচ −'} ${cMoney(x.amount)}</b><small>${esc(x.date||'')} · ${esc(x.note||'বিবরণ নেই')}</small></div><div class="cash-history-actions"><button class="secondary" onclick="editStandaloneCashEntry('${a.id}',${x._i})">এডিট</button><button class="danger" onclick="deleteStandaloneCashEntry('${a.id}',${x._i})">×</button></div></div>`).join('')||'<p class="muted">এখনো কোনো লেনদেন নেই।</p>'}</div>`}
+ function renderCashDetail(a){let t=cashTotalsFor(a);const root=$('cashStandaloneRoot');root.innerHTML=`<div class="cash-top"><div class="row" style="align-items:center"><button class="secondary" style="background:#fff;color:#b91c1c;padding:6px 10px" onclick="backStandaloneCashList()">‹ ফিরে যান</button><h2 style="flex:1;text-align:center">${esc(a.name)}</h2><button class="secondary" style="background:#fff;color:#b91c1c;padding:6px 10px" onclick="renameStandaloneCashAccount('${a.id}')">এডিট</button></div></div><div class="cash-summary"><div class="cash-stat"><small>মোট জমা</small><strong>${cMoney(t.deposit)}</strong></div><div class="cash-stat"><small>খরচ</small><strong>${cMoney(t.withdraw)}</strong></div></div><div class="cash-stat cash-current"><small>বর্তমান ব্যালেন্স</small><strong>${cMoney(cashBalance(a))}</strong></div><div class="cash-switch"><button class="${cashEntryMode==='deposit'?'active':''}" onclick="setStandaloneCashMode('deposit')">জমা নিছি</button><button class="${cashEntryMode==='withdraw'?'active':''}" onclick="setStandaloneCashMode('withdraw')">খরচ</button></div><div class="cash-form"><h3>${cashEntryMode==='deposit'?'জমা এন্ট্রি':'খরচ / উত্তোলন এন্ট্রি'}</h3><label>টাকার পরিমাণ (৳)</label><input id="standaloneCashAmount" type="number" min="1" inputmode="decimal" placeholder="টাকার পরিমাণ"><label>তারিখ</label><input id="standaloneCashDate" type="date" value="${new Date().toISOString().slice(0,10)}"><label>বিবরণ</label><textarea id="standaloneCashNote" rows="2" placeholder="লেনদেনের বিবরণ"></textarea><button style="width:100%;margin-top:10px;background:#168344" onclick="saveStandaloneCashEntry()">${cashEntryMode==='deposit'?'জমা সংরক্ষণ':'খরচ সংরক্ষণ'}</button></div><h3 style="margin:14px 2px 8px">লেনদেনের ইতিহাস</h3><div>${a.entries.slice().map((x,i)=>({...x,_i:i})).reverse().map(x=>`<div class="cash-history-item"><div style="min-width:0;flex:1"><b class="${x.type==='deposit'?'in':'out'}">${x.type==='deposit'?'জমা +':'খরচ −'} ${cMoney(x.amount)}</b><small>${esc(x.date||'')} · ${esc(x.note||'বিবরণ নেই')}</small></div><div class="cash-history-actions"><button class="secondary" onclick="editStandaloneCashEntry('${a.id}',${x._i})">এডিট</button><button class="danger" onclick="deleteStandaloneCashEntry('${a.id}',${x._i})">×</button></div></div>`).join('')||'<p class="muted">এখনো কোনো লেনদেন নেই।</p>'}</div>`}
  window.backStandaloneCashList=function(){activeCashAccount=null;renderCash()};
  window.setStandaloneCashMode=function(m){cashEntryMode=m;renderCash()};
  window.saveStandaloneCashEntry=function(){let a=db.cash.accounts.find(x=>x.id===activeCashAccount),amount=Number($('standaloneCashAmount')?.value),date=$('standaloneCashDate')?.value,note=$('standaloneCashNote')?.value.trim();if(!a)return;if(!Number.isFinite(amount)||amount<=0)return alert('সঠিক টাকার পরিমাণ লিখুন');if(!date)return alert('তারিখ নির্বাচন করুন');a.entries.push({type:cashEntryMode,amount,date,note});save();renderCash()};
@@ -2441,6 +2444,76 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
 #appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
 </style>
+
+<style id="astha-user-requested-polish-v1">
+#cashStandaloneRoot .cash-title-wrap{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important}
+#cashStandaloneRoot .cash-title-wrap h2{margin:0!important}
+#cashStandaloneRoot .cash-title-wrap .cash-create-toggle{order:2!important;margin-left:auto!important}
+#cashStandaloneRoot .cash-stat[style*="margin-bottom:10px"] strong,
+#cashStandaloneRoot .cash-stat .expense-value{color:#dc2626!important}
+#cashStandaloneRoot .cash-stat[style*="margin-bottom:10px"] strong{color:#dc2626!important}
+#cashStandaloneRoot .cash-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#cashStandaloneRoot .cash-opening-edit{display:none!important}
+#customerList .loan-history-shortcut{display:none!important}
+#customerList .compact-customer{touch-action:pan-y}
+#asthaEditModal{position:fixed;inset:0;z-index:1000001;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}
+#asthaEditModal .aem-card{width:min(460px,100%);max-height:90vh;overflow:auto;background:#fff;color:#111827;border-radius:18px;padding:18px;box-shadow:0 18px 60px #0005}
+#asthaEditModal .aem-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+#asthaEditModal .aem-head h3{margin:0;color:#7f1d1d;font-size:17px}
+#asthaEditModal label{display:block;font-size:12px!important;font-weight:700;margin:10px 0 4px!important;color:#374151}
+#asthaEditModal input,#asthaEditModal textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#111827;font-size:15px}
+#asthaEditModal .aem-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.cash-history-item{touch-action:pan-y}
+</style>
+<script id="astha-user-requested-polish-v1">
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function modal(title, fields, onSave){
+  $('asthaEditModal')?.remove();
+  const wrap=document.createElement('div');wrap.id='asthaEditModal';
+  const inputs=fields.map(f=>{const id="aem_"+f.id;const label="<label for=\""+id+"\">"+esc(f.label)+"</label>";if(f.type==="textarea")return label+"<textarea id=\""+id+"\" rows=\"3\">"+esc(f.value??"")+"</textarea>";return label+"<input id=\""+id+"\" type=\""+(f.type||"text")+"\" value=\""+esc(f.value??"")+"\""+(f.min!==undefined?" min=\""+f.min+"\"":"")+(f.step?" step=\""+f.step+"\"":"")+(f.inputmode?" inputmode=\""+f.inputmode+"\"":"")+">"}).join("");
+  wrap.innerHTML=`<div class="aem-card" role="dialog" aria-modal="true"><div class="aem-head"><h3>${esc(title)}</h3><button type="button" class="secondary" id="aemClose">বন্ধ</button></div>${inputs}<div class="aem-actions"><button type="button" class="secondary" id="aemCancel">বাতিল</button><button type="button" id="aemSave">সংরক্ষণ</button></div></div>`;
+  document.body.appendChild(wrap);
+  const close=()=>wrap.remove();$('aemClose').onclick=close;$('aemCancel').onclick=close;
+  $('aemSave').onclick=()=>{const values={};fields.forEach(f=>values[f.id]=$(('aem_'+f.id)).value);if(onSave(values,close)!==false)close()};
+  wrap.addEventListener('click',e=>{if(e.target===wrap)close()});
+  setTimeout(()=>wrap.querySelector('input,textarea')?.focus(),40);
+ }
+ window.renameStandaloneCashAccount=function(id){
+  const a=db?.cash?.accounts?.find(x=>String(x.id)===String(id));if(!a)return;
+  modal('পরিচিত ব্যক্তির নাম এডিট',[{id:'name',label:'নাম',value:a.name}],v=>{const n=v.name.trim();if(!n){alert('নাম খালি রাখা যাবে না');return false}a.name=n;save();renderCash()});
+ };
+ window.editStandaloneCashEntry=function(id,i){
+  const a=db?.cash?.accounts?.find(x=>String(x.id)===String(id)),x=a?.entries?.[i];if(!x)return;
+  modal('লেনদেন এডিট',[{id:'amount',label:'টাকার পরিমাণ (৳)',type:'number',min:'1',step:'0.01',value:x.amount},{id:'date',label:'তারিখ',type:'date',value:x.date||new Date().toISOString().slice(0,10)},{id:'note',label:'বিবরণ',type:'textarea',value:x.note||''}],v=>{const n=Number(v.amount);if(!Number.isFinite(n)||n<=0||!v.date){alert('সঠিক টাকা ও তারিখ দিন');return false}x.amount=n;x.date=v.date;x.note=v.note.trim();save();renderCash()});
+ };
+ window.editPayment=function(id,i){
+  const c=db?.customers?.find(x=>String(x.id)===String(id)),p=c?.payments?.[i];if(!c||!p)return;
+  modal('জমার তথ্য এডিট',[{id:'amount',label:'জমার পরিমাণ (৳)',type:'number',min:'1',step:'0.01',value:p.amount},{id:'date',label:'টাকা নেওয়ার তারিখ',type:'date',value:p.date||''}],v=>{const n=Number(v.amount),max=Number(c.total)-(totals(c).paid-Number(p.amount));if(!Number.isFinite(n)||n<=0||!v.date||n>max){alert('জমার টাকা বা তারিখ সঠিক নয়। বকেয়ার বেশি জমা দেওয়া যাবে না।');return false}p.amount=n;p.date=v.date;save();renderDetail(c);renderCustomers()});
+ };
+ window.editLatestPaymentDate=function(id){
+  const c=db?.customers?.find(x=>String(x.id)===String(id)),p=c?.payments?.[c.payments.length-1];if(!c||!p)return alert('এই গ্রাহকের জমার তারিখ নেই');
+  modal('টাকা নেওয়ার তারিখ এডিট',[{id:'date',label:'তারিখ',type:'date',value:p.date||''}],v=>{if(!v.date){alert('তারিখ নির্বাচন করুন');return false}p.date=v.date;save();renderCustomers();if(!$('detail')?.classList.contains('hidden'))renderDetail(c)});
+ };
+ // Customer list row blank space is deliberately inert; only explicit controls open actions.
+ document.addEventListener('click',function(e){const card=e.target.closest('#customerList .compact-customer');if(!card)return;if(e.target.closest('button,input,a,[role="button"]'))return;e.preventDefault();e.stopPropagation();},true);
+ // Long-press a payment row or cash-history row to edit that exact record.
+ let hold=null;
+ document.addEventListener('pointerdown',function(e){
+  const cash=e.target.closest('#cashStandaloneRoot .cash-history-item');
+  if(cash && !e.target.closest('button')){hold=setTimeout(()=>{hold=null;cash.querySelector('button[onclick*="editStandaloneCashEntry"]')?.click()},650);return}
+  const pay=e.target.closest('#detail tbody tr');
+  if(pay && !e.target.closest('button')){hold=setTimeout(()=>{hold=null;pay.querySelector('button[onclick*="editPayment"]')?.click()},650)}
+ });
+ ['pointerup','pointercancel','pointerleave','scroll'].forEach(ev=>document.addEventListener(ev,()=>{if(hold){clearTimeout(hold);hold=null}},{passive:true}));
+ // Always make the collection date explicit in the customer summary and keep the loan start date visible.
+ const oldRenderCustomers=window.renderCustomers;
+ if(typeof oldRenderCustomers==='function')window.renderCustomers=function(){oldRenderCustomers.apply(this,arguments);(db?.customers||[]).forEach(c=>{const card=[...document.querySelectorAll('#customerList .compact-customer')].find(x=>x.dataset.customer===String(c.id));if(!card)return;const info=card.querySelector('.customer-info-panel');if(info&&!info.querySelector('.loan-start-date')){const d=document.createElement('div');d.className='loan-start-date';d.style.gridColumn='1/-1';d.innerHTML='📅 <b>লোন দেওয়ার তারিখ:</b> '+esc(c.startDate||'তারিখ নেই');info.appendChild(d)}const latest=card.querySelector('.latest-payment-date');if(latest)latest.style.display='block';const main=card.querySelector('.cust-main');if(main&&!main.querySelector('.latest-collection-label')){const stamp=document.createElement('small');stamp.className='latest-collection-label';stamp.style.cssText='display:block;font-size:10px;color:#475569;line-height:1.25;margin-top:2px';const last=(c.payments||[]).slice(-1)[0];stamp.textContent=last?'শেষ জমা: '+(last.date||'তারিখ নেই'):'শেষ জমা: এখনো হয়নি';main.appendChild(stamp)}});};
+})();
+</script>
+
 </body>
 </html>
 
