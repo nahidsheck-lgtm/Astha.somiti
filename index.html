@@ -1406,51 +1406,6 @@ body{padding-bottom:58px!important}
 @media(max-width:390px){#appFooterNav.astha-account-footer{padding-left:8px!important;padding-right:8px!important;gap:10px!important}#appFooterNav.astha-account-footer>button{min-height:37px!important;font-size:10px!important}}
 </style>
 
-<style id="astha-final-user-request-patch">
-/* Reduce customer weekly marks and detail panel density */
-#customerList .weekly-status-mark{width:15px!important;height:15px!important;min-width:15px!important;min-height:15px!important;font-size:9px!important;border-width:1px!important;left:-4px!important;top:3px!important}
-#customerList .weeks-count-badge{font-size:8px!important;padding:1px 3px!important;line-height:1.1!important}
-#customerList .customer-info-panel{padding:7px 9px!important;margin:5px 0!important;border-radius:10px!important;font-size:12px!important;line-height:1.35!important}
-#customerList .customer-info-panel>div{margin:3px 0!important}
-/* Cash summary: three cards, hide count; only balance amount red */
-#cashStandaloneRoot .cash-summary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:8px 0!important}
-#cashStandaloneRoot .cash-summary .cash-stat{padding:10px 5px!important;margin:0!important;min-width:0!important;text-align:center!important}
-#cashStandaloneRoot .cash-summary .cash-stat:first-child{display:none!important}
-#cashStandaloneRoot .cash-summary .cash-stat small{font-size:11px!important}
-#cashStandaloneRoot .cash-summary .cash-stat strong{font-size:14px!important;color:inherit!important;white-space:nowrap!important}
-#cashStandaloneRoot .cash-summary .cash-stat.balance-card strong{color:#b91c1c!important}
-#cashStandaloneRoot .cash-account-balance{color:#b91c1c!important}
-#cashStandaloneRoot .cash-account-actions button.rename-hidden{display:none!important}
-#cashStandaloneRoot .cash-account-name{user-select:none;-webkit-user-select:none;touch-action:manipulation}
-#appFooterNav.astha-account-footer{padding:6px 10px!important;gap:8px!important;min-height:48px!important}
-#appFooterNav.astha-account-footer>button{min-height:36px!important;padding:5px 8px!important;font-size:11px!important;max-width:38vw!important}
-</style>
-<script id="astha-final-user-request-patch-script">
-(function(){
- const originalRender=window.renderCash;
- if(typeof originalRender==='function'&&!originalRender.__finalCashPatch){
-  const patched=function(){originalRender.apply(this,arguments);const root=document.getElementById('cashStandaloneRoot');if(!root)return;
-   if(document.getElementById('cashAccountList')){
-    const summary=root.querySelector('.cash-summary');if(summary){summary.querySelectorAll('.cash-stat').forEach((card,i)=>{const sm=card.querySelector('small');if(!sm)return;const label=sm.textContent.trim();if(label==='মোট হিসাব'){card.remove()}else if(label==='মোট ব্যালেন্স'){card.classList.add('balance-card')}else if(label==='মোট জমা'){sm.textContent='মোট জমা'} });
-     const extra=[...root.querySelectorAll('.cash-stat')].find(x=>x.querySelector('small')?.textContent.trim()==='মোট উত্তোলন');if(extra){extra.querySelector('small').textContent='খরচ';extra.style.margin='0';extra.style.padding='10px 5px';extra.style.textAlign='center';summary.appendChild(extra);}
-    }
-   }else{
-    const summary=root.querySelector('.cash-summary');if(summary){summary.querySelectorAll('.cash-stat').forEach(card=>{const sm=card.querySelector('small');if(!sm)return;if(sm.textContent.trim()==='মোট হিসাব')card.remove();if(sm.textContent.trim()==='মোট ব্যালেন্স')card.classList.add('balance-card')});
-      const expense=[...root.querySelectorAll('.cash-stat')].find(x=>x.querySelector('small')?.textContent.trim()==='মোট উত্তোলন');if(expense){expense.querySelector('small').textContent='খরচ';expense.style.margin='0';summary.appendChild(expense)}
-    }
-    root.querySelectorAll('.cash-account-actions button').forEach(b=>{if(b.textContent.trim()==='নাম এডিট')b.classList.add('rename-hidden')});
-    root.querySelectorAll('.cash-account-name').forEach(el=>{if(el.dataset.longPressBound)return;el.dataset.longPressBound='1';let timer=null;const begin=()=>{timer=setTimeout(()=>{const card=el.closest('.cash-account'),btn=card?.querySelector('.cash-account-actions button.rename-hidden');if(btn)btn.click();timer=null},650)};const cancel=()=>{if(timer){clearTimeout(timer);timer=null}};el.addEventListener('touchstart',begin,{passive:true});el.addEventListener('touchend',cancel);el.addEventListener('touchmove',cancel);el.addEventListener('mousedown',begin);el.addEventListener('mouseup',cancel);el.addEventListener('mouseleave',cancel);});
-   }
-  };
-  patched.__finalCashPatch=true;window.renderCash=patched;
- }
- // Long press on any customer card opens its full edit dialog (existing editCustomer modal).
- function bindLongPress(){document.querySelectorAll('#customerList .compact-customer').forEach(card=>{if(card.dataset.editLongPressBound)return;card.dataset.editLongPressBound='1';let timer=null;const id=card.dataset.customer;const start=()=>{timer=setTimeout(()=>{timer=null;if(window.editCustomer)window.editCustomer(id)},700)};const cancel=()=>{if(timer){clearTimeout(timer);timer=null}};card.addEventListener('touchstart',start,{passive:true});card.addEventListener('touchend',cancel);card.addEventListener('touchmove',cancel);card.addEventListener('mousedown',start);card.addEventListener('mouseup',cancel);card.addEventListener('mouseleave',cancel);});}
- const old=window.renderCustomers;if(typeof old==='function'&&!old.__bindEditLongPress){window.renderCustomers=function(){const r=old.apply(this,arguments);bindLongPress();return r};window.renderCustomers.__bindEditLongPress=true;}
- document.addEventListener('DOMContentLoaded',bindLongPress);setTimeout(bindLongPress,500);setTimeout(bindLongPress,1500);
-})();
-</script>
-
 </body></html>`;
   const frame=document.createElement('iframe');
   frame.setAttribute('title','জমার রসিদ প্রিন্ট');
@@ -2486,51 +2441,6 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
 #appFooterNav.astha-account-footer{display:flex!important;justify-content:space-evenly!important;align-items:center!important;gap:18px!important;padding-left:16px!important;padding-right:16px!important}
 #appFooterNav.astha-account-footer>button{flex:0 1 180px!important;max-width:42vw!important;min-height:48px!important;font-size:13px!important;border-radius:12px!important}
 </style>
-<style id="astha-final-user-request-patch">
-/* Reduce customer weekly marks and detail panel density */
-#customerList .weekly-status-mark{width:15px!important;height:15px!important;min-width:15px!important;min-height:15px!important;font-size:9px!important;border-width:1px!important;left:-4px!important;top:3px!important}
-#customerList .weeks-count-badge{font-size:8px!important;padding:1px 3px!important;line-height:1.1!important}
-#customerList .customer-info-panel{padding:7px 9px!important;margin:5px 0!important;border-radius:10px!important;font-size:12px!important;line-height:1.35!important}
-#customerList .customer-info-panel>div{margin:3px 0!important}
-/* Cash summary: three cards, hide count; only balance amount red */
-#cashStandaloneRoot .cash-summary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:8px 0!important}
-#cashStandaloneRoot .cash-summary .cash-stat{padding:10px 5px!important;margin:0!important;min-width:0!important;text-align:center!important}
-#cashStandaloneRoot .cash-summary .cash-stat:first-child{display:none!important}
-#cashStandaloneRoot .cash-summary .cash-stat small{font-size:11px!important}
-#cashStandaloneRoot .cash-summary .cash-stat strong{font-size:14px!important;color:inherit!important;white-space:nowrap!important}
-#cashStandaloneRoot .cash-summary .cash-stat.balance-card strong{color:#b91c1c!important}
-#cashStandaloneRoot .cash-account-balance{color:#b91c1c!important}
-#cashStandaloneRoot .cash-account-actions button.rename-hidden{display:none!important}
-#cashStandaloneRoot .cash-account-name{user-select:none;-webkit-user-select:none;touch-action:manipulation}
-#appFooterNav.astha-account-footer{padding:6px 10px!important;gap:8px!important;min-height:48px!important}
-#appFooterNav.astha-account-footer>button{min-height:36px!important;padding:5px 8px!important;font-size:11px!important;max-width:38vw!important}
-</style>
-<script id="astha-final-user-request-patch-script">
-(function(){
- const originalRender=window.renderCash;
- if(typeof originalRender==='function'&&!originalRender.__finalCashPatch){
-  const patched=function(){originalRender.apply(this,arguments);const root=document.getElementById('cashStandaloneRoot');if(!root)return;
-   if(document.getElementById('cashAccountList')){
-    const summary=root.querySelector('.cash-summary');if(summary){summary.querySelectorAll('.cash-stat').forEach((card,i)=>{const sm=card.querySelector('small');if(!sm)return;const label=sm.textContent.trim();if(label==='মোট হিসাব'){card.remove()}else if(label==='মোট ব্যালেন্স'){card.classList.add('balance-card')}else if(label==='মোট জমা'){sm.textContent='মোট জমা'} });
-     const extra=[...root.querySelectorAll('.cash-stat')].find(x=>x.querySelector('small')?.textContent.trim()==='মোট উত্তোলন');if(extra){extra.querySelector('small').textContent='খরচ';extra.style.margin='0';extra.style.padding='10px 5px';extra.style.textAlign='center';summary.appendChild(extra);}
-    }
-   }else{
-    const summary=root.querySelector('.cash-summary');if(summary){summary.querySelectorAll('.cash-stat').forEach(card=>{const sm=card.querySelector('small');if(!sm)return;if(sm.textContent.trim()==='মোট হিসাব')card.remove();if(sm.textContent.trim()==='মোট ব্যালেন্স')card.classList.add('balance-card')});
-      const expense=[...root.querySelectorAll('.cash-stat')].find(x=>x.querySelector('small')?.textContent.trim()==='মোট উত্তোলন');if(expense){expense.querySelector('small').textContent='খরচ';expense.style.margin='0';summary.appendChild(expense)}
-    }
-    root.querySelectorAll('.cash-account-actions button').forEach(b=>{if(b.textContent.trim()==='নাম এডিট')b.classList.add('rename-hidden')});
-    root.querySelectorAll('.cash-account-name').forEach(el=>{if(el.dataset.longPressBound)return;el.dataset.longPressBound='1';let timer=null;const begin=()=>{timer=setTimeout(()=>{const card=el.closest('.cash-account'),btn=card?.querySelector('.cash-account-actions button.rename-hidden');if(btn)btn.click();timer=null},650)};const cancel=()=>{if(timer){clearTimeout(timer);timer=null}};el.addEventListener('touchstart',begin,{passive:true});el.addEventListener('touchend',cancel);el.addEventListener('touchmove',cancel);el.addEventListener('mousedown',begin);el.addEventListener('mouseup',cancel);el.addEventListener('mouseleave',cancel);});
-   }
-  };
-  patched.__finalCashPatch=true;window.renderCash=patched;
- }
- // Long press on any customer card opens its full edit dialog (existing editCustomer modal).
- function bindLongPress(){document.querySelectorAll('#customerList .compact-customer').forEach(card=>{if(card.dataset.editLongPressBound)return;card.dataset.editLongPressBound='1';let timer=null;const id=card.dataset.customer;const start=()=>{timer=setTimeout(()=>{timer=null;if(window.editCustomer)window.editCustomer(id)},700)};const cancel=()=>{if(timer){clearTimeout(timer);timer=null}};card.addEventListener('touchstart',start,{passive:true});card.addEventListener('touchend',cancel);card.addEventListener('touchmove',cancel);card.addEventListener('mousedown',start);card.addEventListener('mouseup',cancel);card.addEventListener('mouseleave',cancel);});}
- const old=window.renderCustomers;if(typeof old==='function'&&!old.__bindEditLongPress){window.renderCustomers=function(){const r=old.apply(this,arguments);bindLongPress();return r};window.renderCustomers.__bindEditLongPress=true;}
- document.addEventListener('DOMContentLoaded',bindLongPress);setTimeout(bindLongPress,500);setTimeout(bindLongPress,1500);
-})();
-</script>
-
 </body>
 </html>
 
