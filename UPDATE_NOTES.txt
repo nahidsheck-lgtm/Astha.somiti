@@ -1,0 +1,9 @@
+Astha Somiti update notes
+- Original files preserved from the provided Astha Somiti Complete Updated ZIP.
+- Customer list weekly status markers/badges made smaller.
+- Expanded customer info panel made compact and includes most recent payment date with date-edit action.
+- Long-press customer row opens the existing customer edit modal (name, phone and loan correction section).
+- Cash account detail: opening amount label is now “আমার টাকা”, long press edits the opening amount; withdrawal label/button wording is “খরচ”; deposit button wording “জমা নিছি”.
+- Bottom settings/logout bar made smaller.
+- Inline JavaScript syntax check was performed using Node.
+- Not tested on a real device or against Firebase/live data. Please retain previous ZIP and backups.
