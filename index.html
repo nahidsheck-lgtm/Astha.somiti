@@ -1793,7 +1793,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   overlay.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto';
   const box=document.createElement('div');
   box.style.cssText='background:#fff;color:#222;width:min(560px,100%);max-height:94vh;overflow:auto;padding:18px;border-radius:12px;box-shadow:0 8px 30px #0004';
-  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">গ্রাহকের তথ্য ও লোনের টাকা এডিট</h3><button type="button" id="asthaEditClose" class="secondary">বন্ধ</button></div><p style="font-size:13px;color:#666">ভুল করে দেওয়া লোনের মূল টাকা এখানে সংশোধন করুন। আগের জমা/পেমেন্টের রেকর্ড মুছবে না।</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0"><label>গ্রাহকের নাম<input id="aeName" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>মোবাইল নম্বর<input id="aePhone" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label style="grid-column:1/-1">লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:11px;font-size:18px" /></label><label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" step="1" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>টাকা সংগ্রহের প্রথম তারিখ / লোন দেওয়ার তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><div style="grid-column:1/-1;background:#f7f7f7;padding:10px;border-radius:8px;font-size:14px"><div>সার্ভিস চার্জ (২০%): <b id="aeService"></b></div><div>মোট ফেরত: <b id="aeTotal"></b></div><div>সাপ্তাহিক কিস্তি: <b id="aeInstall"></b></div></div></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="secondary" id="aeCancel">বাতিল</button><button type="button" id="aeSave">পরিবর্তন সংরক্ষণ</button></div>';
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">গ্রাহকের তথ্য ও লোনের টাকা এডিট</h3><button type="button" id="asthaEditClose" class="secondary">বন্ধ</button></div><p style="font-size:13px;color:#666">ভুল করে দেওয়া লোনের মূল টাকা এখানে সংশোধন করুন। আগের জমা/পেমেন্টের রেকর্ড মুছবে না।</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0"><label>গ্রাহকের নাম<input id="aeName" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>মোবাইল নম্বর<input id="aePhone" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label style="grid-column:1/-1">লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:11px;font-size:18px" /></label><label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" step="1" style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><label>টাকা সংগ্রহের প্রথম তারিখ (ভুল হলে এখানে ঠিক করুন)<input id="aeStart" type="date" required style="display:block;width:100%;box-sizing:border-box;padding:9px" /></label><div style="grid-column:1/-1;background:#f7f7f7;padding:10px;border-radius:8px;font-size:14px"><div>সার্ভিস চার্জ (২০%): <b id="aeService"></b></div><div>মোট ফেরত: <b id="aeTotal"></b></div><div>সাপ্তাহিক কিস্তি: <b id="aeInstall"></b></div></div></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="secondary" id="aeCancel">বাতিল</button><button type="button" id="aeSave">পরিবর্তন সংরক্ষণ</button></div>';
   overlay.appendChild(box);document.body.appendChild(overlay);
   const $=s=>box.querySelector(s), moneyFmt=n=>'৳ '+Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2});
   $('#aeName').value=c.name||'';$('#aePhone').value=c.phone||'';
@@ -1810,7 +1810,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
    if(!confirm('লোনের মূল টাকা ও সংশ্লিষ্ট হিসাব পরিবর্তন করে সংরক্ষণ করবেন? আগের পেমেন্টের ইতিহাস অপরিবর্তিত থাকবে।'))return;
    const service=Math.round(principal*.20*100)/100,total=Math.round((principal+service)*100)/100,installment=Math.round(total/weeks*100)/100;
    c.name=name;c.phone=phone;c.given=principal;c.serviceCharge=service;c.total=total;c.weeks=weeks;c.installment=installment;
-   if(start)c.startDate=start;
+   c.startDate=start;
    save();close();renderDetail(c);
    if(typeof renderCustomers==='function')renderCustomers();
    if(typeof renderDash==='function')renderDash();
@@ -1947,7 +1947,7 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
      <p style="font-size:12px;color:#64748b">লোনের টাকা ভুল হলে এখানে সংশোধন করুন। আগের জমার রেকর্ড থাকবে।</p>
      <label>লোনের মূল টাকা (৳)<input id="aeGiven" type="number" min="0" step="0.01" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
      <label>কিস্তির মেয়াদ (সপ্তাহ)<input id="aeWeeks" type="number" min="1" max="260" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
-     <label>লোন দেওয়ার আসল তারিখ<input id="aeStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
+     <label>টাকা দেওয়ার / প্রথম সংগ্রহের তারিখ (ভুল হলে এখানে ঠিক করুন)<input id="aeStart" type="date" required style="display:block;width:100%;box-sizing:border-box;padding:9px"></label>
      <div id="aeLoanPreview" style="font-size:12px;color:#475569;margin-top:8px"></div>
     </details>
     <div style="display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:-16px;background:#fff;padding:12px 0 0">
@@ -1979,12 +1979,14 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
    $('aeSave').onclick=function(){
      const name=$('aeName').value.trim(),phone=$('aePhone').value.trim();
      if(!name||!phone)return alert('গ্রাহকের নাম ও মোবাইল নম্বর লিখুন।');
+    if(!start)return alert('টাকা সংগ্রহের প্রথম তারিখ নির্বাচন করুন।');
      const principal=Number($('aeGiven').value),weeks=Number($('aeWeeks').value);
      if(!Number.isFinite(principal)||principal<0||!Number.isInteger(weeks)||weeks<1||weeks>260)return alert('লোনের হিসাব সঠিকভাবে দিন।');
      c.name=name;c.phone=phone;c.nidNumber=$('aeNid').value.trim();c.dob=$('aeDob').value.trim();c.fatherName=$('aeFather').value.trim();c.motherName=$('aeMother').value.trim();c.address=$('aeAddress').value.trim();
+     if(!$('aeStart').value)return alert('টাকা সংগ্রহের প্রথম তারিখ নির্বাচন করুন।');
      c.photo=profilePhoto;c.nidPhoto=nidPhoto;c.thumbPhoto=thumbPhoto;
      c.given=principal;c.serviceCharge=Math.round(principal*.2*100)/100;c.total=Math.round((principal+c.serviceCharge)*100)/100;c.weeks=weeks;c.installment=Math.round(c.total/weeks*100)/100;
-     if($('aeStart').value)c.startDate=$('aeStart').value;
+     c.startDate=$('aeStart').value;
      if(typeof save==='function')save();close();
      if(typeof renderDetail==='function')renderDetail(c);if(typeof renderCustomers==='function')renderCustomers();if(typeof renderDash==='function')renderDash();
      alert('ব্যক্তিগত পরিচয়পত্রের তথ্য ও ছবি সংরক্ষণ হয়েছে।');
@@ -2601,9 +2603,8 @@ header .head .logo img{width:100%!important;height:100%!important;object-fit:con
   const start=String(c.startDate||'');let lastWeek='';if(start){const dt=new Date(start.slice(0,10)+'T00:00:00');if(!isNaN(dt)){dt.setDate(dt.getDate()+7*Number(c.weeks||12));lastWeek=isoDate(dt)}}
   const rows=[['লোনের পরিমাণ',money(c.given)],['মেয়াদ',bn(c.weeks||12)+' সপ্তাহ'],['মোট জমা',money(totals(c).paid)]];
   panel.innerHTML=rows.map(([a,b])=>'<div class="loan-info-item"><b>'+a+'</b><span>'+b+'</span></div>').join('')+
-   '<div class="loan-date-item"><b>১. টাকা সংগ্রহের প্রথম তারিখ</b><span>'+fmtDate(firstCollection)+'</span></div>'+
-   '<div class="loan-date-item"><b>২. লোন দেওয়ার তারিখ</b><span>'+fmtDate(start)+'</span></div>'+
-   '<div class="loan-date-item"><b>৩. শেষ সপ্তাহের তারিখ</b><span>'+fmtDate(lastWeek)+'</span></div>'+
+   '<div class="loan-date-item"><b>টাকা দেওয়ার / প্রথম সংগ্রহের তারিখ</b><span>'+fmtDate(firstCollection)+'</span></div>'+
+   '<div class="loan-date-item"><b>শেষ সপ্তাহের তারিখ</b><span>'+fmtDate(lastWeek)+'</span></div>'+
    '<div class="ledger-open-row"><button type="button" onclick="window.openAsthaLedger(\''+escText(c.id)+'\')">লেজার দেখুন / প্রিন্ট</button></div>';
  };
  // Add explicit ledger actions to customer detail and ensure the ledger is printable by itself.
